@@ -610,3 +610,92 @@ A comprehensive vendor management system that would allow wedding service provid
 
 ---
 _Last updated: Type consolidation and prop name fix for GoogleReviewsBadge (April 2024)_
+
+# Wedding Platform Progress & TODO
+
+## Progress
+- Added user relationship data model (bidirectional, privacy, type, etc.)
+- Created backend API endpoints for relationship CRUD
+- Enforced that all family members must have user accounts
+- Added validation for family member addition (phone number, user existence)
+- Added relationship management UI (add, edit, delete, privacy, type)
+- Added relationship type selection and privacy settings in UI
+- Added invitation flow for non-user family members
+
+## TODO
+- [ ] Implement actual invitation sending (SMS/email)
+- [ ] Add relationship confirmation flow (pending/accepted/rejected)
+- [ ] Add notifications for relationship requests
+- [ ] Add relationship request/acceptance UI
+- [ ] Add more granular privacy controls (per-wedding, per-event, etc.)
+- [ ] Add relationship strength/closeness metrics
+- [ ] Add tests for relationship endpoints and UI
+- [ ] Improve error handling and user feedback
+- [ ] Documentation for API and UI usage
+
+---
+
+**Last updated:** [auto-update on next feature change]
+
+# Family Social Network
+
+A social network platform for families to connect and share moments.
+
+## Progress
+
+### Completed Features
+- User authentication and account management
+- Family member data models with user accounts
+- Relationship management system
+  - Bidirectional relationships between users
+  - Privacy settings for relationships
+  - Relationship type selection
+  - Relationship request/confirmation flow
+  - Relationship status tracking (pending, accepted, rejected)
+  - Relationship expiration for pending requests
+- Backend API endpoints for relationship management
+- Frontend UI for relationship management
+  - List of existing relationships
+  - Pending relationship requests
+  - Add/Edit/Delete relationships
+  - Accept/Reject relationship requests
+- Database Schema
+  - Users table with authentication
+  - Relationships table with:
+    - Status tracking (pending, accepted, rejected)
+    - Timestamps (requested, responded, created, updated)
+    - Expiration for pending requests
+    - Privacy levels
+    - Relationship types
+    - Constraints for data integrity
+    - Indexes for performance
+
+### Database Migrations
+To set up or update the database schema:
+
+```bash
+# Run migrations
+psql -d your_database_name -f backend/migrations/001_add_relationship_status.sql
+```
+
+### TODO
+- Implement invitation system for non-user family members
+- Add notifications for relationship requests
+- Implement more granular privacy controls
+- Add relationship history tracking
+- Add relationship search and filtering
+- Add relationship analytics
+- Add relationship recommendations
+- Add relationship import/export
+- Add relationship templates
+- Add relationship validation rules
+- Add relationship conflict resolution
+- Add relationship documentation
+- Add relationship testing
+- Add relationship monitoring
+- Add relationship backup/restore
+- Add relationship migration tools
+- Add relationship API documentation
+- Add relationship security measures
+- Add relationship performance optimization
+- Add relationship scalability features

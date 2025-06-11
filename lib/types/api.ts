@@ -29,11 +29,26 @@ export interface WeddingResponse extends WeddingData {
   updated_at: string;
 }
 
+// Relationship Types
+export interface UserRelationship {
+  id: number;
+  user_id: number;
+  related_user_id: number;
+  relationship_type: 'spouse' | 'parent' | 'child' | 'sibling' | 'other';
+  relationship_name: string;  // e.g., "Mother", "Father", "Sister"
+  is_primary: boolean;  // Whether this is the primary relationship between these users
+  privacy_level: 'public' | 'friends' | 'private';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface FamilyMember {
   name: string;
   relationship: string;
   role: string;
   contact?: string;
+  user_id?: number;  // Optional reference to a user account
+  relationship_id?: number;  // Optional reference to a UserRelationship
 }
 
 // User Types
@@ -44,12 +59,11 @@ export interface UserData {
   location?: string;
 }
 
-export interface UserResponse extends UserData {
+export interface UserResponse {
   id: number;
-  firebase_uid?: string;
-  is_active: boolean;
-  is_verified: boolean;
-  created_at: string;
+  name: string;
+  phone_number: string;
+  email?: string;
 }
 
 // Auth Types

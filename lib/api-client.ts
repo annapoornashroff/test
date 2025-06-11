@@ -1,5 +1,6 @@
 // Enhanced API client with comprehensive error handling and real-time data fetching
 import { toast } from 'sonner';
+import { UserResponse } from '@/lib/types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -7,6 +8,20 @@ export interface ApiError {
   message: string;
   status: number;
   details?: any;
+}
+
+export interface Relationship {
+  id: number;
+  user_id: number;
+  related_user_id: number;
+  relationship_type: string;
+  privacy_level: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  requested_at: string;
+  responded_at?: string;
+  expires_at?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export class ApiClient {
@@ -290,6 +305,77 @@ export class ApiClient {
 
   async getReviewStats() {
     return this.request('/reviews/stats');
+  }
+
+  // Relationships
+  async getRelationships(): Promise<Relationship[]> {
+    const response = await this.request<{ data: Relationship[] }>('/relationships');
+    return response.data;
+  }
+
+  async getPendingRelationships(): Promise<Relationship[]> {
+    const response = await this.request<{ data: Relationship[] }>('/relationships/pending');
+    return response.data;
+  }
+
+  async createRelationship(data: {
+    related_user_id: number;
+    relationship_type: string;
+    relationship_name: string;
+    is_primary?: boolean;
+    privacy_level?: string;
+  }): Promise<Relationship> {
+    const response = await this.request<{ data: Relationship }>('/relationships', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  }
+
+  async updateRelationship(
+    id: number,
+    data: {
+      relationship_type?: string;
+      relationship_name?: string;
+      privacy_level?: string;
+    }
+  ): Promise<Relationship> {
+    const response = await this.request<{ data: Relationship }>(`/relationships/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response.data;
+  }
+
+  async deleteRelationship(id: number): Promise<void> {
+    await this.request(`/relationships/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async respondToRelationship(id: number, accept: boolean): Promise<void> {
+    await this.request(`/relationships/${id}/respond`, {
+      method: 'POST',
+      body: JSON.stringify({ accept }),
+    });
+  }
+
+  // User Management
+  async getUserByPhone(phoneNumber: string): Promise<UserResponse | null> {
+    const response = await this.request<{ data: UserResponse }>(`/users/phone/${phoneNumber}`);
+    return response.data;
+  }
+
+  async sendInvite(inviteData: {
+    phone_number: string;
+    name: string;
+    relationship: string;
+    invited_by: string;
+  }) {
+    return this.request('/users/invite', {
+      method: 'POST',
+      body: JSON.stringify(inviteData),
+    });
   }
 }
 

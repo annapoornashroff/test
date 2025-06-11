@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
 from typing import Optional
+from fastapi import HTTPException, status
 
 from app.models.user import User
-from app.schemas.user import UserUpdate
+from app.schemas.user import UserCreate, UserUpdate
 
 class UserService:
     def __init__(self, db: Session):
@@ -43,3 +44,30 @@ class UserService:
         user.is_active = False
         self.db.commit()
         return True
+
+    async def send_invite(
+        self,
+        phone_number: str,
+        name: str,
+        relationship: str,
+        invited_by: int
+    ) -> None:
+        """Send invitation to create account"""
+        # Check if user already exists
+        existing_user = await self.get_user_by_phone(phone_number)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User already exists"
+            )
+        
+        # TODO: Implement actual invitation sending logic
+        # This could involve:
+        # 1. Sending SMS with registration link
+        # 2. Creating a pending invitation record
+        # 3. Sending email if available
+        # For now, we'll just raise an error
+        raise HTTPException(
+            status_code=status.HTTP_501_NOT_IMPLEMENTED,
+            detail="Invitation system not implemented yet"
+        )

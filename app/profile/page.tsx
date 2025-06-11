@@ -16,12 +16,19 @@ import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { type FamilyMember, type WeddingProject, type PersonalInfo } from '@/lib/types/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('personal');
   const [editingPersonal, setEditingPersonal] = useState(false);
   const [editingProject, setEditingProject] = useState<number | null>(null);
   const [showAddFamily, setShowAddFamily] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [invitePhone, setInvitePhone] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRelationship, setInviteRelationship] = useState('');
+  const [inviting, setInviting] = useState(false);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -135,18 +142,40 @@ export default function ProfilePage() {
       if (!user) {
         throw new Error('User not authenticated');
       }
+
+      // First check if user exists
+      const token = await user.getIdToken();
+      const existingUser = await apiClient.getUserByPhone(newFamilyMember.phoneNumber);
+      
+      if (!existingUser) {
+        // Show invite dialog if user doesn't exist
+        setInvitePhone(newFamilyMember.phoneNumber);
+        setInviteName(newFamilyMember.name);
+        setInviteRelationship(newFamilyMember.relationship);
+        setShowInviteDialog(true);
+        return;
+      }
+
+      // Create relationship
+      await apiClient.createRelationship({
+        related_user_id: existingUser.id,
+        relationship_type: 'family',
+        relationship_name: newFamilyMember.relationship,
+        is_primary: true,
+        privacy_level: 'private'
+      });
       
       // Add to family members array
       const updatedFamily = [...family, {
         id: family.length + 1,
-        ...newFamilyMember
+        ...newFamilyMember,
+        user_id: existingUser.id
       }];
       
       setFamily(updatedFamily);
       
       // Update wedding project with new family details
       if (projects.length > 0) {
-        const token = await user.getIdToken();
         await apiClient.updateWedding(projects[0].id, {
           family_details: updatedFamily.map(({ id, ...rest }) => rest)
         });
@@ -166,6 +195,39 @@ export default function ProfilePage() {
       handleApiError(error, 'Failed to add family member');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const sendInvite = async () => {
+    if (!invitePhone || !inviteName) {
+      toast.error('Phone number and name are required');
+      return;
+    }
+
+    try {
+      setInviting(true);
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Send invite to create account
+      await apiClient.sendInvite({
+        phone_number: invitePhone,
+        name: inviteName,
+        relationship: inviteRelationship,
+        invited_by: user.uid
+      });
+
+      toast.success('Invitation sent successfully');
+      setShowInviteDialog(false);
+      setInvitePhone('');
+      setInviteName('');
+      setInviteRelationship('');
+    } catch (error: any) {
+      handleApiError(error, 'Failed to send invitation');
+    } finally {
+      setInviting(false);
     }
   };
 
@@ -712,6 +774,66 @@ export default function ProfilePage() {
           </div>
         )}
       </div>
+
+      {/* Invite Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Family Member</DialogTitle>
+            <DialogDescription>
+              This person needs to create an account first. Would you like to send them an invitation?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <Input
+                value={inviteName}
+                onChange={(e) => setInviteName(e.target.value)}
+                disabled={inviting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+              <Input
+                value={invitePhone}
+                onChange={(e) => setInvitePhone(e.target.value)}
+                disabled={inviting}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Relationship</label>
+              <Input
+                value={inviteRelationship}
+                onChange={(e) => setInviteRelationship(e.target.value)}
+                disabled={inviting}
+              />
+            </div>
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowInviteDialog(false)}
+                disabled={inviting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={sendInvite}
+                disabled={inviting}
+              >
+                {inviting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Invitation'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

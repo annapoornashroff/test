@@ -21,3 +21,5 @@ class User(Base):
     weddings = relationship("Wedding", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user")
     guests = relationship("Guest", back_populates="user")
+    relationships = relationship("Relationship", foreign_keys="Relationship.user_id", back_populates="user")
+    related_relationships = relationship("Relationship", foreign_keys="Relationship.related_user_id", back_populates="related_user")
