@@ -35,5 +35,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+.venv/
+venv/
+
 forevernco-google-calendar-service-account.json
 forevernco-firebase.json
