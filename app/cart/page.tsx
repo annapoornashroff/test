@@ -70,7 +70,7 @@ export default function CartPage() {
 
   const updateItemStatus = async (id: number, status: string) => {
     try {
-      const token = await user.getIdToken();
+      const token = await user?.getIdToken();
       await apiClient.updateCartItem(token, id.toString(), { status });
       
       // Refresh cart data
