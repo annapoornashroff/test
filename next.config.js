@@ -1,10 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  eslint: {
-    ignoreDuringBuilds: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'example.com', // Replace with your image host
+      },
+      {
+        protocol: 'https',
+        hostname: 'another-image-cdn.com', // Add more as needed
+      },
+    ],
   },
-  images: { unoptimized: true },
 };
 
 module.exports = nextConfig;
