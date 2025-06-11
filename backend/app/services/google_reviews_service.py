@@ -299,7 +299,8 @@ class GoogleReviewsService:
                 "rating": 4.9,
                 "total_reviews": 500,
                 "source": "mock_data",
-                "business_name": "Forever N Co."
+                "business_name": "Forever N Co.",
+                "place_id": None
             }
         
         try:
@@ -321,7 +322,8 @@ class GoogleReviewsService:
                             "rating": result.get("rating", 4.9),
                             "total_reviews": result.get("user_ratings_total", 500),
                             "business_name": result.get("name", "Forever N Co."),
-                            "source": "google_places"
+                            "source": "google_places",
+                            "place_id": self.place_id
                         }
         
         except Exception as e:
@@ -332,7 +334,8 @@ class GoogleReviewsService:
             "rating": 4.9,
             "total_reviews": 500,
             "business_name": "Forever N Co.",
-            "source": "mock_data"
+            "source": "mock_data",
+            "place_id": None
         }
     
     async def get_review_stats(self) -> Dict[str, Any]:

@@ -22,6 +22,7 @@ interface BusinessRating {
   total_reviews: number;
   business_name: string;
   source: string;
+  place_id?: string;
 }
 
 interface ReviewStats {
@@ -65,10 +66,10 @@ export function useReviews(limit: number = 6): UseReviewsReturn {
         apiClient.getReviewStats()
       ]);
       
-      setReviews(reviewsData);
-      setFeaturedReviews(featuredData);
-      setBusinessRating(ratingData);
-      setReviewStats(statsData);
+      setReviews(reviewsData as Review[]);
+      setFeaturedReviews(featuredData as Review[]);
+      setBusinessRating(ratingData as BusinessRating);
+      setReviewStats(statsData as ReviewStats);
     } catch (error: any) {
       console.error('Error fetching reviews:', error);
       setError(error.message || 'Failed to load reviews');
