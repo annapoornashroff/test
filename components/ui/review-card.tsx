@@ -1,23 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Quote } from 'lucide-react';
 import Image from 'next/image';
-
-interface ReviewCardProps {
-  review: {
-    id: number;
-    name: string;
-    location: string;
-    rating: number;
-    comment: string;
-    image?: string;
-    wedding_date: string;
-    created_at: string;
-    source: string;
-    relative_time?: string;
-  };
-  isActive?: boolean;
-  className?: string;
-}
+import { type ReviewCardProps } from '@/lib/types/ui';
 
 export function ReviewCard({ review, isActive = false, className = '' }: ReviewCardProps) {
   const formatDate = (dateString: string) => {

@@ -12,33 +12,7 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { apiClient } from '@/lib/api';
-
-interface Vendor {
-  id: number;
-  name: string;
-  category: string;
-  price_min: number;
-  rating?: number;
-}
-
-interface Package {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  original_price?: number;
-  discount_percentage?: number;
-  duration: string;
-  image_url?: string;
-  is_popular?: boolean;
-  includes?: string[];
-  vendors?: Array<{
-    vendor_id: number;
-    vendor_name: string;
-    category: string;
-  }>;
-  customPrice?: number;
-}
+import { type Vendor, type Package } from '@/lib/types/ui';
 
 export default function PackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);

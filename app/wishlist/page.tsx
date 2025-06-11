@@ -15,32 +15,9 @@ import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { type Vendor, type WishlistItem } from '@/lib/types/ui';
 
 const categories = ['All', 'Photography', 'Catering', 'Decoration', 'Music & DJ', 'Makeup', 'Venues'];
-
-interface Vendor {
-  id: number;
-  name: string;
-  location: string;
-  rating: number;
-  images: string[];
-  price_min?: number;
-  price_max?: number;
-  review_count?: number;
-}
-
-interface WishlistItem {
-  id: number;
-  user_id: number;
-  wedding_id: number;
-  vendor_id: number;
-  category: string;
-  price: number;
-  booking_date: string;
-  status: string;
-  created_at: string;
-  vendor?: Vendor;
-}
 
 export default function WishlistPage() {
   const [items, setItems] = useState<WishlistItem[]>([]);

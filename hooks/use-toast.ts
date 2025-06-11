@@ -1,13 +1,6 @@
 // Toast hook for notifications
 import { useState, useCallback } from 'react';
-
-export interface Toast {
-  id: string;
-  title?: string;
-  description?: string;
-  action?: React.ReactNode;
-  variant?: 'default' | 'destructive';
-}
+import { type Toast } from '@/lib/types/ui';
 
 export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);

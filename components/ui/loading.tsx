@@ -1,11 +1,7 @@
 import { cn } from "@/lib/utils";
+import { type LoadingProps } from '@/lib/types/ui';
 
-interface LoadingProps {
-  size?: "sm" | "md" | "lg";
-  className?: string;
-}
-
-export function Loading({ size = "md", className }: LoadingProps) {
+export function Loading({ size = 'md', className }: LoadingProps) {
   const sizeClasses = {
     sm: "w-4 h-4",
     md: "w-8 h-8",

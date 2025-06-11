@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { User, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import { apiClient } from './api';
+import { type AuthContextType } from '@/lib/types/ui';
 
 interface AuthContextType {
   user: User | null;

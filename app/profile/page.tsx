@@ -15,35 +15,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
-
-interface FamilyMember {
-  id: number;
-  name: string;
-  relationship: string;
-  phoneNumber: string;
-  email?: string;
-  role: 'decision_maker' | 'participant' | 'observer';
-}
-
-interface WeddingProject {
-  id: number;
-  name: string;
-  date: string;
-  location: string;
-  estimated_guests: number;
-  budget: number;
-  spent: number;
-  status: 'planning' | 'partially_booked' | 'booked' | 'completed';
-  events: string[];
-  family_details: FamilyMember[];
-}
-
-interface PersonalInfo {
-  name: string;
-  phoneNumber: string;
-  email: string;
-  location: string;
-}
+import { type FamilyMember, type WeddingProject, type PersonalInfo } from '@/lib/types/ui';
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('personal');

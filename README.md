@@ -262,6 +262,77 @@ Instead of SendGrid, we now use Gmail SMTP for email notifications:
 - **Search & Filter**: Enhanced with real-time filtering
 - **Mobile Optimization**: Responsive design for all screen sizes
 
+#### City-based Filtering System
+- Implemented global city filtering across the application
+- Created `CityContext` for managing city state
+- Updated all components to use city-based filtering
+- Added city filtering to:
+  - Vendors
+  - Packages
+  - Testimonials
+  - Search functionality
+- City filter persists across page navigation via URL parameters
+
+#### Components Updated
+- `lib/city-context.tsx`: Global city state management
+- `components/sections/HeroSection.tsx`: City dropdown in header
+- `app/vendors/page.tsx`: City filtering in vendor listings
+- Backend services updated to support city-based filtering
+
+#### Data Model Changes
+- Renamed `location` field to `city` in all relevant models
+- Updated API endpoints to use city-based filtering
+- Added city-based search capabilities
+
+## Features
+
+### Global City Filtering
+- City selection affects all relevant content
+- Filter persists across page navigation
+- URL parameters for shareable filtered views
+- City-based search functionality
+
+### Components Using City Filter
+- Hero Section (Header)
+- Vendor Listings
+- Package Listings
+- Testimonials
+- Search Results
+
+## Technical Details
+
+### City Context Implementation
+```typescript
+interface CityContextType {
+  selectedCity: string;
+  setSelectedCity: (city: string) => void;
+  clearCity: () => void;
+}
+```
+
+### Usage Example
+```typescript
+import { useCity } from '@/lib/city-context';
+
+function YourComponent() {
+  const { selectedCity, setSelectedCity } = useCity();
+  // Use selectedCity for filtering
+  // Use setSelectedCity to update the city
+}
+```
+
+## Backend Services
+- Updated vendor service with city filtering
+- Updated package service with city filtering
+- Updated testimonial service with city filtering
+- Added city-based search capabilities
+
+## TODO
+- Add city-based sorting options
+- Implement city-based analytics
+- Add city-based recommendations
+- Consider adding city-based trending content
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -516,3 +587,26 @@ A comprehensive vendor management system that would allow wedding service provid
 **Next Milestone**: Production deployment and security hardening
 
 **🔄 INTEGRATION MILESTONE ACHIEVED: All frontend pages now connected to backend APIs with comprehensive error handling and loading states!**
+
+## Progress Update: Type Consolidation and Refactor
+
+### Completed Tasks
+- **Consolidated Types/Interfaces:**
+  - Moved all UI/component and shared domain types/interfaces into `lib/types/ui.ts`.
+  - Ensured all components and pages import their types from this common file.
+  - API-specific types remain in `lib/types/api.ts` for separation of concerns.
+- **Removed Duplicates:**
+  - Removed local type/interface definitions from components/pages.
+  - Resolved all linter/type errors that arose from the migration.
+- **Prop Name Consistency:**
+  - Fixed a prop name mismatch for `GoogleReviewsBadge` (`reviewCount` → `totalReviews`).
+- **Linter/Type Safety:**
+  - All components/pages now use the correct, centralized types and pass type-checking.
+
+### Next Steps / TODO
+- Review for any missed or edge-case types/interfaces.
+- Consider further splitting types by domain or feature if the codebase grows.
+- Continue to update the common types file as new components or features are added.
+
+---
+_Last updated: Type consolidation and prop name fix for GoogleReviewsBadge (April 2024)_

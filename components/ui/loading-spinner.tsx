@@ -1,11 +1,7 @@
 import { cn } from '@/lib/utils';
+import { type LoadingSpinnerProps } from '@/lib/types/ui';
 
-interface LoadingSpinnerProps {
-  className?: string;
-  size?: 'sm' | 'md' | 'lg';
-}
-
-export function LoadingSpinner({ className, size = 'md' }: LoadingSpinnerProps) {
+export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',

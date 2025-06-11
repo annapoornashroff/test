@@ -12,12 +12,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { useCity } from '@/lib/city-context';
+import { type Vendor, type ApiResponse, type CategoriesResponse, type CitiesResponse } from '@/lib/types/ui';
 
 interface Vendor {
   id: number;
   name: string;
   category: string;
-  location: string;
+  city: string;
   rating: number;
   review_count: number;
   price_min: number;
@@ -38,8 +40,8 @@ interface CategoriesResponse {
   categories: string[];
 }
 
-interface LocationsResponse {
-  locations: string[];
+interface CitiesResponse {
+  cities: string[];
 }
 
 const categoryIcons: Record<string, any> = {
@@ -54,13 +56,13 @@ const categoryIcons: Record<string, any> = {
 export default function VendorsPage() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [locations, setLocations] = useState<string[]>([]);
+  const [cities, setCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedLocation, setSelectedLocation] = useState('All');
+  const { selectedCity, setSelectedCity } = useCity();
   const [priceRange, setPriceRange] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -70,12 +72,12 @@ export default function VendorsPage() {
       
       if (searchQuery) params.search = searchQuery;
       if (selectedCategory !== 'All') params.category = selectedCategory;
-      if (selectedLocation !== 'All') params.location = selectedLocation;
+      if (selectedCity !== 'All') params.city = selectedCity;
       
       const vendorsData = await apiClient.getVendors(params) as Vendor[];
       setVendors(vendorsData);
     }, setSearchLoading);
-  }, [searchQuery, selectedCategory, selectedLocation]);
+  }, [searchQuery, selectedCategory, selectedCity]);
 
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
@@ -99,9 +101,9 @@ export default function VendorsPage() {
       const categoriesData = await apiClient.getVendorCategories() as CategoriesResponse;
       setCategories(categoriesData.categories || []);
 
-      // Load locations
-      const locationsData = await apiClient.getVendorLocations() as LocationsResponse;
-      setLocations(locationsData.locations || []);
+      // Load cities
+      const citiesData = await apiClient.getVendorLocations() as CitiesResponse;
+      setCities(citiesData.cities || []);
     }, setLoading);
   };
 
@@ -185,7 +187,7 @@ export default function VendorsPage() {
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                placeholder="Search vendors, services, or locations..."
+                placeholder="Search vendors, services, or cities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-12"
@@ -224,15 +226,15 @@ export default function VendorsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                 <select
-                  value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
                   className="w-full h-10 border border-gray-300 rounded-lg px-3"
                 >
-                  <option value="All">All Locations</option>
-                  {locations.map(location => (
-                    <option key={location} value={location}>{location}</option>
+                  <option value="All">All Cities</option>
+                  {cities.map(city => (
+                    <option key={city} value={city}>{city}</option>
                   ))}
                 </select>
               </div>
@@ -261,7 +263,7 @@ export default function VendorsPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.map((category) => {
               const IconComponent = categoryIcons[category] || Camera;
-              const vendorCount = vendors.filter(v => v.category === category).length;
+              const vendorCount = vendors.filter(v => v.category === category && (selectedCity === 'All' || v.city === selectedCity)).length;
               
               return (
                 <button
@@ -325,7 +327,7 @@ export default function VendorsPage() {
               onClick={() => {
                 setSearchQuery('');
                 setSelectedCategory('All');
-                setSelectedLocation('All');
+                setSelectedCity('All');
                 setPriceRange('All');
               }}
               className="bg-primary hover:bg-primary-600"
@@ -337,30 +339,19 @@ export default function VendorsPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {vendors.map((vendor) => (
               <Card key={vendor.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
-                <div className="relative">
+                <div className="relative h-48">
                   <Image
-                    src={vendor.images[0] || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
+                    src={vendor.images[0]}
                     alt={vendor.name}
-                    width={400}
-                    height={192}
-                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  {vendor.is_featured && (
-                    <div className="absolute top-3 left-3 bg-gold text-white px-2 py-1 rounded-full text-xs font-medium">
-                      Featured
-                    </div>
-                  )}
-                  <button 
+                  <button
                     onClick={() => addToWishlist(vendor.id)}
-                    className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors"
+                    className="absolute top-4 right-4 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
                   >
-                    <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
+                    <Heart className="w-5 h-5 text-gray-600" />
                   </button>
-                  {!vendor.is_active && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <span className="text-white font-medium">Not Available</span>
-                    </div>
-                  )}
                 </div>
                 
                 <CardContent className="p-4">
@@ -377,7 +368,7 @@ export default function VendorsPage() {
 
                   <div className="flex items-center text-sm text-gray-600 mb-2">
                     <MapPin className="w-4 h-4 mr-1" />
-                    {vendor.location}
+                    {vendor.city}
                     <span className="mx-2">•</span>
                     {vendor.review_count} reviews
                   </div>

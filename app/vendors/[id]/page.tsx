@@ -16,32 +16,7 @@ import { apiClient, handleApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 import Image from 'next/image';
-
-interface Wedding {
-  id: number;
-  name: string;
-  date: string;
-}
-
-interface Vendor {
-  id: number;
-  name: string;
-  category: string;
-  description?: string;
-  price_min?: number;
-  price_max?: number;
-  rating: number;
-  review_count: number;
-  location: string;
-  images: string[];
-  is_featured: boolean;
-  is_active: boolean;
-  services?: string[];
-  portfolio?: string[];
-  contact_phone?: string;
-  contact_email?: string;
-  contact_website?: string;
-}
+import { type Wedding, type Vendor } from '@/lib/types/ui';
 
 export default function VendorDetailPage() {
   const { id } = useParams();

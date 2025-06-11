@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useNavigation } from '@/lib/navigation-context';
 import { Loading } from '@/components/ui/loading';
+import { useCity } from '@/lib/city-context';
 
 const navigationItems = [
   {
@@ -36,18 +37,18 @@ const weddingImages = [
   'https://images.pexels.com/photos/1444443/pexels-photo-1444443.jpeg'
 ];
 
-const locations = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Kolkata', 'Jaipur', 'Goa'];
+const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Kolkata', 'Jaipur', 'Goa'];
 
 export default function HeroSection() {
   const { navigate } = useNavigation();
+  const { selectedCity, setSelectedCity } = useCity();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState('LOCATION');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const locationDropdownRef = useRef<HTMLDivElement>(null);
+  const cityDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -61,9 +62,9 @@ export default function HeroSection() {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
       
-      // Check location dropdown
-      if (locationDropdownRef.current && !locationDropdownRef.current.contains(target)) {
-        setShowLocationDropdown(false);
+      // Check city dropdown
+      if (cityDropdownRef.current && !cityDropdownRef.current.contains(target)) {
+        setShowCityDropdown(false);
       }
       
       // Check navigation dropdowns
@@ -89,10 +90,9 @@ export default function HeroSection() {
     setActiveDropdown(activeDropdown === title ? null : title);
   };
 
-  const handleLocationSelect = async (location: string) => {
-    setSelectedLocation(location);
-    setShowLocationDropdown(false);
-    await navigate(`/vendors?location=${location.toLowerCase()}`);
+  const handleCitySelect = (city: string) => {
+    setSelectedCity(city);
+    setShowCityDropdown(false);
   };
 
   const handleNavItemClick = async (category: string) => {
@@ -173,29 +173,29 @@ export default function HeroSection() {
               >
                 <ShoppingCart className="w-5 h-5" />
               </Button>
-              <div className="relative" ref={locationDropdownRef}>
+              <div className="relative" ref={cityDropdownRef}>
                 <Button 
                   size="sm" 
                   className="rounded-lg bg-gold hover:bg-gold-600 text-white px-4 h-12 font-bold text-sm"
-                  onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+                  onClick={() => setShowCityDropdown(!showCityDropdown)}
                 >
-                  {selectedLocation}
+                  {selectedCity}
                   <ChevronDown className={`w-4 h-4 ml-2 transition-transform duration-200 ${
-                    showLocationDropdown ? 'rotate-180' : ''
+                    showCityDropdown ? 'rotate-180' : ''
                   }`} />
                 </Button>
                 
-                {/* Location Dropdown */}
-                {showLocationDropdown && (
+                {/* City Dropdown */}
+                {showCityDropdown && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50">
                     <div className="py-2">
-                      {locations.map((location) => (
+                      {cities.map((city) => (
                         <button
-                          key={location}
-                          onClick={() => handleLocationSelect(location)}
+                          key={city}
+                          onClick={() => handleCitySelect(city)}
                           className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gold-50 hover:text-gold-700 transition-colors duration-150"
                         >
-                          {location}
+                          {city}
                         </button>
                       ))}
                     </div>

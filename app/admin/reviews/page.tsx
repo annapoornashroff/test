@@ -182,7 +182,7 @@ export default function AdminReviewsPage() {
                   <div className="flex justify-center">
                     <GoogleReviewsBadge 
                       rating={businessRating.rating} 
-                      reviewCount={businessRating.total_reviews}
+                      totalReviews={businessRating.total_reviews}
                       businessName={businessRating.business_name}
                     />
                   </div>

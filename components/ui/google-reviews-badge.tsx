@@ -1,17 +1,11 @@
 import { Star } from 'lucide-react';
-
-interface GoogleReviewsBadgeProps {
-  rating: number;
-  reviewCount: number;
-  businessName?: string;
-  className?: string;
-}
+import { type GoogleReviewsBadgeProps } from '@/lib/types/ui';
 
 export function GoogleReviewsBadge({ 
   rating, 
-  reviewCount, 
+  totalReviews, 
   businessName = 'Forever N Co.',
-  className = '' 
+  className 
 }: GoogleReviewsBadgeProps) {
   return (
     <div className={`inline-flex items-center bg-white px-4 py-2 rounded-full shadow-md ${className}`}>
@@ -26,7 +20,7 @@ export function GoogleReviewsBadge({
         <Star className="w-4 h-4 text-yellow-500 fill-current" />
         <span className="text-sm font-bold ml-1">{rating.toFixed(1)}</span>
         <span className="text-xs text-gray-500 ml-1">
-          ({reviewCount.toLocaleString()})
+          ({totalReviews.toLocaleString()})
         </span>
       </div>
     </div>

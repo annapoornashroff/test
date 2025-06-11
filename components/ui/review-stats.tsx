@@ -1,19 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Star, Users, Calendar } from 'lucide-react';
-
-interface ReviewStatsProps {
-  stats: {
-    total_reviews: number;
-    average_rating: number;
-    recent_reviews_count: number;
-    wedding_related_count: number;
-    rating_distribution: Record<number, number>;
-    source: string;
-    business_name: string;
-    last_updated: string;
-  };
-  className?: string;
-}
+import { type ReviewStatsProps } from '@/lib/types/ui';
 
 export function ReviewStats({ stats, className = '' }: ReviewStatsProps) {
   // Calculate percentage for each rating

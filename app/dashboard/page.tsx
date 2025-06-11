@@ -12,26 +12,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
 import { toast } from 'sonner';
-
-interface WeddingProject {
-  id: number;
-  name: string;
-  date: string;
-  location: string;
-  status: string;
-  budget: number;
-  spent: number;
-  estimated_guests: number;
-  events: string[];
-}
-
-interface User {
-  id: number;
-  name: string;
-  phone_number: string;
-  email: string;
-  location: string;
-}
+import { type WeddingProject, type User } from '@/lib/types/ui';
 
 const quickActions = [
   { icon: ShoppingCart, label: 'Browse Vendors', href: '/vendors', color: 'bg-blue-500' },

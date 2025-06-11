@@ -2,35 +2,98 @@
 
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
+import { Chart as ChartJS } from 'chart.js';
 
 import { cn } from '@/lib/utils';
+import { type ChartConfig, type ChartContextProps } from '@/lib/types/ui';
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { light: '', dark: '.dark' } as const;
-
-export type ChartConfig = {
-  [k in string]: {
-    label?: React.ReactNode;
-    icon?: React.ComponentType;
-  } & (
-    | { color?: string; theme?: never }
-    | { color?: never; theme: Record<keyof typeof THEMES, string> }
-  );
-};
-
-type ChartContextProps = {
-  config: ChartConfig;
-};
+const THEME_SELECTORS = {
+  light: '.light',
+  dark: '.dark',
+  system: ':root',
+} as const;
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
-function useChart() {
+export function Chart({ config, className }: ChartContextProps) {
+  const { type, data, options, theme } = config;
+  const chartRef = React.useRef<HTMLCanvasElement>(null);
+  const chartInstance = React.useRef<ChartJS | null>(null);
+
+  React.useEffect(() => {
+    if (!chartRef.current) return;
+
+    // Destroy previous chart instance
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    // Create new chart instance
+    const ctx = chartRef.current.getContext('2d');
+    if (!ctx) return;
+
+    // Register theme colors if provided
+    if (theme) {
+      Object.entries(theme).forEach(([themeName, color]) => {
+        ChartJS.register({
+          id: `theme-${themeName}`,
+          beforeDraw: (chart: ChartJS) => {
+            const { ctx } = chart;
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, chart.width, chart.height);
+            ctx.restore();
+          },
+        });
+      });
+    }
+
+    // Create chart
+    chartInstance.current = new ChartJS(ctx, {
+      type,
+      data,
+      options: {
+        ...options,
+        responsive: true,
+        maintainAspectRatio: false,
+      },
+    });
+
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [type, data, options, theme]);
+
+  return (
+    <div className={cn('relative w-full h-full', className)}>
+      <canvas ref={chartRef} />
+      {theme && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: Object.entries(THEME_SELECTORS)
+              .map(
+                ([themeName, prefix]) => `
+                ${prefix} .chart-theme-${themeName} {
+                  background-color: ${theme[themeName as keyof typeof THEME_SELECTORS]};
+                }
+              `
+              )
+              .join('\n'),
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+export function useChart() {
   const context = React.useContext(ChartContext);
-
   if (!context) {
-    throw new Error('useChart must be used within a <ChartContainer />');
+    throw new Error('useChart must be used within a ChartProvider');
   }
-
   return context;
 }
 
@@ -79,7 +142,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
+        __html: Object.entries(THEME_SELECTORS)
           .map(
             ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {

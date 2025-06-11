@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { type NavigationContextType } from '@/lib/types/ui';
 
 interface NavigationContextType {
   isLoading: boolean;

@@ -1,10 +1,6 @@
 import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-interface ErrorMessageProps {
-  message: string;
-  className?: string;
-}
+import { type ErrorMessageProps } from '@/lib/types/ui';
 
 export function ErrorMessage({ message, className }: ErrorMessageProps) {
   return (
