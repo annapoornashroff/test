@@ -39,7 +39,7 @@ export default function CartPage() {
       setLoading(true);
       setError('');
       
-      const token = await user?.getIdToken();
+      const token = await user.getIdToken();
       const [items, summary] = await Promise.all([
         apiClient.getCartItems(token),
         apiClient.getCartSummary(token)
