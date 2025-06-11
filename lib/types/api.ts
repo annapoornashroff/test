@@ -134,6 +134,22 @@ export interface ReviewResponse extends ReviewData {
   relative_time?: string;
 }
 
+export interface ReviewsResponse {
+  reviews: ReviewResponse[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
+export interface BusinessRating {
+  rating: number;
+  total_reviews: number;
+  business_name: string;
+  source: string;
+  place_id?: string;
+}
+
 export interface ReviewStats {
   total_reviews: number;
   average_rating: number;

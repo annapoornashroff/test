@@ -1,5 +1,5 @@
 import httpx
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
 import json
 from app.core.config import settings
@@ -9,12 +9,47 @@ class GoogleReviewsService:
         self.api_key = settings.GOOGLE_PLACES_API_KEY
         self.place_id = settings.GOOGLE_PLACE_ID
         self.base_url = "https://maps.googleapis.com/maps/api/place"
+        self._cached_reviews: Optional[List[Dict[str, Any]]] = None
+        self._cache_timestamp: Optional[datetime] = None
+        self._cache_duration = 3600  # Cache for 1 hour
     
-    async def get_recent_reviews(self, limit: int = 6) -> List[Dict[str, Any]]:
-        """Get recent Google Reviews for the business"""
+    async def get_recent_reviews(self, page: int = 1, limit: int = 10) -> Tuple[List[Dict[str, Any]], int]:
+        """Get paginated Google Reviews for the business
+        
+        Returns:
+            Tuple[List[Dict[str, Any]], int]: (paginated reviews, total count)
+        """
         if not self.api_key or not self.place_id:
             print("Google Places API not configured, using mock data")
-            return self._get_mock_reviews(limit)
+            return self._get_mock_reviews(page=page, limit=limit)
+        
+        try:
+            # Get all reviews (cached if possible)
+            all_reviews = await self._get_all_reviews()
+            total_count = len(all_reviews)
+            
+            # Apply pagination
+            start_idx = (page - 1) * limit
+            end_idx = start_idx + limit
+            paginated_reviews = all_reviews[start_idx:end_idx]
+            
+            if paginated_reviews:
+                print(f"Successfully fetched {len(paginated_reviews)} Google Reviews (page {page} of {(total_count + limit - 1) // limit})")
+                return paginated_reviews, total_count
+            
+            return [], 0
+                
+        except Exception as e:
+            print(f"Error fetching Google Reviews: {e}")
+            return self._get_mock_reviews(page=page, limit=limit)
+    
+    async def _get_all_reviews(self) -> List[Dict[str, Any]]:
+        """Get all reviews with caching"""
+        # Check cache
+        if self._cached_reviews and self._cache_timestamp:
+            cache_age = (datetime.now() - self._cache_timestamp).total_seconds()
+            if cache_age < self._cache_duration:
+                return self._cached_reviews
         
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
@@ -33,20 +68,27 @@ class GoogleReviewsService:
                     data = response.json()
                     if data.get("status") == "OK":
                         reviews = data.get("result", {}).get("reviews", [])
-                        formatted_reviews = self._format_reviews(reviews[:limit])
+                        formatted_reviews = self._format_reviews(reviews)
                         
-                        # If we have real reviews, return them
-                        if formatted_reviews:
-                            print(f"Successfully fetched {len(formatted_reviews)} Google Reviews")
-                            return formatted_reviews
+                        # Update cache
+                        self._cached_reviews = formatted_reviews
+                        self._cache_timestamp = datetime.now()
+                        
+                        return formatted_reviews
                 
                 # If no reviews or API error, fall back to mock data
                 print(f"Google Places API response: {data.get('status', 'Unknown error')}")
-                return self._get_mock_reviews(limit)
+                mock_reviews = self._get_mock_reviews(limit=50)[0]  # Get all mock reviews
+                self._cached_reviews = mock_reviews
+                self._cache_timestamp = datetime.now()
+                return mock_reviews
                 
         except Exception as e:
             print(f"Error fetching Google Reviews: {e}")
-            return self._get_mock_reviews(limit)
+            mock_reviews = self._get_mock_reviews(limit=50)[0]  # Get all mock reviews
+            self._cached_reviews = mock_reviews
+            self._cache_timestamp = datetime.now()
+            return mock_reviews
     
     def _format_reviews(self, reviews: List[Dict]) -> List[Dict[str, Any]]:
         """Format Google Reviews data for frontend consumption"""
@@ -181,7 +223,7 @@ class GoogleReviewsService:
         
         return wedding_date.strftime("%Y-%m-%d")
     
-    def _get_mock_reviews(self, limit: int) -> List[Dict[str, Any]]:
+    def _get_mock_reviews(self, page: int = 1, limit: int = 10) -> Tuple[List[Dict[str, Any]], int]:
         """Return high-quality mock reviews for development/fallback"""
         mock_reviews = [
             {
@@ -248,49 +290,13 @@ class GoogleReviewsService:
                 "source": "mock_data",
                 "is_wedding_related": True,
                 "relative_time": "3 weeks ago"
-            },
-            {
-                "id": 6,
-                "name": "Divya & Karthik",
-                "location": "Pune",
-                "rating": 5,
-                "comment": "Forever N Co turned our wedding dreams into reality! The comprehensive planning tools and vendor network made everything so smooth. Our guests are still talking about it!",
-                "image": "https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg",
-                "wedding_date": "2024-06-12",
-                "created_at": datetime(2024, 6, 16).isoformat(),
-                "source": "mock_data",
-                "is_wedding_related": True,
-                "relative_time": "2 weeks ago"
-            },
-            {
-                "id": 7,
-                "name": "Ritu & Amit",
-                "location": "Jaipur",
-                "rating": 5,
-                "comment": "Incredible experience with Forever N Co! They made our destination wedding in Rajasthan absolutely perfect. Every detail was taken care of professionally.",
-                "image": "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg",
-                "wedding_date": "2024-07-08",
-                "created_at": datetime(2024, 7, 12).isoformat(),
-                "source": "mock_data",
-                "is_wedding_related": True,
-                "relative_time": "1 week ago"
-            },
-            {
-                "id": 8,
-                "name": "Pooja & Sanjay",
-                "location": "Goa",
-                "rating": 5,
-                "comment": "Beach wedding perfection! Forever N Co coordinated everything beautifully. The sunset ceremony was exactly what we dreamed of. Thank you for making it magical!",
-                "image": "https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg",
-                "wedding_date": "2024-08-15",
-                "created_at": datetime(2024, 8, 18).isoformat(),
-                "source": "mock_data",
-                "is_wedding_related": True,
-                "relative_time": "5 days ago"
             }
         ]
         
-        return mock_reviews[:limit]
+        # Apply pagination to mock data
+        start_idx = (page - 1) * limit
+        end_idx = start_idx + limit
+        return mock_reviews[start_idx:end_idx], len(mock_reviews)
     
     async def get_business_rating(self) -> Dict[str, Any]:
         """Get overall business rating from Google"""

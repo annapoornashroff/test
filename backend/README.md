@@ -70,6 +70,39 @@ This is the backend API for Forever N Co., a comprehensive Indian wedding servic
 - `POST /api/v1/guests/{id}/send-invitation` - Send invitation
 - `GET /api/v1/guests/statistics` - Get guest statistics
 
+#### Reviews
+- `GET /api/v1/reviews/` - Get paginated reviews
+  - Query Parameters:
+    - `page` (int, default=1): Page number
+    - `limit` (int, default=10, max=50): Number of reviews per page
+  - Response:
+    ```json
+    {
+      "reviews": [
+        {
+          "id": "string",
+          "name": "string",
+          "location": "string",
+          "rating": "number",
+          "comment": "string",
+          "image": "string",
+          "wedding_date": "string",
+          "created_at": "string",
+          "source": "string",
+          "is_wedding_related": "boolean",
+          "relative_time": "string"
+        }
+      ],
+      "total": "number",
+      "page": "number",
+      "limit": "number",
+      "total_pages": "number"
+    }
+    ```
+- `GET /api/v1/reviews/featured` - Get featured reviews (5-star wedding-related)
+- `GET /api/v1/reviews/rating` - Get business rating and stats
+- `GET /api/v1/reviews/health` - Check reviews service health
+
 ## 🛠️ Setup Instructions
 
 ### 1. Install Dependencies

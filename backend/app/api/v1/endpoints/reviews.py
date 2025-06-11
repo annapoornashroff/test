@@ -8,12 +8,13 @@ router = APIRouter()
 
 @router.get("/", response_model=List[Dict[str, Any]])
 async def get_reviews(
-    limit: int = Query(6, ge=1, le=20, description="Number of reviews to fetch")
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(10, ge=1, le=50, description="Number of reviews per page")
 ):
-    """Get recent Google Reviews for testimonials"""
+    """Get paginated Google Reviews for testimonials"""
     try:
         reviews_service = GoogleReviewsService()
-        reviews = await reviews_service.get_recent_reviews(limit=limit)
+        reviews = await reviews_service.get_recent_reviews(page=page, limit=limit)
         return reviews
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch reviews: {str(e)}")

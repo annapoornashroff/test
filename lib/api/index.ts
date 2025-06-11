@@ -13,7 +13,9 @@ import {
   CartItemData,
   CartItemResponse,
   ReviewResponse,
-  ReviewStats
+  ReviewsResponse,
+  ReviewStats,
+  BusinessRating
 } from '../types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
@@ -49,69 +51,19 @@ export class ApiClient {
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
-    const headers = new Headers({
-      'Content-Type': 'application/json',
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
     });
 
-    // Add auth header if token is provided
-    const authToken = this.token;
-    if (authToken) {
-      headers.append('Authorization', `Bearer ${authToken}`);
-    }
-    
-    // Add other headers
-    if (options.headers) {
-      if (options.headers instanceof Headers) {
-        options.headers.forEach((value, key) => {
-          headers.append(key, value);
-        });
-      } else if (typeof options.headers === 'object') {
-        Object.entries(options.headers).forEach(([key, value]) => {
-          if (value) headers.append(key, value.toString());
-        });
-      }
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
     }
 
-    const config: RequestInit = {
-      ...options,
-      headers,
-    };
-
-    try {
-      const response = await fetch(url, config);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const error: ApiError = {
-          message: errorData.detail || `HTTP error! status: ${response.status}`,
-          status: response.status,
-          details: errorData,
-        };
-        
-        if (response.status === 401) {
-          this.clearToken();
-          toast.error('Session expired. Please login again.');
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
-        } else if (response.status >= 500) {
-          toast.error('Server error. Please try again later.');
-        } else {
-          toast.error(error.message);
-        }
-        
-        throw error;
-      }
-      
-      return await response.json();
-    } catch (error) {
-      if (error instanceof Error && error.name === 'TypeError') {
-        toast.error('Network error. Please check your connection.');
-        throw new Error('Network error');
-      }
-      throw error;
-    }
+    return response.json();
   }
 
   // Authentication
@@ -260,12 +212,21 @@ export class ApiClient {
   }
 
   // Reviews
-  async getReviews(limit: number = 6): Promise<ReviewResponse[]> {
-    return this.request(`/reviews?limit=${limit}`);
+  async getReviews(params: { page?: number; limit?: number } = {}): Promise<ReviewsResponse> {
+    const { page = 1, limit = 10 } = params;
+    return this.request<ReviewsResponse>(`/reviews?page=${page}&limit=${limit}`);
+  }
+
+  async getFeaturedReviews(): Promise<ReviewResponse[]> {
+    return this.request<ReviewResponse[]>('/reviews/featured');
+  }
+
+  async getBusinessRating(): Promise<BusinessRating> {
+    return this.request<BusinessRating>('/reviews/business-rating');
   }
 
   async getReviewStats(): Promise<ReviewStats> {
-    return this.request('/reviews/stats');
+    return this.request<ReviewStats>('/reviews/stats');
   }
 }
 

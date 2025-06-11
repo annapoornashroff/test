@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -12,9 +12,39 @@ import { ReviewCard } from '@/components/ui/review-card';
 import { ReviewStats } from '@/components/ui/review-stats';
 
 export default function ReviewsPage() {
-  const { reviews, businessRating, reviewStats, loading, error, refreshReviews } = useReviews(20);
+  const { 
+    reviews, 
+    businessRating, 
+    reviewStats, 
+    loading, 
+    error, 
+    hasMore,
+    loadMore,
+    refreshReviews 
+  } = useReviews(10);
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const [useInfiniteScroll, setUseInfiniteScroll] = useState(true);
+  const observer = useRef<IntersectionObserver | null>(null);
+  
+  // Check if IntersectionObserver is supported
+  useEffect(() => {
+    setUseInfiniteScroll('IntersectionObserver' in window);
+  }, []);
+
+  const lastReviewRef = useCallback((node: HTMLDivElement | null) => {
+    if (!useInfiniteScroll || loading) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMore();
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore, loadMore, useInfiniteScroll]);
 
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = !searchQuery || 
@@ -27,7 +57,7 @@ export default function ReviewsPage() {
     return matchesSearch && matchesRating;
   });
 
-  if (loading) {
+  if (loading && reviews.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -155,9 +185,30 @@ export default function ReviewsPage() {
               </Card>
             ) : (
               <div className="space-y-6">
-                {filteredReviews.map(review => (
-                  <ReviewCard key={review.id} review={review} />
+                {filteredReviews.map((review, index) => (
+                  <div
+                    key={review.id}
+                    ref={index === filteredReviews.length - 1 ? lastReviewRef : null}
+                  >
+                    <ReviewCard review={review} />
+                  </div>
                 ))}
+                {loading && (
+                  <div className="flex justify-center py-4">
+                    <LoadingSpinner size="md" />
+                  </div>
+                )}
+                {!useInfiniteScroll && hasMore && !loading && (
+                  <div className="flex justify-center py-4">
+                    <Button 
+                      onClick={loadMore}
+                      variant="outline"
+                      className="w-full max-w-xs"
+                    >
+                      Load More Reviews
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
