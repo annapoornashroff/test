@@ -11,7 +11,6 @@ const footerLinks = {
     { name: 'Blog', href: '/blog' }
   ],
   services: [
-    { name: 'Join Our Team', href: '/careers' },
     { name: 'Vendors', href: '/vendors' },
     { name: 'FAQ', href: '/faq' },
     { name: 'Terms & Conditions', href: '/terms' }

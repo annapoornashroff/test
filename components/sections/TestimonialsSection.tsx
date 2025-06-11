@@ -58,8 +58,8 @@ export default function TestimonialsSection() {
         apiClient.getBusinessRating()
       ]);
       
-      setReviews(reviewsData);
-      setBusinessRating(ratingData);
+      setReviews(reviewsData as Review[]);
+      setBusinessRating(ratingData as BusinessRating);
     } catch (error: any) {
       console.error('Error fetching reviews:', error);
       setError(error.message || 'Failed to load testimonials');
@@ -85,7 +85,7 @@ export default function TestimonialsSection() {
       <section className="py-20 bg-gradient-to-br from-pink-50 to-pink-100">
         <div className="container mx-auto px-6">
           <div className="text-center">
-            <LoadingSpinner size="lg\" className="mx-auto mb-4" />
+            <LoadingSpinner size="lg" className="mx-auto mb-4" />
             <p className="text-gray-600">Loading testimonials...</p>
           </div>
         </div>
