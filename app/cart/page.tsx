@@ -57,7 +57,8 @@ export default function CartPage() {
 
   const removeItem = async (id: number) => {
     try {
-      const token = await user?.getIdToken();
+      if (!user) throw new Error('No user found');
+      const token = await user.getIdToken();
       await apiClient.removeFromCart(token, id.toString());
       
       // Refresh cart data
