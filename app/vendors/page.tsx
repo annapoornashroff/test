@@ -28,6 +28,19 @@ interface Vendor {
   contact_email: string;
 }
 
+interface ApiResponse<T> {
+  data: T;
+  error?: string;
+}
+
+interface CategoriesResponse {
+  categories: string[];
+}
+
+interface LocationsResponse {
+  locations: string[];
+}
+
 const categoryIcons: Record<string, any> = {
   'Photography': Camera,
   'Catering': Utensils,
@@ -65,28 +78,28 @@ export default function VendorsPage() {
   const loadInitialData = async () => {
     await withLoading(async () => {
       // Load vendors
-      const vendorsData = await apiClient.getVendors();
+      const vendorsData = await apiClient.getVendors() as Vendor[];
       setVendors(vendorsData);
 
       // Load categories
-      const categoriesData = await apiClient.getVendorCategories();
+      const categoriesData = await apiClient.getVendorCategories() as CategoriesResponse;
       setCategories(categoriesData.categories || []);
 
       // Load locations
-      const locationsData = await apiClient.getVendorLocations();
+      const locationsData = await apiClient.getVendorLocations() as LocationsResponse;
       setLocations(locationsData.locations || []);
     }, setLoading);
   };
 
   const searchVendors = async () => {
     await withLoading(async () => {
-      const params: any = {};
+      const params: Record<string, string> = {};
       
       if (searchQuery) params.search = searchQuery;
       if (selectedCategory !== 'All') params.category = selectedCategory;
       if (selectedLocation !== 'All') params.location = selectedLocation;
       
-      const vendorsData = await apiClient.getVendors(params);
+      const vendorsData = await apiClient.getVendors(params) as Vendor[];
       setVendors(vendorsData);
     }, setSearchLoading);
   };

@@ -8,7 +8,7 @@ import { ErrorMessage } from '@/components/ui/error-message';
 import { 
   Heart, Star, MapPin, Calendar, Phone, Mail, 
   Globe, ShoppingCart, ChevronLeft, ChevronRight,
-  Check, X, Clock, Loader2
+  Check, X, Clock, Loader2, User
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -16,12 +16,38 @@ import { apiClient, handleApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 
+interface Wedding {
+  id: number;
+  name: string;
+  date: string;
+}
+
+interface Vendor {
+  id: number;
+  name: string;
+  category: string;
+  description?: string;
+  price_min?: number;
+  price_max?: number;
+  rating: number;
+  review_count: number;
+  location: string;
+  images: string[];
+  is_featured: boolean;
+  is_active: boolean;
+  services?: string[];
+  portfolio?: string[];
+  contact_phone?: string;
+  contact_email?: string;
+  contact_website?: string;
+}
+
 export default function VendorDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
   
-  const [vendor, setVendor] = useState<any>(null);
-  const [weddings, setWeddings] = useState<any[]>([]);
+  const [vendor, setVendor] = useState<Vendor | null>(null);
+  const [weddings, setWeddings] = useState<Wedding[]>([]);
   const [selectedWedding, setSelectedWedding] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -40,18 +66,19 @@ export default function VendorDetailPage() {
       
       // Load vendor details
       const vendorData = await apiClient.getVendor(Number(id));
-      setVendor(vendorData);
+      setVendor(vendorData as Vendor);
       
       // If user is logged in, load their weddings
       if (user) {
         try {
           const token = await user.getIdToken();
-          const weddingsData = await apiClient.getWeddings(token);
-          setWeddings(weddingsData);
+          const weddingsData = await apiClient.getWeddings();
+          const typedWeddingsData = weddingsData as Wedding[];
+          setWeddings(typedWeddingsData);
           
-          if (weddingsData.length > 0) {
-            setSelectedWedding(weddingsData[0].id);
-            setSelectedDate(new Date(weddingsData[0].date).toISOString().split('T')[0]);
+          if (typedWeddingsData.length > 0) {
+            setSelectedWedding(typedWeddingsData[0].id);
+            setSelectedDate(new Date(typedWeddingsData[0].date).toISOString().split('T')[0]);
           }
         } catch (error) {
           console.error('Error loading weddings:', error);
@@ -81,11 +108,11 @@ export default function VendorDetailPage() {
       setActionLoading(true);
       const token = await user.getIdToken();
       
-      await apiClient.addToCart(token, {
+      await apiClient.addToCart({
         wedding_id: selectedWedding,
-        vendor_id: vendor.id,
-        category: vendor.category,
-        price: vendor.price_min || 0,
+        vendor_id: vendor?.id,
+        category: vendor?.category,
+        price: vendor?.price_min || 0,
         booking_date: selectedDate || new Date().toISOString(),
         status: 'wishlisted'
       });
@@ -113,11 +140,11 @@ export default function VendorDetailPage() {
       setActionLoading(true);
       const token = await user.getIdToken();
       
-      await apiClient.addToCart(token, {
+      await apiClient.addToCart({
         wedding_id: selectedWedding,
-        vendor_id: vendor.id,
-        category: vendor.category,
-        price: vendor.price_min || 0,
+        vendor_id: vendor?.id,
+        category: vendor?.category,
+        price: vendor?.price_min || 0,
         booking_date: selectedDate || new Date().toISOString(),
         status: 'visited',
         visit_date: new Date().toISOString()
@@ -146,11 +173,11 @@ export default function VendorDetailPage() {
       setActionLoading(true);
       const token = await user.getIdToken();
       
-      await apiClient.addToCart(token, {
+      await apiClient.addToCart({
         wedding_id: selectedWedding,
-        vendor_id: vendor.id,
-        category: vendor.category,
-        price: vendor.price_min || 0,
+        vendor_id: vendor?.id,
+        category: vendor?.category,
+        price: vendor?.price_min || 0,
         booking_date: selectedDate || new Date().toISOString(),
         status: 'selected'
       });
@@ -172,13 +199,13 @@ export default function VendorDetailPage() {
   };
 
   const nextImage = () => {
-    if (vendor?.images?.length > 0) {
+    if (vendor && vendor.images && vendor.images.length > 0) {
       setCurrentImageIndex((prev) => (prev + 1) % vendor.images.length);
     }
   };
 
   const prevImage = () => {
-    if (vendor?.images?.length > 0) {
+    if (vendor && vendor.images && vendor.images.length > 0) {
       setCurrentImageIndex((prev) => (prev - 1 + vendor.images.length) % vendor.images.length);
     }
   };
@@ -187,7 +214,7 @@ export default function VendorDetailPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <LoadingSpinner size="lg\" className="mx-auto mb-4" />
+          <LoadingSpinner size="lg" className="mx-auto mb-4" />
           <p className="text-gray-600">Loading vendor details...</p>
         </div>
       </div>
@@ -306,7 +333,7 @@ export default function VendorDetailPage() {
                   
                   {/* Image Pagination */}
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                    {vendor.images.map((_, index: number) => (
+                    {vendor.images.map((image: string, index: number) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
@@ -472,7 +499,7 @@ export default function VendorDetailPage() {
                               className="w-full border border-gray-300 rounded-lg px-3 py-2"
                               disabled={actionLoading}
                             >
-                              {weddings.map((wedding: any) => (
+                              {weddings.map((wedding: Wedding) => (
                                 <option key={wedding.id} value={wedding.id}>
                                   {wedding.name} ({new Date(wedding.date).toLocaleDateString()})
                                 </option>
