@@ -4,12 +4,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Calendar, MapPin, Users, IndianRupee, Heart, ArrowRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
-import { apiClient, handleApiError } from '@/lib/api-client';
+import { apiClient } from '@/lib/api';
+import { handleApiError } from '@/lib/api-client';
+import { WeddingData } from '@/lib/types/api';
 import { toast } from 'sonner';
 
 const events = [
@@ -25,38 +26,38 @@ export default function PlanningPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<WeddingData>({
+    name: 'My Wedding',
     location: '',
-    weddingDate: '',
-    isDateFixed: false,
+    date: '',
+    is_date_fixed: false,
     duration: 2,
-    selectedEvents: [] as string[],
-    selectedCategories: [] as string[],
-    estimatedGuests: 200,
-    budget: 500000,
-    name: 'My Wedding'
+    events: [],
+    categories: [],
+    estimated_guests: 200,
+    budget: 500000
   });
 
   const toggleEvent = (event: string) => {
     setFormData(prev => ({
       ...prev,
-      selectedEvents: prev.selectedEvents.includes(event)
-        ? prev.selectedEvents.filter(e => e !== event)
-        : [...prev.selectedEvents, event]
+      events: prev.events.includes(event)
+        ? prev.events.filter(e => e !== event)
+        : [...prev.events, event]
     }));
   };
 
   const toggleCategory = (category: string) => {
     setFormData(prev => ({
       ...prev,
-      selectedCategories: prev.selectedCategories.includes(category)
-        ? prev.selectedCategories.filter(c => c !== category)
-        : [...prev.selectedCategories, category]
+      categories: prev.categories.includes(category)
+        ? prev.categories.filter(c => c !== category)
+        : [...prev.categories, category]
     }));
   };
 
   const handleSubmit = async () => {
-    if (!formData.location || !formData.weddingDate) {
+    if (!formData.location || !formData.date) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -75,17 +76,7 @@ export default function PlanningPage() {
       const token = await user.getIdToken();
       
       // Create wedding project
-      await apiClient.createWedding(token, {
-        name: formData.name,
-        location: formData.location,
-        date: new Date(formData.weddingDate).toISOString(),
-        is_date_fixed: formData.isDateFixed,
-        duration: formData.duration,
-        events: formData.selectedEvents,
-        categories: formData.selectedCategories,
-        estimated_guests: formData.estimatedGuests,
-        budget: formData.budget
-      });
+      await apiClient.createWedding(token, formData);
       
       toast.success('Wedding project created successfully!');
       router.push('/dashboard');
@@ -167,15 +158,15 @@ export default function PlanningPage() {
                 <div className="space-y-3">
                   <Input
                     type="date"
-                    value={formData.weddingDate}
-                    onChange={(e) => setFormData(prev => ({ ...prev, weddingDate: e.target.value }))}
+                    value={formData.date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
                     className="h-12"
                   />
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      checked={formData.isDateFixed}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isDateFixed: e.target.checked }))}
+                      checked={formData.is_date_fixed}
+                      onChange={(e) => setFormData(prev => ({ ...prev, is_date_fixed: e.target.checked }))}
                       className="rounded border-gray-300"
                     />
                     <span className="text-sm text-gray-600">Date is fixed</span>
@@ -210,7 +201,7 @@ export default function PlanningPage() {
                       type="button"
                       onClick={() => toggleEvent(event)}
                       className={`p-3 rounded-lg border-2 transition-all ${
-                        formData.selectedEvents.includes(event)
+                        formData.events.includes(event)
                           ? 'border-primary bg-primary text-white'
                           : 'border-gray-200 hover:border-primary'
                       }`}
@@ -233,7 +224,7 @@ export default function PlanningPage() {
                       type="button"
                       onClick={() => toggleCategory(category)}
                       className={`p-3 rounded-lg border-2 transition-all ${
-                        formData.selectedCategories.includes(category)
+                        formData.categories.includes(category)
                           ? 'border-gold bg-gold text-white'
                           : 'border-gray-200 hover:border-gold'
                       }`}
@@ -248,15 +239,15 @@ export default function PlanningPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Users className="w-4 h-4 inline mr-2" />
-                  Estimated Guests: {formData.estimatedGuests}
+                  Estimated Guests: {formData.estimated_guests}
                 </label>
                 <input
                   type="range"
                   min="50"
                   max="1000"
                   step="50"
-                  value={formData.estimatedGuests}
-                  onChange={(e) => setFormData(prev => ({ ...prev, estimatedGuests: parseInt(e.target.value) }))}
+                  value={formData.estimated_guests}
+                  onChange={(e) => setFormData(prev => ({ ...prev, estimated_guests: parseInt(e.target.value) }))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
