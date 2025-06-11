@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Heart, ShoppingCart, MapPin, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const navigationItems = [
   {
@@ -98,10 +99,13 @@ export default function HeroSection() {
     <section className="relative min-h-screen overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
-        <img
+        <Image
           src={weddingImages[currentImageIndex]}
           alt="Wedding celebration"
-          className="w-full h-full object-cover transition-opacity duration-1000"
+          fill
+          priority
+          className="object-cover transition-opacity duration-1000"
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/30" />
       </div>
@@ -113,11 +117,13 @@ export default function HeroSection() {
           <div className="flex items-center justify-between px-6 py-4">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-3">
-              <div className="w-auto h-12 overflow-hidden">
-                <img
+              <div className="w-auto h-12 overflow-hidden relative">
+                <Image
                   src="/logo.png"
                   alt="Forever & Co. Logo"
-                  className="w-full h-full object-contain"
+                  width={48}
+                  height={48}
+                  className="object-contain"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';

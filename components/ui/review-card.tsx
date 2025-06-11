@@ -1,5 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Quote } from 'lucide-react';
+import Image from 'next/image';
 
 interface ReviewCardProps {
   review: {
@@ -38,10 +39,12 @@ export function ReviewCard({ review, isActive = false, className = '' }: ReviewC
       } border-2 border-pink-200 ${className}`}
     >
       <div className="aspect-video relative overflow-hidden">
-        <img
+        <Image
           src={review.image || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
           alt={`${review.name} wedding`}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 33vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-4 left-4 text-white">
@@ -84,7 +87,7 @@ export function ReviewCard({ review, isActive = false, className = '' }: ReviewC
         
         {/* Comment */}
         <p className="text-gray-600 text-sm leading-relaxed mb-4">
-          "{review.comment}"
+          &quot;{review.comment}&quot;
         </p>
         
         {/* Wedding Date */}

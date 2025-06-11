@@ -148,7 +148,7 @@ export default function DashboardPage() {
                 Welcome back, {user?.name || 'there'}! 👋
               </h2>
               <p className="text-gray-600">
-                Let's continue planning your dream wedding
+                Let&apos;s continue planning your dream wedding
               </p>
             </div>
 

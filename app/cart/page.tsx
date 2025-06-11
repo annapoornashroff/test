@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient } from '@/lib/api';
+import Image from 'next/image';
 
 const categories = [
   'Photography', 'Catering', 'Decoration', 'Makeup', 'Music & DJ', 'Venues'
@@ -57,13 +58,7 @@ export default function CartPage() {
   const { user } = useAuth();
   useProtectedRoute();
 
-  useEffect(() => {
-    if (user) {
-      fetchCartData();
-    }
-  }, [user]);
-
-  const fetchCartData = async () => {
+  const fetchCartData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -83,7 +78,13 @@ export default function CartPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchCartData();
+    }
+  }, [user, fetchCartData]);
 
   const removeItem = async (id: number) => {
     try {
@@ -231,11 +232,14 @@ export default function CartPage() {
                   <Card key={item.id} className="overflow-hidden">
                     <CardContent className="p-0">
                       <div className="flex">
-                        <img
-                          src={item.vendor?.images?.[0] || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
-                          alt={item.vendor?.name || 'Vendor'}
-                          className="w-32 h-32 object-cover"
-                        />
+                        <div className="relative w-32 h-32">
+                          <Image
+                            src={item.vendor?.images?.[0] || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
+                            alt={item.vendor?.name || 'Vendor'}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
                         <div className="flex-1 p-4">
                           <div className="flex items-start justify-between mb-2">
                             <div>

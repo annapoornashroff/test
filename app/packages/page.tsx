@@ -10,6 +10,7 @@ import {
   Filter, Search, Plus, Minus, ArrowRight, Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { apiClient } from '@/lib/api';
 
 interface Vendor {
@@ -206,10 +207,12 @@ export default function PackagesPage() {
                   )}
                   
                   <div className="aspect-video relative overflow-hidden">
-                    <img
+                    <Image
                       src={pkg.image_url || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
                       alt={pkg.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      sizes="(max-width: 768px) 100vw, 50vw"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                     <div className="absolute bottom-4 left-4 text-white">

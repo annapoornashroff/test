@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -15,6 +15,7 @@ import { useParams } from 'next/navigation';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 interface Wedding {
   id: number;
@@ -55,11 +56,7 @@ export default function VendorDetailPage() {
   const [error, setError] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  useEffect(() => {
-    loadVendorData();
-  }, [id]);
-
-  const loadVendorData = async () => {
+  const loadVendorData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -91,7 +88,11 @@ export default function VendorDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, user]);
+
+  useEffect(() => {
+    loadVendorData();
+  }, [loadVendorData]);
 
   const addToWishlist = async () => {
     if (!user) {
@@ -242,7 +243,7 @@ export default function VendorDetailPage() {
         <Card className="max-w-md w-full">
           <CardContent className="p-6 text-center">
             <h3 className="text-xl font-semibold mb-2">Vendor Not Found</h3>
-            <p className="text-gray-600 mb-4">The vendor you're looking for doesn't exist or has been removed.</p>
+            <p className="text-gray-600 mb-4">The vendor you&apos;re looking for doesn&apos;t exist or has been removed.</p>
             <Link href="/vendors">
               <Button>
                 Back to Vendors
@@ -303,16 +304,20 @@ export default function VendorDetailPage() {
             {/* Vendor Images */}
             <div className="relative rounded-xl overflow-hidden bg-gray-100 aspect-video">
               {vendor.images && vendor.images.length > 0 ? (
-                <img
+                <Image
                   src={vendor.images[currentImageIndex]}
                   alt={vendor.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 66vw"
                 />
               ) : (
-                <img
+                <Image
                   src="https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg"
                   alt={vendor.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 66vw"
                 />
               )}
               
@@ -464,11 +469,13 @@ export default function VendorDetailPage() {
                 <h3 className="text-lg font-semibold mb-4">Portfolio</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {vendor.portfolio.map((image: string, index: number) => (
-                    <div key={index} className="aspect-square rounded-lg overflow-hidden">
-                      <img 
+                    <div key={index} className="aspect-square rounded-lg overflow-hidden relative">
+                      <Image 
                         src={image} 
                         alt={`${vendor.name} portfolio ${index + 1}`} 
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        fill
+                        className="object-cover hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 50vw, 33vw"
                       />
                     </div>
                   ))}

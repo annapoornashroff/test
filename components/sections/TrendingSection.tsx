@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Filter, ArrowRight, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
 const trendingThemes = [
   {
@@ -52,7 +53,7 @@ export default function TrendingSection() {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-serif font-bold text-white mb-8">
-            CHECK WHAT'S TRENDING!
+            CHECK WHAT&apos;S TRENDING!
           </h2>
         </div>
 
@@ -61,10 +62,12 @@ export default function TrendingSection() {
           {trendingThemes.map((theme) => (
             <Card key={theme.id} className="bg-white rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="aspect-square relative overflow-hidden">
-                <img
+                <Image
                   src={theme.image}
                   alt={theme.name}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                  fill
+                  className="object-cover transition-transform duration-300 hover:scale-110"
+                  sizes="(max-width: 768px) 100vw, 33vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">

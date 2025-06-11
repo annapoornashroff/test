@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Filter, ArrowRight, Star, MapPin, Camera, Utensils, Palette } from 'lucide-react';
+import Image from 'next/image';
 
 const categories = [
   { name: 'Photography', icon: Camera, color: 'bg-blue-500' },
@@ -69,10 +70,12 @@ export default function VendorSection() {
           {vendors.map((vendor) => (
             <Card key={vendor.id} className="bg-pink-100 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="aspect-square relative overflow-hidden">
-                <img
+                <Image
                   src={vendor.image}
                   alt={vendor.name}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                  fill
+                  className="object-cover transition-transform duration-300 hover:scale-110"
+                  sizes="(max-width: 768px) 100vw, 33vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">

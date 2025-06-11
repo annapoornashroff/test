@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,20 +51,7 @@ export default function GuestsPage() {
   const { user } = useAuth() as { user: User | null };
   useProtectedRoute();
 
-  useEffect(() => {
-    if (user) {
-      fetchWeddings();
-    }
-  }, [user]);
-
-  useEffect(() => {
-    if (selectedWedding) {
-      fetchGuests();
-      fetchGuestStats();
-    }
-  }, [selectedWedding]);
-
-  const fetchWeddings = async () => {
+  const fetchWeddings = useCallback(async () => {
     if (!user) {
       setError('User not authenticated');
       return;
@@ -87,9 +74,9 @@ export default function GuestsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const fetchGuests = async () => {
+  const fetchGuests = useCallback(async () => {
     if (!user || !selectedWedding) return;
 
     try {
@@ -100,9 +87,9 @@ export default function GuestsPage() {
       console.error('Error fetching guests:', error);
       setError(error.message || 'Failed to load guests');
     }
-  };
+  }, [user, selectedWedding]);
 
-  const fetchGuestStats = async () => {
+  const fetchGuestStats = useCallback(async () => {
     if (!user || !selectedWedding) return;
 
     try {
@@ -112,7 +99,20 @@ export default function GuestsPage() {
     } catch (error: any) {
       console.error('Error fetching guest stats:', error);
     }
-  };
+  }, [user, selectedWedding]);
+
+  useEffect(() => {
+    if (user) {
+      fetchWeddings();
+    }
+  }, [user, fetchWeddings]);
+
+  useEffect(() => {
+    if (selectedWedding) {
+      fetchGuests();
+      fetchGuestStats();
+    }
+  }, [selectedWedding, fetchGuests, fetchGuestStats]);
 
   const addGuest = async () => {
     if (!user || !newGuest.name || !newGuest.phoneNumber || !selectedWedding) return;

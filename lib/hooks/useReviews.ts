@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/lib/api';
 
 interface Review {
@@ -54,7 +54,7 @@ export function useReviews(limit: number = 6): UseReviewsReturn {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -76,11 +76,11 @@ export function useReviews(limit: number = 6): UseReviewsReturn {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit]);
 
   useEffect(() => {
     fetchReviews();
-  }, [limit]);
+  }, [fetchReviews]);
 
   return {
     reviews,

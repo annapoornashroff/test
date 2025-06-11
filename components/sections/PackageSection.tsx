@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Filter, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 const packages = [
   {
@@ -63,10 +64,12 @@ export default function PackageSection() {
           {packages.map((pkg) => (
             <Card key={pkg.id} className="bg-white rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="aspect-video relative overflow-hidden">
-                <img
+                <Image
                   src={pkg.image}
                   alt={pkg.name}
-                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                  fill
+                  className="object-cover transition-transform duration-300 hover:scale-110"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-4 left-4 text-white">

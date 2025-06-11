@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './firebase';
 import { apiClient } from './api';
@@ -34,7 +34,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [userProfile, setUserProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refreshUserProfile = async () => {
+  const refreshUserProfile = useCallback(async () => {
     if (user) {
       try {
         const token = await user.getIdToken();
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     }
-  };
+  }, [user]);
 
   const handleSignOut = async () => {
     try {
@@ -81,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [refreshUserProfile]);
 
   const value = {
     user,

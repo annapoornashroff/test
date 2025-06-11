@@ -312,7 +312,7 @@ export default function AdminReviewsPage() {
                 <div className="space-y-2">
                   <h4 className="font-medium">How to Get Your Place ID</h4>
                   <ol className="text-sm text-gray-600 space-y-1 list-decimal pl-4">
-                    <li>Go to <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google's Place ID Finder</a></li>
+                    <li>Go to <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google&apos;s Place ID Finder</a></li>
                     <li>Enter your business name and location</li>
                     <li>Copy the Place ID that appears</li>
                     <li>Add it to your environment variables</li>
@@ -371,7 +371,7 @@ export default function AdminReviewsPage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">No reviews available</h3>
                 <p className="text-gray-600 mb-6">
                   {healthStatus?.google_api_configured 
-                    ? "We couldn't find any reviews. Try refreshing or check your Place ID."
+                    ? "We couldn&apos;t find any reviews. Try refreshing or check your Place ID."
                     : "Google Places API is not configured. Add your API key and Place ID to see real reviews."}
                 </p>
                 <Button onClick={refreshReviews}>

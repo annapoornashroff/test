@@ -112,7 +112,7 @@ export default function PlanningPage() {
               Plan Your Dream Wedding
             </h1>
             <p className="text-lg text-gray-600">
-              Tell us about your special day and we'll create the perfect plan for you
+              Tell us about your special day and we&apos;ll create the perfect plan for you
             </p>
           </div>
 

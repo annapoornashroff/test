@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
   Search, Filter, MapPin, Star, Heart, Calendar,
-  Camera, Utensils, Palette, Music, Sparkles, Home, Loader2
+  Camera, Utensils, Palette, Music, Sparkles, Home, Loader2, Car, Cake, Gift
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
 import { toast } from 'sonner';
 
@@ -63,9 +64,18 @@ export default function VendorsPage() {
   const [priceRange, setPriceRange] = useState('All');
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    loadInitialData();
-  }, []);
+  const searchVendors = useCallback(async () => {
+    await withLoading(async () => {
+      const params: Record<string, string> = {};
+      
+      if (searchQuery) params.search = searchQuery;
+      if (selectedCategory !== 'All') params.category = selectedCategory;
+      if (selectedLocation !== 'All') params.location = selectedLocation;
+      
+      const vendorsData = await apiClient.getVendors(params) as Vendor[];
+      setVendors(vendorsData);
+    }, setSearchLoading);
+  }, [searchQuery, selectedCategory, selectedLocation]);
 
   useEffect(() => {
     const delayedSearch = setTimeout(() => {
@@ -73,7 +83,11 @@ export default function VendorsPage() {
     }, 500);
 
     return () => clearTimeout(delayedSearch);
-  }, [searchQuery, selectedCategory, selectedLocation, priceRange]);
+  }, [searchVendors]);
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
 
   const loadInitialData = async () => {
     await withLoading(async () => {
@@ -89,19 +103,6 @@ export default function VendorsPage() {
       const locationsData = await apiClient.getVendorLocations() as LocationsResponse;
       setLocations(locationsData.locations || []);
     }, setLoading);
-  };
-
-  const searchVendors = async () => {
-    await withLoading(async () => {
-      const params: Record<string, string> = {};
-      
-      if (searchQuery) params.search = searchQuery;
-      if (selectedCategory !== 'All') params.category = selectedCategory;
-      if (selectedLocation !== 'All') params.location = selectedLocation;
-      
-      const vendorsData = await apiClient.getVendors(params) as Vendor[];
-      setVendors(vendorsData);
-    }, setSearchLoading);
   };
 
   const addToWishlist = async (vendorId: number) => {
@@ -296,7 +297,7 @@ export default function VendorsPage() {
               {vendors.length} Vendors Found
             </h3>
             {searchQuery && (
-              <p className="text-gray-600">Results for "{searchQuery}"</p>
+              <p className="text-gray-600">Results for &quot;{searchQuery}&quot;</p>
             )}
           </div>
           
@@ -337,9 +338,11 @@ export default function VendorsPage() {
             {vendors.map((vendor) => (
               <Card key={vendor.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
                 <div className="relative">
-                  <img
+                  <Image
                     src={vendor.images[0] || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
                     alt={vendor.name}
+                    width={400}
+                    height={192}
                     className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   {vendor.is_featured && (

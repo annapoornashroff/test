@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
@@ -14,6 +14,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 const categories = ['All', 'Photography', 'Catering', 'Decoration', 'Music & DJ', 'Makeup', 'Venues'];
 
@@ -51,13 +52,7 @@ export default function WishlistPage() {
   const { user } = useAuth();
   useProtectedRoute();
 
-  useEffect(() => {
-    if (user) {
-      fetchWishlistItems();
-    }
-  }, [user]);
-
-  const fetchWishlistItems = async () => {
+  const fetchWishlistItems = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -76,7 +71,13 @@ export default function WishlistPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchWishlistItems();
+    }
+  }, [user, fetchWishlistItems]);
 
   const removeFromWishlist = async (id: number) => {
     try {
@@ -395,11 +396,15 @@ function WishlistCard({
       <Card className="overflow-hidden">
         <CardContent className="p-0">
           <div className="flex">
-            <img
-              src={vendor.images?.[0] || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
-              alt={vendor.name || 'Vendor'}
-              className="w-32 h-32 object-cover"
-            />
+            <div className="relative w-32 h-32">
+              <Image
+                src={vendor.images?.[0] || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
+                alt={vendor.name || 'Vendor'}
+                fill
+                className="object-cover"
+                sizes="128px"
+              />
+            </div>
             <div className="flex-1 p-4">
               <div className="flex items-start justify-between mb-2">
                 <div>
@@ -459,9 +464,11 @@ function WishlistCard({
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
       <div className="relative">
-        <img
+        <Image
           src={vendor.images?.[0] || 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'}
           alt={vendor.name || 'Vendor'}
+          width={400}
+          height={192}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
         <button
