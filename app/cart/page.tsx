@@ -19,9 +19,38 @@ const categories = [
   'Photography', 'Catering', 'Decoration', 'Makeup', 'Music & DJ', 'Venues'
 ];
 
+interface CartItem {
+  id: number;
+  user_id: number;
+  wedding_id: number;
+  vendor_id: number;
+  category: string;
+  price: number;
+  booking_date: string;
+  status: string;
+  visit_date?: string;
+  notes?: string;
+  created_at: string;
+  vendor?: {
+    id: number;
+    name: string;
+    location: string;
+    rating: number;
+    images: string[];
+    price_min?: number;
+    price_max?: number;
+  };
+}
+
+interface CartSummary {
+  total_items: number;
+  total_amount: number;
+  status_breakdown: Record<string, number>;
+}
+
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState([]);
-  const [cartSummary, setCartSummary] = useState(null);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartSummary, setCartSummary] = useState<CartSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -38,6 +67,7 @@ export default function CartPage() {
     try {
       setLoading(true);
       setError('');
+      
       if (!user) throw new Error('No user found')
       const token = await user.getIdToken();
       const [items, summary] = await Promise.all([
@@ -71,7 +101,8 @@ export default function CartPage() {
 
   const updateItemStatus = async (id: number, status: string) => {
     try {
-      const token = await user?.getIdToken();
+      if (!user) throw new Error('No user found');
+      const token = await user.getIdToken();
       await apiClient.updateCartItem(token, id.toString(), { status });
       
       // Refresh cart data
@@ -122,8 +153,8 @@ export default function CartPage() {
   const getCategoryProgress = () => {
     return categories.map(category => ({
       name: category,
-      completed: cartItems.some((item: any) => item.category === category),
-      status: cartItems.find((item: any) => item.category === category)?.status || 'pending'
+      completed: cartItems.some((item: CartItem) => item.category === category),
+      status: cartItems.find((item: CartItem) => item.category === category)?.status || 'pending'
     }));
   };
 
@@ -194,7 +225,7 @@ export default function CartPage() {
 
             {/* Cart Items */}
             <div className="space-y-4">
-              {cartItems.map((item: any) => {
+              {cartItems.map((item: CartItem) => {
                 const StatusIcon = getStatusIcon(item.status);
                 return (
                   <Card key={item.id} className="overflow-hidden">
