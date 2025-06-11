@@ -38,7 +38,7 @@ export default function CartPage() {
     try {
       setLoading(true);
       setError('');
-      
+      if (!user) throw new Error('No user found')
       const token = await user.getIdToken();
       const [items, summary] = await Promise.all([
         apiClient.getCartItems(token),
