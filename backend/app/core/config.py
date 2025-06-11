@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     # Firebase
     FIREBASE_SERVICE_ACCOUNT_KEY: Optional[str] = None
     
+    GOOGLE_CALENDAR_CREDENTIALS: Optional[str] = None
+
     # Google Places API for Reviews
     GOOGLE_PLACES_API_KEY: Optional[str] = None
     GOOGLE_PLACE_ID: Optional[str] = None  # Your business place ID

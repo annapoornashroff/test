@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship as SQLRelationship
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -23,5 +23,5 @@ class Guest(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    user = relationship("User", back_populates="guests")
-    wedding = relationship("Wedding", back_populates="guests")
+    user = SQLRelationship("User", back_populates="guests")
+    wedding = SQLRelationship("Wedding", back_populates="guests")

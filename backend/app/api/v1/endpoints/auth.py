@@ -8,7 +8,7 @@ import os
 from app.core.database import get_db
 from app.core.security import create_access_token
 from app.core.config import settings
-from app.schemas.auth import Token, FirebaseSignupRequest
+from app.schemas.auth import Token, FirebaseSignupRequest, LoginRequest, OTPRequest
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import AuthService
 

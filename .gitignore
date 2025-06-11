@@ -35,5 +35,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+venv/
+__pycache__/
 forevernco-google-calendar-service-account.json
 forevernco-firebase.json
