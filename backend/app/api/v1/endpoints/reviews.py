@@ -14,7 +14,7 @@ async def get_reviews(
     """Get paginated Google Reviews for testimonials"""
     try:
         reviews_service = GoogleReviewsService()
-        reviews = await reviews_service.get_recent_reviews(page=page, limit=limit)
+        reviews, _ = await reviews_service.get_recent_reviews(page=page, limit=limit)
         return reviews
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch reviews: {str(e)}")
@@ -24,7 +24,7 @@ async def get_featured_reviews():
     """Get featured reviews for homepage testimonials"""
     try:
         reviews_service = GoogleReviewsService()
-        reviews = await reviews_service.get_recent_reviews(limit=6)
+        reviews, _ = await reviews_service.get_recent_reviews(limit=6)
         
         # Filter for the best reviews (5-star ratings first, then wedding-related)
         featured_reviews = []

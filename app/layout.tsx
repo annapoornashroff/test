@@ -2,6 +2,8 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { Toaster } from 'sonner';
+import { NavigationProvider } from '@/lib/navigation-context';
+import { Transition } from '@/components/ui/transition';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
@@ -20,7 +22,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans`}>
-        {children}
+        <NavigationProvider>
+          <Transition>
+            {children}
+          </Transition>
+        </NavigationProvider>
         <Toaster 
           position="top-right"
           toastOptions={{

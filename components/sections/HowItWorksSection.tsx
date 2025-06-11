@@ -2,27 +2,56 @@
 
 import { Button } from '@/components/ui/button';
 import { ArrowDown } from 'lucide-react';
+import { useNavigation } from '@/lib/navigation-context';
+import { Loading } from '@/components/ui/loading';
+import { useState } from 'react';
 
 const steps = [
   {
     title: 'CHOOSE A PACKAGE',
-    description: 'Select from our curated wedding packages or start with a custom plan'
+    description: 'Select from our curated wedding packages or start with a custom plan',
+    path: '/packages'
   },
   {
     title: 'CHOOSE A VENDOR',
-    description: 'Browse and select from our verified network of premium wedding vendors'
+    description: 'Browse and select from our verified network of premium wedding vendors',
+    path: '/vendors'
   },
   {
     title: 'ADD TO CART',
-    description: 'Build your perfect wedding by adding services to your cart'
+    description: 'Build your perfect wedding by adding services to your cart',
+    path: '/cart'
   },
   {
     title: 'CUSTOMISE',
-    description: 'Personalize every detail to match your dream wedding vision'
+    description: 'Personalize every detail to match your dream wedding vision',
+    path: '/customize'
   }
 ];
 
 export default function HowItWorksSection() {
+  const { navigate } = useNavigation();
+  const [activeStep, setActiveStep] = useState<number | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
+
+  const handleStepClick = async (index: number, path: string) => {
+    setActiveStep(index);
+    try {
+      await navigate(path);
+    } finally {
+      setActiveStep(null);
+    }
+  };
+
+  const handleStartJourney = async () => {
+    setIsStarting(true);
+    try {
+      await navigate('/packages');
+    } finally {
+      setIsStarting(false);
+    }
+  };
+
   return (
     <section className="py-20 bg-gradient-to-br from-gold-50 to-gold-100 relative overflow-hidden">
       {/* Background Pattern */}
@@ -48,8 +77,14 @@ export default function HowItWorksSection() {
                 size="xl" 
                 variant="gold" 
                 className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 mb-6"
+                onClick={() => handleStepClick(index, step.path)}
+                disabled={activeStep === index}
               >
-                {step.title}
+                {activeStep === index ? (
+                  <Loading size="sm" className="text-white" />
+                ) : (
+                  step.title
+                )}
               </Button>
 
               {/* Description */}
@@ -67,8 +102,18 @@ export default function HowItWorksSection() {
 
         {/* CTA */}
         <div className="text-center mt-16">
-          <Button size="xl" variant="primary" className="rounded-full shadow-lg">
-            Start Your Journey
+          <Button 
+            size="xl" 
+            variant="primary" 
+            className="rounded-full shadow-lg"
+            onClick={handleStartJourney}
+            disabled={isStarting}
+          >
+            {isStarting ? (
+              <Loading size="sm" className="text-white" />
+            ) : (
+              'Start Your Journey'
+            )}
           </Button>
         </div>
       </div>

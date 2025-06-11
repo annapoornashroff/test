@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Filter, ArrowRight, Sparkles } from 'lucide-react';
 import Image from 'next/image';
+import { useNavigation } from '@/lib/navigation-context';
+import { Loading } from '@/components/ui/loading';
+import { useState } from 'react';
 
 const trendingThemes = [
   {
@@ -30,6 +33,26 @@ const trendingThemes = [
 ];
 
 export default function TrendingSection() {
+  const { navigate } = useNavigation();
+  const [isExploring, setIsExploring] = useState<number | null>(null);
+
+  const handleExploreTheme = async (themeId: number) => {
+    setIsExploring(themeId);
+    try {
+      await navigate(`/themes/${themeId}`);
+    } finally {
+      setIsExploring(null);
+    }
+  };
+
+  const handleViewAll = async () => {
+    await navigate('/themes');
+  };
+
+  const handleFilter = async () => {
+    await navigate('/themes?filter=true');
+  };
+
   return (
     <section className="py-20 bg-gradient-to-br from-gold via-gold-400 to-gold-500 relative overflow-hidden">
       {/* Background Pattern */}
@@ -91,8 +114,16 @@ export default function TrendingSection() {
                     </span>
                   ))}
                 </div>
-                <Button className="w-full mt-4 bg-gold hover:bg-gold-600 text-white">
-                  Explore Theme
+                <Button 
+                  className="w-full mt-4 bg-gold hover:bg-gold-600 text-white"
+                  onClick={() => handleExploreTheme(theme.id)}
+                  disabled={isExploring === theme.id}
+                >
+                  {isExploring === theme.id ? (
+                    <Loading size="sm" className="text-white" />
+                  ) : (
+                    'Explore Theme'
+                  )}
                 </Button>
               </CardContent>
             </Card>
@@ -101,11 +132,19 @@ export default function TrendingSection() {
 
         {/* Bottom Actions */}
         <div className="flex items-center justify-between">
-          <Button variant="outline" className="bg-white/20 border-white/30 text-white hover:bg-white/30">
+          <Button 
+            variant="outline" 
+            className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            onClick={handleFilter}
+          >
             <Filter className="w-5 h-5 mr-2" />
             FILTER / SORT
           </Button>
-          <Button variant="outline" className="bg-white/20 border-white/30 text-white hover:bg-white/30">
+          <Button 
+            variant="outline" 
+            className="bg-white/20 border-white/30 text-white hover:bg-white/30"
+            onClick={handleViewAll}
+          >
             VIEW ALL
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>

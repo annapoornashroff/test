@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Search, Heart, ShoppingCart, MapPin, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useNavigation } from '@/lib/navigation-context';
+import { Loading } from '@/components/ui/loading';
 
 const navigationItems = [
   {
@@ -37,11 +39,13 @@ const weddingImages = [
 const locations = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Kolkata', 'Jaipur', 'Goa'];
 
 export default function HeroSection() {
+  const { navigate } = useNavigation();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState('LOCATION');
+  const [isSearching, setIsSearching] = useState(false);
   const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const locationDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -85,14 +89,31 @@ export default function HeroSection() {
     setActiveDropdown(activeDropdown === title ? null : title);
   };
 
-  const handleLocationSelect = (location: string) => {
+  const handleLocationSelect = async (location: string) => {
     setSelectedLocation(location);
     setShowLocationDropdown(false);
+    await navigate(`/vendors?location=${location.toLowerCase()}`);
   };
 
-  const handleNavItemClick = (category: string) => {
+  const handleNavItemClick = async (category: string) => {
     setActiveDropdown(null);
-    // Navigation will be handled by the Link component
+    await navigate(`/vendors?category=${category.toLowerCase()}`);
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    try {
+      await navigate(`/vendors?search=${encodeURIComponent(searchQuery.trim())}`);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
@@ -116,7 +137,10 @@ export default function HeroSection() {
         <div className="bg-white/95 backdrop-blur-sm">
           <div className="flex items-center justify-between px-6 py-4">
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3">
+            <button 
+              onClick={() => navigate('/')}
+              className="flex items-center space-x-3"
+            >
               <div className="w-auto h-12 overflow-hidden relative">
                 <Image
                   src="/logo.png"
@@ -131,26 +155,24 @@ export default function HeroSection() {
                   }}
                 />
               </div>
-            </Link>
+            </button>
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-2">
-              <Link href="/wishlist">
-                <Button 
-                  size="sm" 
-                  className="rounded-lg bg-gold hover:bg-gold-600 text-white w-12 h-12 p-0"
-                >
-                  <Heart className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link href="/cart">
-                <Button 
-                  size="sm" 
-                  className="rounded-lg bg-gold hover:bg-gold-600 text-white w-12 h-12 p-0"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                </Button>
-              </Link>
+              <Button 
+                size="sm" 
+                className="rounded-lg bg-gold hover:bg-gold-600 text-white w-12 h-12 p-0"
+                onClick={() => navigate('/wishlist')}
+              >
+                <Heart className="w-5 h-5" />
+              </Button>
+              <Button 
+                size="sm" 
+                className="rounded-lg bg-gold hover:bg-gold-600 text-white w-12 h-12 p-0"
+                onClick={() => navigate('/cart')}
+              >
+                <ShoppingCart className="w-5 h-5" />
+              </Button>
               <div className="relative" ref={locationDropdownRef}>
                 <Button 
                   size="sm" 
@@ -207,14 +229,13 @@ export default function HeroSection() {
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-40">
                       <div className="py-2">
                         {item.items.map((subItem) => (
-                          <Link
+                          <button
                             key={subItem}
-                            href={`/vendors?category=${subItem.toLowerCase()}`}
-                            className="block px-4 py-3 text-sm text-gray-700 hover:bg-gold-50 hover:text-gold-700 transition-colors duration-150"
                             onClick={() => handleNavItemClick(subItem)}
+                            className="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gold-50 hover:text-gold-700 transition-colors duration-150"
                           >
                             {subItem}
-                          </Link>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -242,16 +263,21 @@ export default function HeroSection() {
                 placeholder="SEARCH"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="w-full h-16 text-xl text-center border-0 rounded-2xl bg-white/95 backdrop-blur-sm placeholder:text-primary placeholder:font-bold placeholder:tracking-wider text-primary font-semibold shadow-2xl pr-20"
               />
-              <Link href={`/vendors?search=${searchQuery}`}>
-                <Button
-                  size="lg"
-                  className="absolute right-2 top-2 h-12 w-12 rounded-xl bg-primary hover:bg-primary-600 transition-all duration-200"
-                >
+              <Button
+                size="lg"
+                className="absolute right-2 top-2 h-12 w-12 rounded-xl bg-primary hover:bg-primary-600 transition-all duration-200"
+                onClick={handleSearch}
+                disabled={isSearching}
+              >
+                {isSearching ? (
+                  <Loading size="sm" className="text-white" />
+                ) : (
                   <Search className="w-6 h-6 text-white" />
-                </Button>
-              </Link>
+                )}
+              </Button>
             </div>
           </div>
 

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Filter, ArrowRight, Star, MapPin, Camera, Utensils, Palette } from 'lucide-react';
 import Image from 'next/image';
+import { useNavigation } from '@/lib/navigation-context';
 
 const categories = [
   { name: 'Photography', icon: Camera, color: 'bg-blue-500' },
@@ -45,6 +46,17 @@ const vendors = [
 ];
 
 export default function VendorSection() {
+  const { navigate } = useNavigation();
+
+  const handleViewDetails = async (vendorId: number) => {
+    await navigate(`/vendors/${vendorId}`);
+  };
+
+  const handleAddToCart = async (vendorId: number) => {
+    // TODO: Implement add to cart functionality
+    console.log('Adding vendor to cart:', vendorId);
+  };
+
   return (
     <section className="py-20 bg-gray-50">
       <div className="container mx-auto px-6">
@@ -101,11 +113,21 @@ export default function VendorSection() {
                 </div>
                 <p className="text-sm text-gray-600 mb-4">{vendor.price}</p>
                 <div className="flex space-x-2">
-                  <Button size="sm" variant="outline" className="flex-1">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="flex-1"
+                    onClick={() => handleViewDetails(vendor.id)}
+                  >
                     View Details
                   </Button>
-                  <Button size="sm" variant="gold" className="flex-1">
-                    Book Visit
+                  <Button 
+                    size="sm" 
+                    variant="gold" 
+                    className="flex-1"
+                    onClick={() => handleAddToCart(vendor.id)}
+                  >
+                    Add to Cart
                   </Button>
                 </div>
               </CardContent>
@@ -115,7 +137,12 @@ export default function VendorSection() {
 
         {/* View All Button */}
         <div className="text-center">
-          <Button variant="primary" size="lg" className="rounded-full">
+          <Button 
+            variant="primary" 
+            size="lg" 
+            className="rounded-full"
+            onClick={() => navigate('/vendors')}
+          >
             VIEW ALL
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
