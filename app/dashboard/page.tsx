@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Heart, Calendar, MapPin, Users, IndianRupee, 
   ShoppingCart, Bookmark, User, Plus, Edit,
-  CheckCircle, Clock, AlertCircle, Loader2
+  CheckCircle, Clock, AlertCircle, Loader2, Phone, Mail
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -122,7 +122,7 @@ export default function DashboardPage() {
 
             <div className="flex items-center space-x-4">
               <Link href="/cart">
-                <Button variant="gold-outline" size="sm" className="rounded-full">
+                <Button variant="outline" size="sm" className="rounded-full">
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Cart
                 </Button>

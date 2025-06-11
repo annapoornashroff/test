@@ -356,7 +356,7 @@ export default function AdminReviewsPage() {
               onClick={refreshReviews}
               disabled={loading}
             >
-              {loading ? <LoadingSpinner size="sm\" className="mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+              {loading ? <LoadingSpinner size="sm" className="mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               Refresh
             </Button>
           </CardHeader>

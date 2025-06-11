@@ -17,8 +17,30 @@ import { toast } from 'sonner';
 
 const categories = ['All', 'Photography', 'Catering', 'Decoration', 'Music & DJ', 'Makeup', 'Venues'];
 
+interface WishlistItem {
+  id: number;
+  user_id: number;
+  wedding_id: number;
+  vendor_id: number;
+  category: string;
+  price: number;
+  booking_date: string;
+  status: string;
+  created_at: string;
+  vendor?: {
+    id: number;
+    name: string;
+    location: string;
+    rating: number;
+    images: string[];
+    price_min?: number;
+    price_max?: number;
+    review_count?: number;
+  };
+}
+
 export default function WishlistPage() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -38,12 +60,13 @@ export default function WishlistPage() {
       setLoading(true);
       setError('');
       
+      if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
       const cartItems = await apiClient.getCartItems(token);
       
       // Filter for wishlisted items only
       const wishlistItems = cartItems.filter((item: any) => item.status === 'wishlisted');
-      setItems(wishlistItems);
+      setItems(wishlistItems as WishlistItem[]);
     } catch (error: any) {
       console.error('Error fetching wishlist:', error);
       setError(error.message || 'Failed to load wishlist');
@@ -54,6 +77,7 @@ export default function WishlistPage() {
 
   const removeFromWishlist = async (id: number) => {
     try {
+      if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
       await apiClient.removeFromCart(token, id.toString());
       toast.success('Item removed from wishlist');
@@ -67,6 +91,7 @@ export default function WishlistPage() {
 
   const moveToCart = async (id: number) => {
     try {
+      if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
       await apiClient.updateCartItem(token, id.toString(), { status: 'selected' });
       toast.success('Item moved to cart');
@@ -78,17 +103,17 @@ export default function WishlistPage() {
     }
   };
 
-  const filteredItems = items.filter((item: any) => 
+  const filteredItems = items.filter((item: WishlistItem) => 
     selectedCategory === 'All' || item.category === selectedCategory
   );
 
   const groupedByCategory = categories.reduce((acc, category) => {
     if (category === 'All') return acc;
-    acc[category] = filteredItems.filter((item: any) => item.category === category);
+    acc[category] = filteredItems.filter((item: WishlistItem) => item.category === category);
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, WishlistItem[]>);
 
-  const formatCurrency = (min: number, max: number) => {
+  const formatCurrency = (min?: number, max?: number) => {
     const formatter = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
@@ -112,7 +137,7 @@ export default function WishlistPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <LoadingSpinner size="lg\" className="mx-auto mb-4" />
+          <LoadingSpinner size="lg" className="mx-auto mb-4" />
           <p className="text-gray-600">Loading your wishlist...</p>
         </div>
       </div>
@@ -137,7 +162,7 @@ export default function WishlistPage() {
 
             <div className="flex items-center space-x-4">
               <Link href="/vendors">
-                <Button variant="gold-outline" size="sm" className="rounded-full">
+                <Button variant="outline" size="sm" className="rounded-full">
                   Browse Vendors
                 </Button>
               </Link>
@@ -227,7 +252,7 @@ export default function WishlistPage() {
                     ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' 
                     : 'space-y-4'
                   }>
-                    {categoryItems.map((item: any) => (
+                    {categoryItems.map((item: WishlistItem) => (
                       <WishlistCard 
                         key={item.id} 
                         item={item} 
@@ -247,7 +272,7 @@ export default function WishlistPage() {
             ? 'grid md:grid-cols-2 lg:grid-cols-3 gap-6' 
             : 'space-y-4'
           }>
-            {filteredItems.map((item: any) => (
+            {filteredItems.map((item: WishlistItem) => (
               <WishlistCard 
                 key={item.id} 
                 item={item} 
@@ -266,10 +291,11 @@ export default function WishlistPage() {
               variant="outline"
               onClick={async () => {
                 try {
+                  if (!user) throw new Error('No user found');
                   const token = await user.getIdToken();
                   // Move all items to cart
                   await Promise.all(
-                    items.map((item: any) => 
+                    items.map((item: WishlistItem) => 
                       apiClient.updateCartItem(token, item.id.toString(), { status: 'selected' })
                     )
                   );
@@ -287,10 +313,11 @@ export default function WishlistPage() {
               className="text-red-600 hover:text-red-700"
               onClick={async () => {
                 try {
+                  if (!user) throw new Error('No user found');
                   const token = await user.getIdToken();
                   // Remove all items
                   await Promise.all(
-                    items.map((item: any) => 
+                    items.map((item: WishlistItem) => 
                       apiClient.removeFromCart(token, item.id.toString())
                     )
                   );
@@ -316,7 +343,7 @@ function WishlistCard({
   onRemove, 
   onMoveToCart 
 }: { 
-  item: any; 
+  item: WishlistItem; 
   viewMode: 'grid' | 'list';
   onRemove: (id: number) => void;
   onMoveToCart: (id: number) => void;
