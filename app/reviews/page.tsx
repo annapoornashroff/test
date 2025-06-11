@@ -31,7 +31,7 @@ export default function ReviewsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <LoadingSpinner size="lg\" className="mx-auto mb-4" />
+          <LoadingSpinner size="lg" className="mx-auto mb-4" />
           <p className="text-gray-600">Loading reviews...</p>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function ReviewsPage() {
 
             <div className="flex items-center space-x-4">
               <Link href="/vendors">
-                <Button variant="gold-outline" size="sm" className="rounded-full">
+                <Button variant="outline" size="sm" className="rounded-full">
                   Browse Vendors
                 </Button>
               </Link>
