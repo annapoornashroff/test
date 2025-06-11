@@ -68,15 +68,15 @@ export default function CartPage() {
       setLoading(true);
       setError('');
       
-      if (!user) throw new Error('No user found')
+      if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
       const [items, summary] = await Promise.all([
         apiClient.getCartItems(token),
         apiClient.getCartSummary(token)
       ]);
       
-      setCartItems(items);
-      setCartSummary(summary);
+      setCartItems(items as CartItem[]);
+      setCartSummary(summary as CartSummary);
     } catch (error: any) {
       console.error('Error fetching cart data:', error);
       setError(error.message || 'Failed to load cart data');
@@ -190,7 +190,7 @@ export default function CartPage() {
 
             <div className="flex items-center space-x-4">
               <Link href="/vendors">
-                <Button variant="gold-outline" size="sm" className="rounded-full">
+                <Button variant="outline" size="sm" className="rounded-full">
                   Browse Vendors
                 </Button>
               </Link>
