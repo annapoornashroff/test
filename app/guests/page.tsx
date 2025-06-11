@@ -15,13 +15,24 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient } from '@/lib/api';
 
+// Add type for user
+type User = {
+  getIdToken: () => Promise<string>;
+};
+
+// Add type for wedding data
+type Wedding = {
+  id: number;
+  name: string;
+};
+
 const guestCategories = ['Family', 'Friends', 'Colleagues', 'Neighbors', 'Others'];
 
 export default function GuestsPage() {
-  const [guests, setGuests] = useState([]);
-  const [weddings, setWeddings] = useState([]);
+  const [guests, setGuests] = useState<any[]>([]);
+  const [weddings, setWeddings] = useState<Wedding[]>([]);
   const [selectedWedding, setSelectedWedding] = useState('');
-  const [guestStats, setGuestStats] = useState(null);
+  const [guestStats, setGuestStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -37,7 +48,7 @@ export default function GuestsPage() {
     category: 'Family'
   });
 
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
   useProtectedRoute();
 
   useEffect(() => {
@@ -54,12 +65,17 @@ export default function GuestsPage() {
   }, [selectedWedding]);
 
   const fetchWeddings = async () => {
+    if (!user) {
+      setError('User not authenticated');
+      return;
+    }
+
     try {
       setLoading(true);
       setError('');
       
       const token = await user.getIdToken();
-      const weddingsData = await apiClient.getWeddings(token);
+      const weddingsData = await apiClient.getWeddings(token) as Wedding[];
       
       setWeddings(weddingsData);
       if (weddingsData.length > 0) {
@@ -74,12 +90,12 @@ export default function GuestsPage() {
   };
 
   const fetchGuests = async () => {
-    if (!selectedWedding) return;
+    if (!user || !selectedWedding) return;
 
     try {
       const token = await user.getIdToken();
       const guestsData = await apiClient.getGuests(token, selectedWedding);
-      setGuests(guestsData);
+      setGuests(guestsData as any[]);
     } catch (error: any) {
       console.error('Error fetching guests:', error);
       setError(error.message || 'Failed to load guests');
@@ -87,7 +103,7 @@ export default function GuestsPage() {
   };
 
   const fetchGuestStats = async () => {
-    if (!selectedWedding) return;
+    if (!user || !selectedWedding) return;
 
     try {
       const token = await user.getIdToken();
@@ -99,7 +115,7 @@ export default function GuestsPage() {
   };
 
   const addGuest = async () => {
-    if (!newGuest.name || !newGuest.phoneNumber || !selectedWedding) return;
+    if (!user || !newGuest.name || !newGuest.phoneNumber || !selectedWedding) return;
 
     try {
       const token = await user.getIdToken();
@@ -127,6 +143,8 @@ export default function GuestsPage() {
   };
 
   const sendInvitation = async (guestId: number) => {
+    if (!user) return;
+
     try {
       const token = await user.getIdToken();
       await apiClient.sendInvitation(token, guestId.toString());
@@ -140,6 +158,8 @@ export default function GuestsPage() {
   };
 
   const updateConfirmationStatus = async (guestId: number, status: string) => {
+    if (!user) return;
+
     try {
       const token = await user.getIdToken();
       await apiClient.updateGuest(token, guestId.toString(), {
@@ -156,6 +176,8 @@ export default function GuestsPage() {
   };
 
   const removeGuest = async (guestId: number) => {
+    if (!user) return;
+
     try {
       const token = await user.getIdToken();
       await apiClient.deleteGuest(token, guestId.toString());
@@ -259,7 +281,7 @@ export default function GuestsPage() {
                 onChange={(e) => setSelectedWedding(e.target.value)}
                 className="border border-gray-300 rounded-lg px-3 py-2"
               >
-                {weddings.map((wedding: any) => (
+                {weddings.map((wedding) => (
                   <option key={wedding.id} value={wedding.id}>
                     {wedding.name}
                   </option>

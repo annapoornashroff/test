@@ -12,15 +12,42 @@ import {
 import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 
+interface Vendor {
+  id: number;
+  name: string;
+  category: string;
+  price_min: number;
+  rating?: number;
+}
+
+interface Package {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  original_price?: number;
+  discount_percentage?: number;
+  duration: string;
+  image_url?: string;
+  is_popular?: boolean;
+  includes?: string[];
+  vendors?: Array<{
+    vendor_id: number;
+    vendor_name: string;
+    category: string;
+  }>;
+  customPrice?: number;
+}
+
 export default function PackagesPage() {
-  const [packages, setPackages] = useState([]);
-  const [vendors, setVendors] = useState([]);
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [customizing, setCustomizing] = useState(false);
-  const [customPackage, setCustomPackage] = useState(null);
+  const [customPackage, setCustomPackage] = useState<Package | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -38,8 +65,8 @@ export default function PackagesPage() {
         apiClient.getVendors()
       ]);
 
-      setPackages(packagesData);
-      setVendors(vendorsData);
+      setPackages(packagesData as Package[]);
+      setVendors(vendorsData as Vendor[]);
     } catch (error: any) {
       console.error('Error fetching packages:', error);
       setError(error.message || 'Failed to load packages');
@@ -48,7 +75,7 @@ export default function PackagesPage() {
     }
   };
 
-  const startCustomization = (pkg: any) => {
+  const startCustomization = (pkg: Package) => {
     setSelectedPackage(pkg);
     setCustomPackage({
       ...pkg,
@@ -59,18 +86,20 @@ export default function PackagesPage() {
   };
 
   const swapVendor = (categoryToSwap: string, newVendorId: string) => {
-    const newVendor = vendors.find((v: any) => v.id.toString() === newVendorId);
+    if (!customPackage) return;
+    
+    const newVendor = vendors.find((v) => v.id.toString() === newVendorId);
     if (!newVendor) return;
 
-    const updatedVendors = customPackage.vendors.map((vendor: any) => 
+    const updatedVendors = customPackage.vendors?.map((vendor) => 
       vendor.category === categoryToSwap 
         ? { ...vendor, vendor_name: newVendor.name, vendor_id: newVendor.id }
         : vendor
-    );
+    ) || [];
 
     // Recalculate price based on vendor changes
-    const newPrice = updatedVendors.reduce((total: number, vendor: any) => {
-      const vendorData = vendors.find((v: any) => v.id.toString() === vendor.vendor_id.toString());
+    const newPrice = updatedVendors.reduce((total, vendor) => {
+      const vendorData = vendors.find((v) => v.id.toString() === vendor.vendor_id.toString());
       return total + (vendorData?.price_min || 0);
     }, 0);
 
@@ -275,7 +304,7 @@ export default function PackagesPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-3xl font-serif font-bold text-gray-900">
-                  Customize {selectedPackage.name}
+                  Customize {selectedPackage?.name}
                 </h2>
                 <p className="text-gray-600">
                   Swap vendors to create your perfect wedding package
@@ -306,21 +335,21 @@ export default function PackagesPage() {
                   <div>
                     <h3 className="text-lg font-semibold text-primary">Custom Package Price</h3>
                     <p className="text-sm text-primary-600">
-                      {customPackage.customPrice !== selectedPackage.price && 
-                        `Original: ${formatCurrency(selectedPackage.price)}`
+                      {customPackage?.customPrice !== selectedPackage?.price && 
+                        `Original: ${formatCurrency(selectedPackage?.price || 0)}`
                       }
                     </p>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-primary">
-                      {formatCurrency(customPackage.customPrice)}
+                      {formatCurrency(customPackage?.customPrice || 0)}
                     </div>
-                    {customPackage.customPrice !== selectedPackage.price && (
+                    {customPackage?.customPrice !== selectedPackage?.price && (
                       <div className={`text-sm font-medium ${
-                        customPackage.customPrice > selectedPackage.price ? 'text-red-600' : 'text-green-600'
+                        (customPackage?.customPrice || 0) > (selectedPackage?.price || 0) ? 'text-red-600' : 'text-green-600'
                       }`}>
-                        {customPackage.customPrice > selectedPackage.price ? '+' : ''}
-                        {formatCurrency(customPackage.customPrice - selectedPackage.price)}
+                        {(customPackage?.customPrice || 0) > (selectedPackage?.price || 0) ? '+' : ''}
+                        {formatCurrency((customPackage?.customPrice || 0) - (selectedPackage?.price || 0))}
                       </div>
                     )}
                   </div>
@@ -334,8 +363,8 @@ export default function PackagesPage() {
               <div>
                 <h3 className="text-xl font-semibold mb-4">Current Package</h3>
                 <div className="space-y-4">
-                  {(customPackage.vendors || []).map((vendor: any, index: number) => {
-                    const vendorData = vendors.find((v: any) => v.id.toString() === vendor.vendor_id?.toString());
+                  {(customPackage?.vendors || []).map((vendor, index) => {
+                    const vendorData = vendors.find((v) => v.id.toString() === vendor.vendor_id?.toString());
                     return (
                       <Card key={index}>
                         <CardContent className="p-4">

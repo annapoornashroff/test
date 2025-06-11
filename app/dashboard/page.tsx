@@ -55,11 +55,11 @@ export default function DashboardPage() {
   const loadDashboardData = async () => {
     await withLoading(async () => {
       // Load user data
-      const userData = await apiClient.getCurrentUser();
+      const userData = (await apiClient.getCurrentUser()) as User;
       setUser(userData);
 
       // Load wedding projects
-      const projectsData = await apiClient.getWeddings();
+      const projectsData = (await apiClient.getWeddings()) as WeddingProject[];
       setWeddingProjects(projectsData);
       
       if (projectsData.length > 0) {
