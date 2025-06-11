@@ -17,6 +17,17 @@ import { toast } from 'sonner';
 
 const categories = ['All', 'Photography', 'Catering', 'Decoration', 'Music & DJ', 'Makeup', 'Venues'];
 
+interface Vendor {
+  id: number;
+  name: string;
+  location: string;
+  rating: number;
+  images: string[];
+  price_min?: number;
+  price_max?: number;
+  review_count?: number;
+}
+
 interface WishlistItem {
   id: number;
   user_id: number;
@@ -27,16 +38,7 @@ interface WishlistItem {
   booking_date: string;
   status: string;
   created_at: string;
-  vendor?: {
-    id: number;
-    name: string;
-    location: string;
-    rating: number;
-    images: string[];
-    price_min?: number;
-    price_max?: number;
-    review_count?: number;
-  };
+  vendor?: Vendor;
 }
 
 export default function WishlistPage() {
@@ -62,11 +64,12 @@ export default function WishlistPage() {
       
       if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
-      const cartItems = await apiClient.getCartItems(token);
+      apiClient.setToken(token);
+      const cartItems = await apiClient.getCartItems() as WishlistItem[];
       
       // Filter for wishlisted items only
-      const wishlistItems = cartItems.filter((item: any) => item.status === 'wishlisted');
-      setItems(wishlistItems as WishlistItem[]);
+      const wishlistItems = cartItems.filter((item) => item.status === 'wishlisted');
+      setItems(wishlistItems);
     } catch (error: any) {
       console.error('Error fetching wishlist:', error);
       setError(error.message || 'Failed to load wishlist');
@@ -79,7 +82,8 @@ export default function WishlistPage() {
     try {
       if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
-      await apiClient.removeFromCart(token, id.toString());
+      apiClient.setToken(token);
+      await apiClient.removeFromCart(id);
       toast.success('Item removed from wishlist');
       
       // Refresh wishlist
@@ -93,7 +97,8 @@ export default function WishlistPage() {
     try {
       if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
-      await apiClient.updateCartItem(token, id.toString(), { status: 'selected' });
+      apiClient.setToken(token);
+      await apiClient.updateCartItem(id, { status: 'selected' });
       toast.success('Item moved to cart');
       
       // Refresh wishlist
@@ -293,10 +298,11 @@ export default function WishlistPage() {
                 try {
                   if (!user) throw new Error('No user found');
                   const token = await user.getIdToken();
+                  apiClient.setToken(token);
                   // Move all items to cart
                   await Promise.all(
-                    items.map((item: WishlistItem) => 
-                      apiClient.updateCartItem(token, item.id.toString(), { status: 'selected' })
+                    items.map((item) => 
+                      apiClient.updateCartItem(item.id, { status: 'selected' })
                     )
                   );
                   toast.success('All items moved to cart');
@@ -315,10 +321,11 @@ export default function WishlistPage() {
                 try {
                   if (!user) throw new Error('No user found');
                   const token = await user.getIdToken();
+                  apiClient.setToken(token);
                   // Remove all items
                   await Promise.all(
-                    items.map((item: WishlistItem) => 
-                      apiClient.removeFromCart(token, item.id.toString())
+                    items.map((item) => 
+                      apiClient.removeFromCart(item.id)
                     )
                   );
                   toast.success('Wishlist cleared');
@@ -363,7 +370,17 @@ function WishlistCard({
     }
   };
 
-  const vendor = item.vendor || {};
+  const vendor = item.vendor || {
+    id: 0,
+    name: 'Vendor Name',
+    location: 'Location',
+    rating: 4.5,
+    images: ['https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'],
+    price_min: undefined,
+    price_max: undefined,
+    review_count: 0
+  };
+
   const formatPrice = () => {
     if (vendor.price_min && vendor.price_max) {
       return `₹${vendor.price_min.toLocaleString('en-IN')} - ₹${vendor.price_max.toLocaleString('en-IN')}`;
