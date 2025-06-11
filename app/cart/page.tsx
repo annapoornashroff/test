@@ -60,7 +60,7 @@ export default function CartPage() {
       if (!user) throw new Error('No user found');
       const token = await user.getIdToken();
       await apiClient.removeFromCart(token, id.toString());
-      
+
       // Refresh cart data
       await fetchCartData();
     } catch (error: any) {
