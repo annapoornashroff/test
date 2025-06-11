@@ -16,26 +16,55 @@ import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
 
+interface FamilyMember {
+  id: number;
+  name: string;
+  relationship: string;
+  phoneNumber: string;
+  email?: string;
+  role: 'decision_maker' | 'participant' | 'observer';
+}
+
+interface WeddingProject {
+  id: number;
+  name: string;
+  date: string;
+  location: string;
+  estimated_guests: number;
+  budget: number;
+  spent: number;
+  status: 'planning' | 'partially_booked' | 'booked' | 'completed';
+  events: string[];
+  family_details: FamilyMember[];
+}
+
+interface PersonalInfo {
+  name: string;
+  phoneNumber: string;
+  email: string;
+  location: string;
+}
+
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('personal');
   const [editingPersonal, setEditingPersonal] = useState(false);
-  const [editingProject, setEditingProject] = useState(null);
+  const [editingProject, setEditingProject] = useState<number | null>(null);
   const [showAddFamily, setShowAddFamily] = useState(false);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
-  const [personalInfo, setPersonalInfo] = useState({
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
     name: '',
     phoneNumber: '',
     email: '',
     location: ''
   });
 
-  const [projects, setProjects] = useState([]);
-  const [family, setFamily] = useState([]);
-  const [newFamilyMember, setNewFamilyMember] = useState({
+  const [projects, setProjects] = useState<WeddingProject[]>([]);
+  const [family, setFamily] = useState<FamilyMember[]>([]);
+  const [newFamilyMember, setNewFamilyMember] = useState<Omit<FamilyMember, 'id'>>({
     name: '',
     relationship: '',
     phoneNumber: '',
@@ -57,10 +86,19 @@ export default function ProfilePage() {
       setLoading(true);
       setError('');
       
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
       const token = await user.getIdToken();
       
       // Load user profile
-      const userProfile = await apiClient.getCurrentUser(token);
+      const userProfile = await apiClient.getCurrentUser() as {
+        name?: string;
+        phone_number?: string;
+        email?: string;
+        location?: string;
+      };
       setPersonalInfo({
         name: userProfile.name || '',
         phoneNumber: userProfile.phone_number || '',
@@ -69,7 +107,7 @@ export default function ProfilePage() {
       });
       
       // Load wedding projects
-      const weddingProjects = await apiClient.getWeddings(token);
+      const weddingProjects = await apiClient.getWeddings() as WeddingProject[];
       setProjects(weddingProjects);
       
       // Load family members (from the first wedding project if available)
@@ -91,9 +129,14 @@ export default function ProfilePage() {
   const savePersonalInfo = async () => {
     try {
       setSaving(true);
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
       const token = await user.getIdToken();
       
-      await apiClient.updateUser(token, {
+      await apiClient.updateUser({
         name: personalInfo.name,
         email: personalInfo.email,
         location: personalInfo.location
@@ -117,6 +160,10 @@ export default function ProfilePage() {
     try {
       setSaving(true);
       
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
       // Add to family members array
       const updatedFamily = [...family, {
         id: family.length + 1,
@@ -128,7 +175,7 @@ export default function ProfilePage() {
       // Update wedding project with new family details
       if (projects.length > 0) {
         const token = await user.getIdToken();
-        await apiClient.updateWedding(token, projects[0].id, {
+        await apiClient.updateWedding(projects[0].id, {
           family_details: updatedFamily.map(({ id, ...rest }) => rest)
         });
       }
@@ -154,6 +201,10 @@ export default function ProfilePage() {
     try {
       setSaving(true);
       
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+      
       // Remove from family members array
       const updatedFamily = family.filter(member => member.id !== id);
       setFamily(updatedFamily);
@@ -161,7 +212,7 @@ export default function ProfilePage() {
       // Update wedding project with new family details
       if (projects.length > 0) {
         const token = await user.getIdToken();
-        await apiClient.updateWedding(token, projects[0].id, {
+        await apiClient.updateWedding(projects[0].id, {
           family_details: updatedFamily.map(({ id, ...rest }) => rest)
         });
       }
@@ -573,7 +624,10 @@ export default function ProfilePage() {
                     />
                     <select
                       value={newFamilyMember.role}
-                      onChange={(e) => setNewFamilyMember(prev => ({ ...prev, role: e.target.value }))}
+                      onChange={(e) => {
+                        const role = e.target.value as 'decision_maker' | 'participant' | 'observer';
+                        setNewFamilyMember(prev => ({ ...prev, role }));
+                      }}
                       className="h-10 border border-gray-300 rounded-lg px-3"
                       disabled={saving}
                     >
