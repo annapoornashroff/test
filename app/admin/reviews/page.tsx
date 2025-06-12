@@ -257,12 +257,12 @@ export default function AdminReviewsPage() {
                     
                     <div className="text-gray-500">Wedding Related:</div>
                     <div className="font-medium">
-                      {reviews.filter((r: ReviewResponse) => r.is_wedding_related).length}
+                      {reviews.filter((r: ReviewResponse) => r.wedding_date).length}
                     </div>
                     
                     <div className="text-gray-500">Latest Review:</div>
                     <div className="font-medium">
-                      {reviews[0]?.relative_time || 'Unknown'}
+                      {reviews[0]?.relative_time_description || 'Unknown'}
                     </div>
                   </div>
                   
@@ -400,7 +400,7 @@ export default function AdminReviewsPage() {
                         <td className="py-2 px-2">
                           <div className="flex items-center">
                             <div>
-                              <div className="font-medium">{review.name}</div>
+                              <div className="font-medium">{review.author_name}</div>
                               <div className="text-sm text-gray-500">{review.city}</div>
                             </div>
                           </div>
@@ -421,8 +421,8 @@ export default function AdminReviewsPage() {
                         </td>
                         <td className="py-2 px-2">
                           <div className="max-w-md">
-                            <p className="text-sm line-clamp-2">{review.comment}</p>
-                            {review.is_wedding_related && (
+                            <p className="text-sm line-clamp-2">{review.text}</p>
+                            {review.wedding_date && (
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-pink-100 text-pink-800 mt-1">
                                 <Heart className="w-3 h-3 mr-1" />
                                 Wedding
@@ -432,17 +432,15 @@ export default function AdminReviewsPage() {
                         </td>
                         <td className="py-2 px-2">
                           <div className="text-sm">
-                            <div>{new Date(review.created_at).toLocaleDateString()}</div>
-                            <div className="text-gray-500">{review.relative_time}</div>
+                            <div>{new Date(review.time * 1000).toLocaleDateString()}</div>
+                            <div className="text-gray-500">{review.relative_time_description}</div>
                           </div>
                         </td>
                         <td className="py-2 px-2">
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            review.source === 'google_reviews' 
-                              ? 'bg-blue-100 text-blue-800' 
-                              : 'bg-gray-100 text-gray-800'
+                            review.author_url.includes('google') ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                           }`}>
-                            {review.source === 'google_reviews' ? 'Google' : 'Mock'}
+                            {review.author_url.includes('google') ? 'Google' : 'Mock'}
                           </span>
                         </td>
                       </tr>
