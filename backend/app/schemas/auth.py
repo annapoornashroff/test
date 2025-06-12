@@ -11,7 +11,7 @@ class OTPRequest(BaseModel):
 class FirebaseSignupRequest(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
-    location: Optional[str] = None
+    city: Optional[str] = None
 
 class Token(BaseModel):
     access_token: str

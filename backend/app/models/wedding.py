@@ -9,7 +9,7 @@ class Wedding(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     name = Column(String(200), nullable=False)
-    location = Column(String(100), nullable=False)
+    city = Column(String(100), nullable=False)
     date = Column(DateTime, nullable=False)
     is_date_fixed = Column(Boolean, default=False)
     duration = Column(Integer, default=2)  # days

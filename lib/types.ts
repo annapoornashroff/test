@@ -8,14 +8,14 @@ export interface User {
   weddingDate?: Date;
   isDateFixed?: boolean;
   events?: string[];
-  location?: string;
+  city?: string;
   createdAt: Date;
 }
 
 export interface Wedding {
   id: string;
   userId: string;
-  location: string;
+  city: string;
   date: Date;
   isDateFixed: boolean;
   duration: number;
@@ -34,7 +34,7 @@ export interface Vendor {
   id: string;
   name: string;
   category: string;
-  location: string;
+  city: string;
   description: string;
   images: string[];
   price: {
@@ -112,7 +112,7 @@ export interface FamilyMember {
 export interface Testimonial {
   id: string;
   name: string;
-  location: string;
+  city: string;
   rating: number;
   comment: string;
   image?: string;

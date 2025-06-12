@@ -28,7 +28,7 @@ export default function PlanningPage() {
   
   const [formData, setFormData] = useState<WeddingData>({
     name: 'My Wedding',
-    location: '',
+    city: '',
     date: '',
     is_date_fixed: false,
     duration: 2,
@@ -57,7 +57,7 @@ export default function PlanningPage() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.location || !formData.date) {
+    if (!formData.city || !formData.date) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -135,16 +135,16 @@ export default function PlanningPage() {
                 />
               </div>
               
-              {/* Location */}
+              {/* City */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <MapPin className="w-4 h-4 inline mr-2" />
-                  Wedding Location
+                  Wedding City
                 </label>
                 <Input
-                  placeholder="Enter city or venue"
-                  value={formData.location}
-                  onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Enter city"
+                  value={formData.city}
+                  onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                   className="h-12"
                 />
               </div>

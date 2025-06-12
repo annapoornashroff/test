@@ -4,13 +4,6 @@ import { createContext, useContext, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { type NavigationContextType } from '@/lib/types/ui';
 
-interface NavigationContextType {
-  isLoading: boolean;
-  navigate: (path: string) => Promise<void>;
-  error: string | null;
-  clearError: () => void;
-}
-
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export function NavigationProvider({ children }: { children: React.ReactNode }) {

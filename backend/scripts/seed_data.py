@@ -20,7 +20,7 @@ def seed_vendors(db: Session):
         {
             "name": "Royal Photography Studio",
             "category": "Photography",
-            "location": "Mumbai",
+            "city": "Mumbai",
             "description": "Professional wedding photography with cinematic style",
             "price_min": Decimal("50000"),
             "price_max": Decimal("200000"),
@@ -41,7 +41,7 @@ def seed_vendors(db: Session):
         {
             "name": "Spice Garden Catering",
             "category": "Catering",
-            "location": "Delhi",
+            "city": "Delhi",
             "description": "Multi-cuisine catering with authentic Indian flavors",
             "price_min": Decimal("800"),
             "price_max": Decimal("1500"),
@@ -59,7 +59,7 @@ def seed_vendors(db: Session):
         {
             "name": "Elegant Decorators",
             "category": "Decoration",
-            "location": "Bangalore",
+            "city": "Bangalore",
             "description": "Theme-based wedding decorations and floral arrangements",
             "price_min": Decimal("100000"),
             "price_max": Decimal("500000"),
@@ -72,6 +72,42 @@ def seed_vendors(db: Session):
                 "https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg"
             ],
             "services": ["Theme Decoration", "Floral Arrangements", "Lighting"],
+            "portfolio": []
+        },
+        {
+            "name": "Melody Makers",
+            "category": "Entertainment",
+            "city": "Chennai",
+            "description": "Live music and entertainment for weddings",
+            "price_min": Decimal("50000"),
+            "price_max": Decimal("150000"),
+            "rating": Decimal("4.6"),
+            "review_count": 67,
+            "contact_phone": "+91 65432 10987",
+            "contact_email": "bookings@melodymakers.com",
+            "is_featured": False,
+            "images": [
+                "https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg"
+            ],
+            "services": ["Live Music", "DJ", "Cultural Performances"],
+            "portfolio": []
+        },
+        {
+            "name": "Royal Venues",
+            "category": "Venue",
+            "city": "Hyderabad",
+            "description": "Luxury wedding venues with modern amenities",
+            "price_min": Decimal("200000"),
+            "price_max": Decimal("1000000"),
+            "rating": Decimal("4.9"),
+            "review_count": 145,
+            "contact_phone": "+91 54321 09876",
+            "contact_email": "events@royalvenues.com",
+            "is_featured": True,
+            "images": [
+                "https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg"
+            ],
+            "services": ["Indoor Venues", "Outdoor Venues", "Banquet Halls"],
             "portfolio": []
         }
     ]

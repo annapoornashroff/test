@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     phone_number: str
     name: Optional[str] = None
     email: Optional[EmailStr] = None
-    location: Optional[str] = None
+    city: Optional[str] = None
 
 class UserCreate(UserBase):
     firebase_uid: Optional[str] = None
@@ -15,7 +15,7 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
-    location: Optional[str] = None
+    city: Optional[str] = None
     firebase_uid: Optional[str] = None
     is_verified: Optional[bool] = None
 

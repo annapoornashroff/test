@@ -65,7 +65,7 @@ export class ApiClient {
   // Vendors
   async getVendors(params?: { 
     category?: string; 
-    location?: string; 
+    city?: string; 
     min_price?: number;
     max_price?: number;
     search?: string;
@@ -74,7 +74,7 @@ export class ApiClient {
   }) {
     const searchParams = new URLSearchParams();
     if (params?.category) searchParams.append('category', params.category);
-    if (params?.location) searchParams.append('location', params.location);
+    if (params?.city) searchParams.append('city', params.city);
     if (params?.min_price) searchParams.append('min_price', params.min_price.toString());
     if (params?.max_price) searchParams.append('max_price', params.max_price.toString());
     if (params?.search) searchParams.append('search', params.search);
@@ -92,8 +92,8 @@ export class ApiClient {
     return this.request('/vendors/categories');
   }
 
-  async getVendorLocations() {
-    return this.request('/vendors/locations');
+  async getVendorCities() {
+    return this.request('/vendors/cities');
   }
 
   async getFeaturedVendors(limit: number = 10) {

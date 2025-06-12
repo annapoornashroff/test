@@ -47,7 +47,7 @@ This is the backend API for Forever N Co., a comprehensive Indian wedding servic
 - `GET /api/v1/vendors/` - Get vendors with filtering
 - `GET /api/v1/vendors/{id}` - Get vendor details
 - `GET /api/v1/vendors/categories` - Get vendor categories
-- `GET /api/v1/vendors/locations` - Get vendor locations
+- `GET /api/v1/vendors/cities` - Get vendor cities
 - `GET /api/v1/vendors/featured` - Get featured vendors
 
 #### Packages
@@ -82,7 +82,7 @@ This is the backend API for Forever N Co., a comprehensive Indian wedding servic
         {
           "id": "string",
           "name": "string",
-          "location": "string",
+          "city": "string",
           "rating": "number",
           "comment": "string",
           "image": "string",

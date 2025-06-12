@@ -17,7 +17,7 @@ const vendors = [
     id: 1,
     name: 'Royal Photography Studio',
     category: 'Photography',
-    location: 'Mumbai',
+    city: 'Mumbai',
     rating: 4.8,
     reviews: 156,
     price: '₹50,000 - ₹2,00,000',
@@ -27,7 +27,7 @@ const vendors = [
     id: 2,
     name: 'Spice Garden Catering',
     category: 'Catering',
-    location: 'Delhi',
+    city: 'Delhi',
     rating: 4.9,
     reviews: 203,
     price: '₹800 - ₹1,500 per plate',
@@ -37,7 +37,7 @@ const vendors = [
     id: 3,
     name: 'Elegant Decorators',
     category: 'Decoration',
-    location: 'Bangalore',
+    city: 'Bangalore',
     rating: 4.7,
     reviews: 89,
     price: '₹1,00,000 - ₹5,00,000',
@@ -94,7 +94,7 @@ export default function VendorSection() {
                   <h3 className="text-lg font-bold">{vendor.name}</h3>
                   <div className="flex items-center space-x-2 mt-1">
                     <MapPin className="w-4 h-4" />
-                    <span className="text-sm">{vendor.location}</span>
+                    <span className="text-sm">{vendor.city}</span>
                   </div>
                 </div>
                 <div className="absolute top-4 right-4 bg-white/90 rounded-full px-3 py-1">

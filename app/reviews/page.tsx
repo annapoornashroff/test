@@ -50,7 +50,7 @@ export default function ReviewsPage() {
     const matchesSearch = !searchQuery || 
       review.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       review.comment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.location.toLowerCase().includes(searchQuery.toLowerCase());
+      review.city.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesRating = ratingFilter === null || review.rating === ratingFilter;
     

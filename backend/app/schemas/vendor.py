@@ -6,7 +6,7 @@ from decimal import Decimal
 class VendorBase(BaseModel):
     name: str
     category: str
-    location: str
+    city: str
     description: Optional[str] = None
     price_min: Optional[Decimal] = None
     price_max: Optional[Decimal] = None
@@ -23,7 +23,7 @@ class VendorCreate(VendorBase):
 class VendorUpdate(BaseModel):
     name: Optional[str] = None
     category: Optional[str] = None
-    location: Optional[str] = None
+    city: Optional[str] = None
     description: Optional[str] = None
     images: Optional[List[str]] = None
     price_min: Optional[Decimal] = None

@@ -12,7 +12,7 @@ router = APIRouter()
 async def get_vendors(
     db: Session = Depends(get_db),
     category: Optional[str] = Query(None),
-    location: Optional[str] = Query(None),
+    city: Optional[str] = Query(None),
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
     search: Optional[str] = Query(None),
@@ -23,7 +23,7 @@ async def get_vendors(
     vendor_service = VendorService(db)
     vendors = await vendor_service.get_vendors(
         category=category,
-        location=location,
+        city=city,
         min_price=min_price,
         max_price=max_price,
         search=search,
@@ -39,12 +39,12 @@ async def get_vendor_categories(db: Session = Depends(get_db)):
     categories = await vendor_service.get_categories()
     return {"categories": categories}
 
-@router.get("/locations")
-async def get_vendor_locations(db: Session = Depends(get_db)):
-    """Get all vendor locations"""
+@router.get("/cities")
+async def get_vendor_cities(db: Session = Depends(get_db)):
+    """Get all vendor cities"""
     vendor_service = VendorService(db)
-    locations = await vendor_service.get_locations()
-    return {"locations": locations}
+    cities = await vendor_service.get_cities()
+    return {"cities": cities}
 
 @router.get("/{vendor_id}", response_model=VendorResponse)
 async def get_vendor(vendor_id: int, db: Session = Depends(get_db)):

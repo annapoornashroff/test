@@ -8,7 +8,7 @@ export interface ApiError {
 // Wedding Types
 export interface WeddingData {
   name: string;
-  location: string;
+  city: string;
   date: string;
   is_date_fixed: boolean;
   duration: number;
@@ -56,7 +56,7 @@ export interface UserData {
   phone_number: string;
   name?: string;
   email?: string;
-  location?: string;
+  city?: string;
 }
 
 export interface UserResponse {
@@ -76,7 +76,7 @@ export interface TokenResponse {
 export interface VendorData {
   name: string;
   category: string;
-  location: string;
+  city: string;
   description: string;
   price_range: {
     min: number;
@@ -133,7 +133,7 @@ export interface CartItemResponse extends CartItemData {
 // Review Types
 export interface ReviewData {
   name: string;
-  location: string;
+  city: string;
   rating: number;
   comment: string;
   image?: string;

@@ -4,12 +4,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { type CityContextType } from '@/lib/types/ui';
 
-interface CityContextType {
-  selectedCity: string;
-  setSelectedCity: (city: string) => void;
-  clearCity: () => void;
-}
-
 const CityContext = createContext<CityContextType | undefined>(undefined);
 
 export function CityProvider({ children }: { children: React.ReactNode }) {

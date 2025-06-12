@@ -11,7 +11,7 @@ class User(Base):
     firebase_uid = Column(String(128), unique=True, index=True)
     name = Column(String(100))
     email = Column(String(100), unique=True, index=True)
-    location = Column(String(100))
+    city = Column(String(100))
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

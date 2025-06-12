@@ -221,7 +221,7 @@ Instead of SendGrid, we now use Gmail SMTP for email notifications:
 3. **Vendors** - ✅ DONE
    - Dynamic vendor loading with filters
    - Search functionality with debouncing
-   - Category and location filtering
+   - Category and city filtering
 
 4. **Cart & Wishlist** - ✅ DONE
    - Add/remove items functionality

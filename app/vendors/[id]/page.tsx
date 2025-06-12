@@ -330,7 +330,7 @@ export default function VendorDetailPage() {
                     </span>
                     <div className="flex items-center text-sm text-gray-600">
                       <MapPin className="w-4 h-4 mr-1" />
-                      {vendor.location}
+                      {vendor.city}
                     </div>
                     <div className="flex items-center text-sm">
                       <Star className="w-4 h-4 text-yellow-500 fill-current mr-1" />

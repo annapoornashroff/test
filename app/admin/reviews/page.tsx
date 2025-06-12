@@ -313,7 +313,7 @@ export default function AdminReviewsPage() {
                   <h4 className="font-medium">How to Get Your Place ID</h4>
                   <ol className="text-sm text-gray-600 space-y-1 list-decimal pl-4">
                     <li>Go to <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google&apos;s Place ID Finder</a></li>
-                    <li>Enter your business name and location</li>
+                    <li>Enter your business name and city</li>
                     <li>Copy the Place ID that appears</li>
                     <li>Add it to your environment variables</li>
                   </ol>
@@ -397,7 +397,7 @@ export default function AdminReviewsPage() {
                         <tr key={review.id} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-2">
                             <div className="font-medium">{review.name}</div>
-                            <div className="text-xs text-gray-500">{review.location}</div>
+                            <div className="text-xs text-gray-500">{review.city}</div>
                           </td>
                           <td className="py-2 px-2">
                             <div className="flex">

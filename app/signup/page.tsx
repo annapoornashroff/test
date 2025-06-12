@@ -22,7 +22,7 @@ export default function SignupPage() {
     phoneNumber: '',
     name: '',
     email: '',
-    location: '',
+    city: '',
     weddingDate: '',
     isDateFixed: false,
     selectedEvents: [] as string[]
@@ -44,7 +44,7 @@ export default function SignupPage() {
         phone_number: formData.phoneNumber,
         name: formData.name,
         email: formData.email,
-        location: formData.location,
+        city: formData.city,
       };
 
       await apiClient.signup(userData);
@@ -189,12 +189,12 @@ export default function SignupPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Location
+                      City
                     </label>
                     <Input
                       placeholder="City, State"
-                      value={formData.location}
-                      onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                      value={formData.city}
+                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
                       className="h-12"
                     />
                   </div>

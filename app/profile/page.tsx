@@ -38,7 +38,7 @@ export default function ProfilePage() {
     name: '',
     phoneNumber: '',
     email: '',
-    location: ''
+    city: ''
   });
 
   const [projects, setProjects] = useState<WeddingProject[]>([]);
@@ -70,13 +70,13 @@ export default function ProfilePage() {
         name?: string;
         phone_number?: string;
         email?: string;
-        location?: string;
+        city?: string;
       };
       setPersonalInfo({
         name: userProfile.name || '',
         phoneNumber: userProfile.phone_number || '',
         email: userProfile.email || '',
-        location: userProfile.location || ''
+        city: userProfile.city || ''
       });
       
       // Load wedding projects
@@ -118,7 +118,7 @@ export default function ProfilePage() {
       await apiClient.updateUser({
         name: personalInfo.name,
         email: personalInfo.email,
-        location: personalInfo.location
+        city: personalInfo.city
       });
       
       setEditingPersonal(false);
@@ -479,16 +479,16 @@ export default function ProfilePage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Location
+                    City
                   </label>
                   {editingPersonal ? (
                     <Input
-                      value={personalInfo.location}
-                      onChange={(e) => setPersonalInfo(prev => ({ ...prev, location: e.target.value }))}
+                      value={personalInfo.city}
+                      onChange={(e) => setPersonalInfo(prev => ({ ...prev, city: e.target.value }))}
                       disabled={saving}
                     />
                   ) : (
-                    <p className="text-gray-900">{personalInfo.location || 'Not provided'}</p>
+                    <p className="text-gray-900">{personalInfo.city || 'Not provided'}</p>
                   )}
                 </div>
               </div>
@@ -547,7 +547,7 @@ export default function ProfilePage() {
                       </div>
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="w-4 h-4 mr-2" />
-                        {project.location}
+                        {project.city}
                       </div>
                       <div className="flex items-center text-sm text-gray-600">
                         <Users className="w-4 h-4 mr-2" />

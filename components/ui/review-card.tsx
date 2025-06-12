@@ -33,7 +33,7 @@ export function ReviewCard({ review, isActive = false, className = '' }: ReviewC
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <div className="absolute bottom-4 left-4 text-white">
           <h3 className="text-lg font-bold">{review.name}</h3>
-          <p className="text-sm opacity-90">{review.location}</p>
+          <p className="text-sm opacity-90">{review.city}</p>
         </div>
         <div className="absolute top-4 right-4">
           <Quote className="w-8 h-8 text-white/80" />

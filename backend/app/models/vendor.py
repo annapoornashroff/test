@@ -9,7 +9,7 @@ class Vendor(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), nullable=False, index=True)
     category = Column(String(100), nullable=False, index=True)
-    location = Column(String(100), nullable=False, index=True)
+    city = Column(String(100), nullable=False, index=True)
     description = Column(Text)
     images = Column(JSON)  # List of image URLs
     price_min = Column(Numeric(12, 2))

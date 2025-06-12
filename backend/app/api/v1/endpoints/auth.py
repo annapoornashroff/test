@@ -66,7 +66,7 @@ async def firebase_signup(
         user_data = {
             'name': request.name or existing_user.name,
             'email': request.email or existing_user.email,
-            'location': request.location or existing_user.location,
+            'city': request.city or existing_user.city,
             'firebase_uid': firebase_uid,
             'is_verified': True
         }
@@ -78,7 +78,7 @@ async def firebase_signup(
             phone_number=phone_number,
             name=request.name,
             email=request.email,
-            location=request.location,
+            city=request.city,
             firebase_uid=firebase_uid,
             is_verified=True
         )

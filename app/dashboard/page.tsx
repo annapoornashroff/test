@@ -5,14 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Heart, Calendar, MapPin, Users, IndianRupee, 
-  ShoppingCart, Bookmark, User, Plus, Edit,
+  ShoppingCart, Bookmark, User as UserIcon, Plus, Edit,
   CheckCircle, Clock, AlertCircle, Loader2, Phone, Mail
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { type WeddingProject, type User } from '@/lib/types/ui';
+import { type WeddingProject } from '@/lib/types/ui';
+import { type User } from '@/lib/types';
 
 const quickActions = [
   { icon: ShoppingCart, label: 'Browse Vendors', href: '/vendors', color: 'bg-blue-500' },
@@ -110,7 +111,7 @@ export default function DashboardPage() {
               </Link>
               <Link href="/profile">
                 <Button variant="gold" size="sm" className="rounded-full">
-                  <User className="w-4 h-4 mr-2" />
+                  <UserIcon className="w-4 h-4 mr-2" />
                   Profile
                 </Button>
               </Link>
@@ -193,7 +194,7 @@ export default function DashboardPage() {
                             </div>
                             <div className="flex items-center">
                               <MapPin className="w-4 h-4 mr-2" />
-                              {project.location}
+                              {project.city}
                             </div>
                           </div>
 
@@ -299,7 +300,7 @@ export default function DashboardPage() {
                 <CardContent className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <Phone className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">{user.phone_number}</span>
+                    <span className="text-sm">{user.phoneNumber}</span>
                   </div>
                   {user.email && (
                     <div className="flex items-center space-x-3">
@@ -307,10 +308,10 @@ export default function DashboardPage() {
                       <span className="text-sm">{user.email}</span>
                     </div>
                   )}
-                  {user.location && (
+                  {user.city && (
                     <div className="flex items-center space-x-3">
                       <MapPin className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm">{user.location}</span>
+                      <span className="text-sm">{user.city}</span>
                     </div>
                   )}
                   <Link href="/profile">

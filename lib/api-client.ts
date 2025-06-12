@@ -178,7 +178,7 @@ export class ApiClient {
   // Vendors
   async getVendors(params?: {
     category?: string;
-    location?: string;
+    city?: string;
     min_price?: number;
     max_price?: number;
     search?: string;
@@ -205,8 +205,8 @@ export class ApiClient {
     return this.request('/vendors/categories');
   }
 
-  async getVendorLocations() {
-    return this.request('/vendors/locations');
+  async getVendorCities() {
+    return this.request('/vendors/cities');
   }
 
   async getFeaturedVendors(limit: number = 10) {

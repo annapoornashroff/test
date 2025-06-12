@@ -243,7 +243,7 @@ export default function CartPage() {
 
                           <div className="flex items-center text-sm text-gray-600 mb-2">
                             <MapPin className="w-4 h-4 mr-1" />
-                            {item.vendor?.location || 'Location'}
+                            {item.vendor?.city || 'City'}
                             <span className="mx-2">•</span>
                             <Star className="w-4 h-4 mr-1 text-yellow-500" />
                             {item.vendor?.rating || '4.5'}

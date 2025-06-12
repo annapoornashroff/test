@@ -73,7 +73,7 @@ export default function VendorsPage() {
       setCategories(categoriesData.categories || []);
 
       // Load cities
-      const citiesData = await apiClient.getVendorLocations() as CitiesResponse;
+      const citiesData = await apiClient.getVendorCities() as CitiesResponse;
       setCities(citiesData.cities || []);
     }, setLoading);
   };

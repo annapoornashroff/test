@@ -5,7 +5,7 @@ from decimal import Decimal
 
 class WeddingBase(BaseModel):
     name: str
-    location: str
+    city: str
     date: datetime
     is_date_fixed: bool = False
     duration: int = 2
@@ -19,7 +19,7 @@ class WeddingCreate(WeddingBase):
 
 class WeddingUpdate(BaseModel):
     name: Optional[str] = None
-    location: Optional[str] = None
+    city: Optional[str] = None
     date: Optional[datetime] = None
     is_date_fixed: Optional[bool] = None
     duration: Optional[int] = None

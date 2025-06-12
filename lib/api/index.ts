@@ -128,7 +128,7 @@ export class ApiClient {
   // Vendors
   async getVendors(params?: {
     category?: string;
-    location?: string;
+    city?: string;
     min_price?: number;
     max_price?: number;
     search?: string;
@@ -136,13 +136,13 @@ export class ApiClient {
     limit?: number;
   }): Promise<VendorResponse[]> {
     const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          searchParams.append(key, value.toString());
-        }
-      });
-    }
+    if (params?.category) searchParams.append('category', params.category);
+    if (params?.city) searchParams.append('city', params.city);
+    if (params?.min_price) searchParams.append('min_price', params.min_price.toString());
+    if (params?.max_price) searchParams.append('max_price', params.max_price.toString());
+    if (params?.search) searchParams.append('search', params.search);
+    if (params?.skip) searchParams.append('skip', params.skip.toString());
+    if (params?.limit) searchParams.append('limit', params.limit.toString());
     
     return this.request(`/vendors?${searchParams.toString()}`);
   }

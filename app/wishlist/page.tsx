@@ -351,7 +351,7 @@ function WishlistCard({
   const vendor = item.vendor || {
     id: 0,
     name: 'Vendor Name',
-    location: 'Location',
+    city: 'City',
     rating: 4.5,
     images: ['https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'],
     price_min: undefined,
@@ -403,7 +403,7 @@ function WishlistCard({
 
               <div className="flex items-center text-sm text-gray-600 mb-2">
                 <MapPin className="w-4 h-4 mr-1" />
-                {vendor.location || 'Location'}
+                {vendor.city || 'City'}
                 <span className="mx-2">•</span>
                 <Star className="w-4 h-4 mr-1 text-yellow-500" />
                 {vendor.rating || '4.5'} ({vendor.review_count || '0'} reviews)
@@ -475,7 +475,7 @@ function WishlistCard({
 
         <div className="flex items-center text-sm text-gray-600 mb-2">
           <MapPin className="w-4 h-4 mr-1" />
-          {vendor.location || 'Location'}
+          {vendor.city || 'City'}
           <span className="mx-2">•</span>
           {vendor.review_count || '0'} reviews
         </div>

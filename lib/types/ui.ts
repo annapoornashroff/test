@@ -2,8 +2,9 @@
 import { type DialogProps } from '@radix-ui/react-dialog';
 import { Toast, ToastAction } from '@/components/ui/toast';
 import { Toaster as Sonner } from 'sonner';
-import { badgeVariants } from '@/components/ui/badge';
-import { VariantProps } from 'class-variance-authority';
+import { badgeVariants } from '@/lib/styles/badge';
+import { VariantProps, cva } from 'class-variance-authority';
+import * as React from 'react';
 
 // Loading Components
 export interface LoadingProps {
@@ -20,7 +21,7 @@ export interface LoadingSpinnerProps {
 export interface Review {
   id: number;
   name: string;
-  location: string;
+  city: string;
   rating: number;
   comment: string;
   image?: string;
@@ -80,6 +81,7 @@ export type ChartConfig = {
   theme?: {
     [key in 'light' | 'dark' | 'system']: string;
   };
+  [key: string]: any;
 };
 
 export type ChartContextProps = {
@@ -111,9 +113,29 @@ export type ToastActionElement = React.ReactElement<typeof ToastAction>;
 export type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 // Sheet Components
-export interface SheetContentProps {
-  children: React.ReactNode;
+export const sheetVariants = cva(
+  'fixed z-50 gap-4 bg-background p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  {
+    variants: {
+      side: {
+        top: 'inset-x-0 top-0 border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top',
+        bottom:
+          'inset-x-0 bottom-0 border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom',
+        left: 'inset-y-0 left-0 h-full w-3/4 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm',
+        right:
+          'inset-y-0 right-0 h-full w-3/4  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm',
+      },
+    },
+    defaultVariants: {
+      side: 'right',
+    },
+  }
+);
+
+export interface SheetContentProps extends React.ComponentPropsWithoutRef<'div'> {
+  side?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
+  children: React.ReactNode;
 }
 
 // Transition Components
@@ -154,7 +176,7 @@ export interface CartItem {
   vendor?: {
     id: number;
     name: string;
-    location: string;
+    city: string;
     rating: number;
     images: string[];
     price_min?: number;
@@ -174,15 +196,19 @@ export interface Vendor {
   name: string;
   category: string;
   city: string;
+  description?: string;
   rating: number;
   review_count: number;
   price_min: number;
   price_max: number;
   images: string[];
+  services?: string[];
+  portfolio?: string[];
   is_featured: boolean;
   is_active: boolean;
   contact_phone: string;
   contact_email: string;
+  contact_website?: string;
 }
 
 // Auth Types
@@ -195,12 +221,10 @@ export interface AuthContextType {
 }
 
 export interface NavigationContextType {
-  currentPath: string;
-  navigate: (path: string) => void;
-  goBack: () => void;
-  goForward: () => void;
-  canGoBack: boolean;
-  canGoForward: boolean;
+  isLoading: boolean;
+  navigate: (path: string) => Promise<void>;
+  error: string | null;
+  clearError: () => void;
 }
 
 export interface WishlistItem {
@@ -243,7 +267,7 @@ export interface WeddingProject {
   id: number;
   name: string;
   date: string;
-  location: string;
+  city: string;
   estimated_guests: number;
   budget: number;
   spent: number;
@@ -256,7 +280,7 @@ export interface PersonalInfo {
   name: string;
   phoneNumber: string;
   email: string;
-  location: string;
+  city: string;
 }
 
 // Testimonial Types
@@ -264,4 +288,30 @@ export interface BusinessRating {
   rating: number;
   total_reviews: number;
   business_name: string;
+}
+
+// Package Types
+export interface Package {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  original_price?: number;
+  discount_percentage?: number;
+  duration: string;
+  image_url?: string;
+  is_popular?: boolean;
+  includes?: string[];
+  vendors?: Array<{
+    category: string;
+    vendor_name: string;
+    vendor_id: number;
+  }>;
+  customPrice?: number;
+}
+
+export interface CityContextType {
+  selectedCity: string;
+  setSelectedCity: (city: string) => void;
+  clearCity: () => void;
 } 

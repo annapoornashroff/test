@@ -112,7 +112,7 @@ class GoogleReviewsService:
             formatted_review = {
                 "id": review.get("time", 0),
                 "name": self._format_reviewer_name(review.get("author_name", "Anonymous")),
-                "location": self._extract_location(review.get("author_name", "")),
+                "city": self._extract_city(review.get("author_name", "")),
                 "rating": rating,
                 "comment": self._clean_review_text(review.get("text", "")),
                 "image": self._get_profile_image(review),
@@ -150,8 +150,8 @@ class GoogleReviewsService:
         
         return author_name
     
-    def _extract_location(self, author_name: str) -> str:
-        """Extract or estimate location from review data"""
+    def _extract_city(self, author_name: str) -> str:
+        """Extract or estimate city from review data"""
         # Common Indian wedding destinations
         indian_cities = [
             "Mumbai", "Delhi", "Bangalore", "Chennai", "Hyderabad", 
@@ -229,7 +229,7 @@ class GoogleReviewsService:
             {
                 "id": 1,
                 "name": "Priya & Arjun",
-                "location": "Mumbai",
+                "city": "Mumbai",
                 "rating": 5,
                 "comment": "Forever N Co made our dream wedding come true! The seamless planning and attention to detail was incredible. Every vendor was perfectly coordinated and our special day was absolutely magical.",
                 "image": "https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg",
@@ -242,7 +242,7 @@ class GoogleReviewsService:
             {
                 "id": 2,
                 "name": "Sneha & Vikram",
-                "location": "Delhi",
+                "city": "Delhi",
                 "rating": 5,
                 "comment": "The e-commerce experience was game-changing! We could plan everything online and track our progress. No stress, just pure joy on our wedding day. Highly recommend Forever N Co!",
                 "image": "https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg",
@@ -255,7 +255,7 @@ class GoogleReviewsService:
             {
                 "id": 3,
                 "name": "Kavya & Rohit",
-                "location": "Bangalore",
+                "city": "Bangalore",
                 "rating": 5,
                 "comment": "Outstanding service! The team handled everything from vendor coordination to last-minute changes. Our families were amazed by the flawless execution. Thank you Forever N Co!",
                 "image": "https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg",
@@ -268,7 +268,7 @@ class GoogleReviewsService:
             {
                 "id": 4,
                 "name": "Anita & Suresh",
-                "location": "Chennai",
+                "city": "Chennai",
                 "rating": 5,
                 "comment": "From the initial planning to the final celebration, Forever N Co exceeded our expectations. The vendor quality was exceptional and the coordination was seamless.",
                 "image": "https://images.pexels.com/photos/1024994/pexels-photo-1024994.jpeg",
@@ -281,7 +281,7 @@ class GoogleReviewsService:
             {
                 "id": 5,
                 "name": "Meera & Rajesh",
-                "location": "Hyderabad",
+                "city": "Hyderabad",
                 "rating": 5,
                 "comment": "The best decision we made for our wedding was choosing Forever N Co. Their platform made vendor selection so easy and the execution was flawless. Absolutely loved it!",
                 "image": "https://images.pexels.com/photos/1444443/pexels-photo-1444443.jpeg",
