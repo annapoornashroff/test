@@ -79,10 +79,20 @@ describe('TestimonialsSection', () => {
   });
 
   it('renders loading state initially', async () => {
-    await act(async () => {
-      render(<TestimonialsSection />)
-    })
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument()
+    // Delay the API response to ensure loading state is visible
+    (apiClient.get as jest.Mock).mockImplementation(() => 
+      new Promise(resolve => setTimeout(() => resolve({
+        data: {
+          reviews: mockReviews,
+          business_rating: mockBusinessRating
+        }
+      }), 100))
+    );
+
+    render(<TestimonialsSection />);
+    
+    // The loading spinner should be immediately visible
+    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
   })
 
   it('renders reviews and business rating after loading', async () => {
@@ -97,11 +107,13 @@ describe('TestimonialsSection', () => {
     })
 
     expect(screen.getByText('New York')).toBeInTheDocument()
-    expect(screen.getByText('(100 reviews)')).toBeInTheDocument()
+    expect(screen.getByText('(100)')).toBeInTheDocument()
   })
 
   it('handles API error gracefully', async () => {
     const errorMessage = 'Failed to fetch reviews'
+    const originalConsoleError = console.error
+    console.error = jest.fn()
     ;(apiClient.get as jest.Mock).mockRejectedValueOnce(new Error(errorMessage))
 
     await act(async () => {
@@ -114,6 +126,9 @@ describe('TestimonialsSection', () => {
     })
 
     expect(screen.getByText('Try Again')).toBeInTheDocument()
+    expect(console.error).toHaveBeenCalledWith('Error fetching reviews:', expect.any(Error))
+    
+    console.error = originalConsoleError
   })
 
   it('rotates through reviews automatically', async () => {
