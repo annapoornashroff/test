@@ -5,6 +5,7 @@ import { Toaster as Sonner } from 'sonner';
 import { badgeVariants } from '@/lib/styles/badge';
 import { VariantProps, cva } from 'class-variance-authority';
 import * as React from 'react';
+import { type ReviewResponse } from './api';
 
 // Loading Components
 export interface LoadingProps {
@@ -18,21 +19,8 @@ export interface LoadingSpinnerProps {
 }
 
 // Review Components
-export interface Review {
-  id: number;
-  name: string;
-  city: string;
-  rating: number;
-  comment: string;
-  image?: string;
-  wedding_date: string;
-  created_at: string;
-  source: string;
-  relative_time?: string;
-}
-
 export interface ReviewCardProps {
-  review: Review;
+  review: ReviewResponse;
   isActive?: boolean;
   className?: string;
 }
@@ -244,6 +232,7 @@ export interface ApiResponse<T> {
   data: T;
   message: string;
   status: number;
+  success: boolean;
 }
 
 export interface CategoriesResponse {
@@ -281,13 +270,6 @@ export interface PersonalInfo {
   phoneNumber: string;
   email: string;
   city: string;
-}
-
-// Testimonial Types
-export interface BusinessRating {
-  rating: number;
-  total_reviews: number;
-  business_name: string;
 }
 
 // Package Types

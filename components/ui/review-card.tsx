@@ -1,7 +1,13 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Quote } from 'lucide-react';
 import Image from 'next/image';
-import { type ReviewCardProps } from '@/lib/types/ui';
+import { type ReviewResponse } from '@/lib/types/api';
+
+interface ReviewCardProps {
+  review: ReviewResponse;
+  isActive?: boolean;
+  className?: string;
+}
 
 export function ReviewCard({ review, isActive = false, className = '' }: ReviewCardProps) {
   const formatDate = (dateString: string) => {

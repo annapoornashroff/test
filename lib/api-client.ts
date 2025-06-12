@@ -1,6 +1,13 @@
 // Enhanced API client with comprehensive error handling and real-time data fetching
 import { toast } from 'sonner';
-import { UserResponse } from '@/lib/types/api';
+import { 
+  UserResponse, 
+  ReviewsResponse, 
+  ReviewResponse, 
+  BusinessRating, 
+  ReviewStats 
+} from '@/lib/types/api';
+import { ApiResponse } from '@/lib/types/ui';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -63,13 +70,13 @@ export class ApiClient {
 
     try {
       const response = await fetch(url, config);
+      const data = await response.json();
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
         const error: ApiError = {
-          message: errorData.detail || `HTTP error! status: ${response.status}`,
+          message: data.message || `HTTP error! status: ${response.status}`,
           status: response.status,
-          details: errorData,
+          details: data,
         };
         
         // Handle specific error cases
@@ -89,7 +96,15 @@ export class ApiClient {
         throw error;
       }
       
-      return await response.json();
+      // Handle the new response structure
+      if (data && typeof data === 'object' && 'data' in data && 'success' in data) {
+        if (!data.success) {
+          throw new Error(data.message || 'Request failed');
+        }
+        return data.data;
+      }
+      
+      return data;
     } catch (error) {
       if (error instanceof Error && error.name === 'TypeError') {
         // Network error
@@ -291,20 +306,21 @@ export class ApiClient {
   }
 
   // Reviews
-  async getReviews(limit: number = 6) {
-    return this.request(`/reviews/?limit=${limit}`);
+  async getReviews(params: { page?: number; limit?: number } = {}): Promise<ReviewsResponse> {
+    const { page = 1, limit = 10 } = params;
+    return this.request<ReviewsResponse>(`/reviews?page=${page}&limit=${limit}`);
   }
 
-  async getFeaturedReviews() {
-    return this.request('/reviews/featured');
+  async getFeaturedReviews(): Promise<ReviewResponse[]> {
+    return this.request<ReviewResponse[]>('/reviews/featured');
   }
 
-  async getBusinessRating() {
-    return this.request('/reviews/business-rating');
+  async getBusinessRating(): Promise<BusinessRating> {
+    return this.request<BusinessRating>('/reviews/business-rating');
   }
 
-  async getReviewStats() {
-    return this.request('/reviews/stats');
+  async getReviewStats(): Promise<ReviewStats> {
+    return this.request<ReviewStats>('/reviews/stats');
   }
 
   // Relationships

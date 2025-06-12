@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { ApiResponse } from '@/lib/types/ui';
+import { ReviewsResponse } from '@/lib/types/api';
 
 // This is a proxy endpoint to avoid exposing API keys in the frontend
 export const dynamic = 'force-dynamic'; // Explicitly mark as dynamic route
@@ -33,16 +35,32 @@ export async function GET(request: Request) {
     }
     
     const data = await response.json();
-    return NextResponse.json(data, {
+    
+    // Validate required fields
+    if (!data.reviews || !Array.isArray(data.reviews)) {
+      throw new Error('Invalid response format: reviews array is missing');
+    }
+    
+    const apiResponse: ApiResponse<ReviewsResponse> = {
+      data,
+      message: 'Reviews fetched successfully',
+      status: 200,
+      success: true
+    };
+    
+    return NextResponse.json(apiResponse, {
       headers: {
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       },
     });
   } catch (error: any) {
     console.error('Reviews API error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch reviews' },
-      { status: 500 }
-    );
+    const errorResponse: ApiResponse<null> = {
+      data: null,
+      message: error.message || 'Failed to fetch reviews',
+      status: 500,
+      success: false
+    };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }

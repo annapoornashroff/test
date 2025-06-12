@@ -1,4 +1,12 @@
 import { NextResponse } from 'next/server';
+import { ApiResponse } from '@/lib/types/ui';
+
+interface HealthStatus {
+  status: 'healthy' | 'error';
+  google_api_configured: boolean;
+  data_source: string;
+  fallback_available: boolean;
+}
 
 export async function GET() {
   try {
@@ -17,16 +25,28 @@ export async function GET() {
     }
     
     const data = await response.json();
-    return NextResponse.json(data);
+    
+    // Validate required fields
+    if (!data.status || !data.data_source) {
+      throw new Error('Invalid response format: required health check fields are missing');
+    }
+    
+    const apiResponse: ApiResponse<HealthStatus> = {
+      data,
+      message: 'Health check completed successfully',
+      status: 200,
+      success: true
+    };
+    
+    return NextResponse.json(apiResponse);
   } catch (error: any) {
     console.error('Reviews health check error:', error);
-    return NextResponse.json(
-      { 
-        status: 'error',
-        error: error.message || 'Failed to check reviews service health',
-        fallback_available: true
-      },
-      { status: 200 } // Still return 200 to indicate the API itself is working
-    );
+    const errorResponse: ApiResponse<null> = {
+      data: null,
+      message: error.message || 'Failed to check reviews service health',
+      status: 500,
+      success: false
+    };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }

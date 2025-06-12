@@ -1,5 +1,12 @@
 import { Star } from 'lucide-react';
-import { type GoogleReviewsBadgeProps } from '@/lib/types/ui';
+import { type BusinessRating } from '@/lib/types/api';
+
+interface GoogleReviewsBadgeProps {
+  rating: number;
+  totalReviews: number;
+  businessName?: string;
+  className?: string;
+}
 
 export function GoogleReviewsBadge({ 
   rating, 

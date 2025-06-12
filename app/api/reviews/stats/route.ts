@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { ApiResponse } from '@/lib/types/ui';
+import { ReviewStats } from '@/lib/types/api';
 
 export async function GET() {
   try {
@@ -17,12 +19,28 @@ export async function GET() {
     }
     
     const data = await response.json();
-    return NextResponse.json(data);
+    
+    // Validate required fields
+    if (!data.total_reviews || typeof data.average_rating !== 'number') {
+      throw new Error('Invalid response format: required stats fields are missing');
+    }
+    
+    const apiResponse: ApiResponse<ReviewStats> = {
+      data,
+      message: 'Review stats fetched successfully',
+      status: 200,
+      success: true
+    };
+    
+    return NextResponse.json(apiResponse);
   } catch (error: any) {
     console.error('Review stats API error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch review statistics' },
-      { status: 500 }
-    );
+    const errorResponse: ApiResponse<null> = {
+      data: null,
+      message: error.message || 'Failed to fetch review statistics',
+      status: 500,
+      success: false
+    };
+    return NextResponse.json(errorResponse, { status: 500 });
   }
 }

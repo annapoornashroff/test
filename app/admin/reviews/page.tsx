@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useReviews } from '@/lib/hooks/useReviews';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
+import { type ReviewResponse } from '@/lib/types/api';
 
 export default function AdminReviewsPage() {
   const { reviews, businessRating, reviewStats, loading, error, refreshReviews } = useReviews(10);
@@ -117,39 +118,28 @@ export default function AdminReviewsPage() {
                   <LoadingSpinner size="sm" />
                 </div>
               ) : healthError ? (
-                <div>
-                  <p className="text-red-500 mb-2">{healthError}</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={checkReviewsHealth}
-                    className="w-full"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Retry
-                  </Button>
-                </div>
-              ) : (
+                <div className="text-red-500 text-sm">{healthError}</div>
+              ) : healthStatus ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div className="text-gray-500">Status:</div>
-                    <div className={`font-medium ${healthStatus?.status === 'healthy' ? 'text-green-600' : 'text-red-600'}`}>
-                      {healthStatus?.status === 'healthy' ? 'Healthy' : 'Error'}
+                    <div className="font-medium">
+                      {healthStatus.status === 'healthy' ? 'Healthy' : 'Error'}
                     </div>
                     
                     <div className="text-gray-500">API Configured:</div>
                     <div className="font-medium">
-                      {healthStatus?.google_api_configured ? 'Yes' : 'No'}
+                      {healthStatus.google_api_configured ? 'Yes' : 'No'}
                     </div>
                     
                     <div className="text-gray-500">Data Source:</div>
                     <div className="font-medium">
-                      {healthStatus?.data_source === 'google_places' ? 'Google Places API' : 'Mock Data'}
+                      {healthStatus.data_source === 'google_places' ? 'Google Places API' : 'Mock Data'}
                     </div>
                     
-                    <div className="text-gray-500">Fallback:</div>
+                    <div className="text-gray-500">Last Updated:</div>
                     <div className="font-medium">
-                      {healthStatus?.fallback_available ? 'Available' : 'Not Available'}
+                      {healthStatus.timestamp ? new Date(healthStatus.timestamp).toLocaleString() : 'Unknown'}
                     </div>
                   </div>
                   
@@ -161,6 +151,19 @@ export default function AdminReviewsPage() {
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Refresh Status
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-500 mb-2">No status available</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={checkReviewsHealth}
+                    className="w-full"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Check Status
                   </Button>
                 </div>
               )}
@@ -231,7 +234,7 @@ export default function AdminReviewsPage() {
             </CardContent>
           </Card>
 
-          {/* Recent Reviews */}
+          {/* Recent Reviews Summary */}
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Recent Reviews</CardTitle>
@@ -249,12 +252,12 @@ export default function AdminReviewsPage() {
                     
                     <div className="text-gray-500">5-Star Reviews:</div>
                     <div className="font-medium">
-                      {reviews.filter(r => r.rating === 5).length}
+                      {reviews.filter((r: ReviewResponse) => r.rating === 5).length}
                     </div>
                     
                     <div className="text-gray-500">Wedding Related:</div>
                     <div className="font-medium">
-                      {reviews.filter(r => r.is_wedding_related).length}
+                      {reviews.filter((r: ReviewResponse) => r.is_wedding_related).length}
                     </div>
                     
                     <div className="text-gray-500">Latest Review:</div>
@@ -346,7 +349,7 @@ export default function AdminReviewsPage() {
           </div>
         )}
 
-        {/* Recent Reviews Preview */}
+        {/* Reviews Table */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Reviews</CardTitle>
@@ -380,57 +383,74 @@ export default function AdminReviewsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-2">Reviewer</th>
-                        <th className="text-left py-2 px-2">Rating</th>
-                        <th className="text-left py-2 px-2">Comment</th>
-                        <th className="text-left py-2 px-2">Date</th>
-                        <th className="text-left py-2 px-2">Source</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {reviews.map(review => (
-                        <tr key={review.id} className="border-b hover:bg-gray-50">
-                          <td className="py-2 px-2">
-                            <div className="font-medium">{review.name}</div>
-                            <div className="text-xs text-gray-500">{review.city}</div>
-                          </td>
-                          <td className="py-2 px-2">
-                            <div className="flex">
-                              {[...Array(5)].map((_, i) => (
-                                <Star 
-                                  key={i} 
-                                  className={`w-4 h-4 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
-                                />
-                              ))}
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-2">Name</th>
+                      <th className="text-left py-2 px-2">Rating</th>
+                      <th className="text-left py-2 px-2">Comment</th>
+                      <th className="text-left py-2 px-2">Date</th>
+                      <th className="text-left py-2 px-2">Source</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reviews.map((review: ReviewResponse) => (
+                      <tr key={review.id} className="border-b hover:bg-gray-50">
+                        <td className="py-2 px-2">
+                          <div className="flex items-center">
+                            <div>
+                              <div className="font-medium">{review.name}</div>
+                              <div className="text-sm text-gray-500">{review.city}</div>
                             </div>
-                          </td>
-                          <td className="py-2 px-2 max-w-xs">
-                            <div className="truncate">{review.comment}</div>
-                          </td>
-                          <td className="py-2 px-2 whitespace-nowrap">
-                            {review.relative_time || new Date(review.created_at).toLocaleDateString()}
-                          </td>
-                          <td className="py-2 px-2">
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              review.source === 'google_reviews' 
-                                ? 'bg-blue-100 text-blue-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {review.source === 'google_reviews' ? 'Google' : 'Mock'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          </div>
+                        </td>
+                        <td className="py-2 px-2">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                className={`w-4 h-4 ${
+                                  i < review.rating 
+                                    ? 'text-yellow-500 fill-current' 
+                                    : 'text-gray-300'
+                                }`} 
+                              />
+                            ))}
+                          </div>
+                        </td>
+                        <td className="py-2 px-2">
+                          <div className="max-w-md">
+                            <p className="text-sm line-clamp-2">{review.comment}</p>
+                            {review.is_wedding_related && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-pink-100 text-pink-800 mt-1">
+                                <Heart className="w-3 h-3 mr-1" />
+                                Wedding
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-2 px-2">
+                          <div className="text-sm">
+                            <div>{new Date(review.created_at).toLocaleDateString()}</div>
+                            <div className="text-gray-500">{review.relative_time}</div>
+                          </div>
+                        </td>
+                        <td className="py-2 px-2">
+                          <span className={`px-2 py-1 rounded-full text-xs ${
+                            review.source === 'google_reviews' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {review.source === 'google_reviews' ? 'Google' : 'Mock'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
                 
-                <div className="flex justify-center">
+                <div className="flex justify-center mt-6">
                   <Link href="/reviews">
                     <Button variant="outline">
                       View All Reviews
