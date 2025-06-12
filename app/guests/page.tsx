@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient } from '@/lib/api';
+import { type WeddingProject, type PersonalInfo } from '@/lib/types/ui';
 
 // Add type for user
 type User = {

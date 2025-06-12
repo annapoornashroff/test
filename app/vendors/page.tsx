@@ -15,35 +15,6 @@ import { toast } from 'sonner';
 import { useCity } from '@/lib/city-context';
 import { type Vendor, type ApiResponse, type CategoriesResponse, type CitiesResponse } from '@/lib/types/ui';
 
-interface Vendor {
-  id: number;
-  name: string;
-  category: string;
-  city: string;
-  rating: number;
-  review_count: number;
-  price_min: number;
-  price_max: number;
-  images: string[];
-  is_featured: boolean;
-  is_active: boolean;
-  contact_phone: string;
-  contact_email: string;
-}
-
-interface ApiResponse<T> {
-  data: T;
-  error?: string;
-}
-
-interface CategoriesResponse {
-  categories: string[];
-}
-
-interface CitiesResponse {
-  cities: string[];
-}
-
 const categoryIcons: Record<string, any> = {
   'Photography': Camera,
   'Catering': Utensils,

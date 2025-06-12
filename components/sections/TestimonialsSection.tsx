@@ -6,27 +6,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Star, Quote, ExternalLink } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import Image from 'next/image';
-
-interface Review {
-  id: number;
-  name: string;
-  location: string;
-  rating: number;
-  comment: string;
-  image?: string;
-  wedding_date: string;
-  created_at: string;
-  source: string;
-  relative_time?: string;
-  is_wedding_related?: boolean;
-}
-
-interface BusinessRating {
-  rating: number;
-  total_reviews: number;
-  business_name: string;
-  source: string;
-}
+import { type Review, type BusinessRating } from '@/lib/types/ui';
 
 export default function TestimonialsSection() {
   const [reviews, setReviews] = useState<Review[]>([]);

@@ -15,39 +15,12 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient } from '@/lib/api';
 import Image from 'next/image';
+import { useCart } from '@/lib/hooks/useCart';
+import { type CartItem, type CartSummary } from '@/lib/types/ui';
 
 const categories = [
   'Photography', 'Catering', 'Decoration', 'Makeup', 'Music & DJ', 'Venues'
 ];
-
-interface CartItem {
-  id: number;
-  user_id: number;
-  wedding_id: number;
-  vendor_id: number;
-  category: string;
-  price: number;
-  booking_date: string;
-  status: string;
-  visit_date?: string;
-  notes?: string;
-  created_at: string;
-  vendor?: {
-    id: number;
-    name: string;
-    location: string;
-    rating: number;
-    images: string[];
-    price_min?: number;
-    price_max?: number;
-  };
-}
-
-interface CartSummary {
-  total_items: number;
-  total_amount: number;
-  status_breakdown: Record<string, number>;
-}
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -56,6 +29,7 @@ export default function CartPage() {
   const [error, setError] = useState('');
 
   const { user } = useAuth();
+  const { handleCartAction, loading: cartActionLoading } = useCart();
   useProtectedRoute();
 
   const fetchCartData = useCallback(async () => {
@@ -88,9 +62,14 @@ export default function CartPage() {
 
   const removeItem = async (id: number) => {
     try {
-      if (!user) throw new Error('No user found');
-      const token = await user.getIdToken();
-      await apiClient.removeFromCart(token, id.toString());
+      await handleCartAction('REMOVE_FROM_CART', {
+        vendor_id: id,
+        wedding_id: cartItems.find(item => item.id === id)?.wedding_id || 0,
+        category: '',
+        price: 0,
+        booking_date: new Date().toISOString(),
+        status: 'wishlisted'
+      });
 
       // Refresh cart data
       await fetchCartData();
@@ -100,11 +79,19 @@ export default function CartPage() {
     }
   };
 
-  const updateItemStatus = async (id: number, status: string) => {
+  const updateItemStatus = async (id: number, status: 'wishlisted' | 'visited' | 'selected' | 'booked') => {
     try {
-      if (!user) throw new Error('No user found');
-      const token = await user.getIdToken();
-      await apiClient.updateCartItem(token, id.toString(), { status });
+      const item = cartItems.find(item => item.id === id);
+      if (!item) return;
+
+      await handleCartAction('UPDATE_CART', {
+        vendor_id: id,
+        wedding_id: item.wedding_id,
+        category: item.category,
+        price: item.price,
+        booking_date: item.booking_date,
+        status
+      });
       
       // Refresh cart data
       await fetchCartData();

@@ -16,14 +16,16 @@ import { apiClient, handleApiError } from '@/lib/api-client';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 import Image from 'next/image';
-import { type Wedding, type Vendor } from '@/lib/types/ui';
+import { type WeddingProject, type Vendor } from '@/lib/types/ui';
+import { useCart } from '@/lib/hooks/useCart';
 
 export default function VendorDetailPage() {
   const { id } = useParams();
   const { user } = useAuth();
+  const { handleCartAction, loading: cartLoading } = useCart();
   
   const [vendor, setVendor] = useState<Vendor | null>(null);
-  const [weddings, setWeddings] = useState<Wedding[]>([]);
+  const [weddings, setWeddings] = useState<WeddingProject[]>([]);
   const [selectedWedding, setSelectedWedding] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -45,7 +47,7 @@ export default function VendorDetailPage() {
         try {
           const token = await user.getIdToken();
           const weddingsData = await apiClient.getWeddings();
-          const typedWeddingsData = weddingsData as Wedding[];
+          const typedWeddingsData = weddingsData as WeddingProject[];
           setWeddings(typedWeddingsData);
           
           if (typedWeddingsData.length > 0) {
@@ -135,35 +137,19 @@ export default function VendorDetailPage() {
   };
 
   const addToCart = async () => {
-    if (!user) {
-      toast.error('Please log in to add to cart');
-      return;
-    }
-    
-    if (!selectedWedding) {
+    if (!selectedWedding || !vendor) {
       toast.error('Please select a wedding project');
       return;
     }
 
-    try {
-      setActionLoading(true);
-      const token = await user.getIdToken();
-      
-      await apiClient.addToCart({
-        wedding_id: selectedWedding,
-        vendor_id: vendor?.id,
-        category: vendor?.category,
-        price: vendor?.price_min || 0,
-        booking_date: selectedDate || new Date().toISOString(),
-        status: 'selected'
-      });
-      
-      toast.success('Added to cart');
-    } catch (error: any) {
-      handleApiError(error, 'Failed to add to cart');
-    } finally {
-      setActionLoading(false);
-    }
+    await handleCartAction('ADD_TO_CART', {
+      wedding_id: selectedWedding,
+      vendor_id: vendor.id,
+      category: vendor.category,
+      price: vendor.price_min || 0,
+      booking_date: selectedDate || new Date().toISOString(),
+      status: 'selected'
+    });
   };
 
   const formatCurrency = (amount: number) => {
@@ -481,7 +467,7 @@ export default function VendorDetailPage() {
                               className="w-full border border-gray-300 rounded-lg px-3 py-2"
                               disabled={actionLoading}
                             >
-                              {weddings.map((wedding: Wedding) => (
+                              {weddings.map((wedding: WeddingProject) => (
                                 <option key={wedding.id} value={wedding.id}>
                                   {wedding.name} ({new Date(wedding.date).toLocaleDateString()})
                                 </option>

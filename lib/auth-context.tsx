@@ -6,14 +6,6 @@ import { auth } from './firebase';
 import { apiClient } from './api';
 import { type AuthContextType } from '@/lib/types/ui';
 
-interface AuthContextType {
-  user: User | null;
-  userProfile: any | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
-  refreshUserProfile: () => Promise<void>;
-}
-
 const AuthContext = createContext<AuthContextType>({
   user: null,
   userProfile: null,

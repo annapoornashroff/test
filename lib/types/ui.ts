@@ -138,15 +138,60 @@ export interface Toast {
   variant?: 'default' | 'destructive';
 }
 
+// Cart Types
+export interface CartItem {
+  id: number;
+  user_id: number;
+  wedding_id: number;
+  vendor_id: number;
+  category: string;
+  price: number;
+  booking_date: string;
+  status: string;
+  visit_date?: string;
+  notes?: string;
+  created_at: string;
+  vendor?: {
+    id: number;
+    name: string;
+    location: string;
+    rating: number;
+    images: string[];
+    price_min?: number;
+    price_max?: number;
+  };
+}
+
+export interface CartSummary {
+  total_items: number;
+  total_amount: number;
+  status_breakdown: Record<string, number>;
+}
+
+// Vendor Types
+export interface Vendor {
+  id: number;
+  name: string;
+  category: string;
+  city: string;
+  rating: number;
+  review_count: number;
+  price_min: number;
+  price_max: number;
+  images: string[];
+  is_featured: boolean;
+  is_active: boolean;
+  contact_phone: string;
+  contact_email: string;
+}
+
+// Auth Types
 export interface AuthContextType {
   user: any;
+  userProfile: any;
   loading: boolean;
-  error: string | null;
-  signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
-  updateProfile: (data: any) => Promise<void>;
+  refreshUserProfile: () => Promise<void>;
 }
 
 export interface NavigationContextType {
@@ -156,26 +201,6 @@ export interface NavigationContextType {
   goForward: () => void;
   canGoBack: boolean;
   canGoForward: boolean;
-}
-
-export interface Vendor {
-  id: number;
-  name: string;
-  category: string;
-  description?: string;
-  price_min?: number;
-  price_max?: number;
-  rating: number;
-  review_count: number;
-  location: string;
-  images: string[];
-  is_featured: boolean;
-  is_active: boolean;
-  services?: string[];
-  portfolio?: string[];
-  contact_phone?: string;
-  contact_email?: string;
-  contact_website?: string;
 }
 
 export interface WishlistItem {
@@ -232,4 +257,11 @@ export interface PersonalInfo {
   phoneNumber: string;
   email: string;
   location: string;
+}
+
+// Testimonial Types
+export interface BusinessRating {
+  rating: number;
+  total_reviews: number;
+  business_name: string;
 } 

@@ -252,6 +252,27 @@ Instead of SendGrid, we now use Gmail SMTP for email notifications:
    - Search and filter functionality
    - Responsive design with mobile optimization
 
+### 📝 TypeScript Guidelines
+
+#### Type Definitions
+- All interfaces and types MUST be defined in `lib/types/ui.ts`
+- No individual file should contain type definitions
+- This ensures consistency and prevents duplication
+- Makes it easier to maintain and update types across the application
+
+#### Progress
+- ✅ Moved Vendor interface to common types
+- ✅ Moved WeddingProject interface to common types
+- ✅ Moved Review interface to common types
+- ✅ Moved AuthContextType to common types
+- ✅ Moved NavigationContextType to common types
+- ✅ Moved WishlistItem interface to common types
+- ✅ Moved ApiResponse interface to common types
+- ✅ Moved CategoriesResponse interface to common types
+- ✅ Moved CitiesResponse interface to common types
+- ✅ Moved FamilyMember interface to common types
+- ✅ Moved PersonalInfo interface to common types
+
 ### 🔄 Recent Updates
 
 #### Reviews Page Enhancements (Latest)
