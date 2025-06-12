@@ -8,6 +8,7 @@ import {
   ReviewStats 
 } from '@/lib/types/api';
 import { ApiResponse } from '@/lib/types/ui';
+import axios from 'axios'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -29,6 +30,17 @@ export interface Relationship {
   expires_at?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface ApiClient {
+  get: (endpoint: string) => Promise<{ data: any }>
+}
+
+export const apiClient: ApiClient = {
+  get: async (endpoint: string) => {
+    const response = await axios.get(`/api${endpoint}`)
+    return response.data
+  }
 }
 
 export class ApiClient {

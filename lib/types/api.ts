@@ -132,20 +132,19 @@ export interface CartItemResponse extends CartItemData {
 
 // Review Types
 export interface ReviewData {
-  name: string;
-  city: string;
+  author_name: string;
+  author_url: string;
+  profile_photo_url: string;
   rating: number;
-  comment: string;
-  image?: string;
+  text: string;
+  relative_time_description: string;
+  time: number;
   wedding_date: string;
-  source: string;
-  is_wedding_related?: boolean;
+  city: string;
 }
 
 export interface ReviewResponse extends ReviewData {
-  id: number;
-  created_at: string;
-  relative_time?: string;
+  id: string;
 }
 
 export interface ReviewsResponse {

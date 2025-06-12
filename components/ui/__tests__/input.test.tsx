@@ -13,14 +13,16 @@ describe('Input', () => {
   })
 
   it('handles different input types', () => {
-    const { rerender } = render(<Input type="text" />)
-    expect(screen.getByRole('textbox')).toHaveAttribute('type', 'text')
+    const { rerender } = render(<Input type="text" placeholder="Text input" />)
+    expect(screen.getByPlaceholderText('Text input')).toHaveAttribute('type', 'text')
 
-    rerender(<Input type="password" />)
-    expect(screen.getByRole('textbox')).toHaveAttribute('type', 'password')
+    rerender(<Input type="password" placeholder="Password input" />)
+    const passwordInput = screen.getByPlaceholderText('Password input')
+    expect(passwordInput).toHaveAttribute('type', 'password')
 
-    rerender(<Input type="email" />)
-    expect(screen.getByRole('textbox')).toHaveAttribute('type', 'email')
+    rerender(<Input type="email" placeholder="Email input" />)
+    const emailInput = screen.getByPlaceholderText('Email input')
+    expect(emailInput).toHaveAttribute('type', 'email')
   })
 
   it('handles user input', async () => {
@@ -31,26 +33,27 @@ describe('Input', () => {
   })
 
   it('can be disabled', () => {
-    render(<Input disabled />)
-    const input = screen.getByRole('textbox')
+    render(<Input disabled placeholder="Disabled input" />)
+    const input = screen.getByPlaceholderText('Disabled input')
     expect(input).toBeDisabled()
     expect(input).toHaveClass('disabled:cursor-not-allowed')
   })
 
   it('forwards ref correctly', () => {
     const ref = React.createRef<HTMLInputElement>()
-    render(<Input ref={ref} />)
+    render(<Input ref={ref} placeholder="Ref input" />)
     expect(ref.current).toBeInstanceOf(HTMLInputElement)
   })
 
   it('applies custom className', () => {
-    render(<Input className="custom-class" />)
-    expect(screen.getByRole('textbox')).toHaveClass('custom-class')
+    render(<Input className="custom-class" placeholder="Custom class input" />)
+    const input = screen.getByPlaceholderText('Custom class input')
+    expect(input).toHaveClass('custom-class')
   })
 
   it('handles file input type', () => {
-    render(<Input type="file" />)
-    const input = screen.getByRole('textbox')
+    render(<Input type="file" placeholder="Choose a file" />)
+    const input = screen.getByPlaceholderText('Choose a file')
     expect(input).toHaveAttribute('type', 'file')
     expect(input).toHaveClass('file:border-0 file:bg-transparent')
   })

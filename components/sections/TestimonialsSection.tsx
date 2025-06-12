@@ -1,171 +1,199 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { Star, Quote, ExternalLink } from 'lucide-react';
-import { apiClient } from '@/lib/api';
+import { Star, Quote, ExternalLink, ChevronLeft, ChevronRight } from 'lucide-react';
+import { apiClient } from '@/lib/api-client';
 import Image from 'next/image';
-import { type ReviewResponse, type BusinessRating } from '@/lib/types/api';
+import { ReviewResponse, BusinessRating } from '@/lib/types/api';
 import { ApiErrorBoundary } from '@/components/ui/api-error-boundary';
+import { ReviewCard } from '@/components/ui/review-card';
+import { GoogleReviewsBadge } from '@/components/ui/google-reviews-badge';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 
 export default function TestimonialsSection() {
   const [reviews, setReviews] = useState<ReviewResponse[]>([]);
   const [businessRating, setBusinessRating] = useState<BusinessRating | null>(null);
-  const [currentReview, setCurrentReview] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    fetchReviews();
-  }, []);
-
-  useEffect(() => {
-    if (reviews.length > 0) {
-      const interval = setInterval(() =>
-        setCurrentReview((prev) => (prev + 1) % Math.min(reviews.length, 5)),
-      3000);
-      return () => clearInterval(interval);
-    }
-  }, [reviews]);
-
-  const fetchReviews = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      // Fetch featured reviews and business rating in parallel
-      const [reviewsData, ratingData] = await Promise.all([
-        apiClient.getFeaturedReviews(),
-        apiClient.getBusinessRating()
-      ]);
-      
-      setReviews(reviewsData as ReviewResponse[]);
-      setBusinessRating(ratingData as BusinessRating);
-    } catch (error: any) {
-      console.error('Error fetching reviews:', error);
-      setError(error.message || 'Failed to load testimonials');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [error, setError] = useState<string | null>(null);
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const { toast } = useToast();
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-IN', {
-        year: 'numeric',
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original string if date is invalid
+      }
+      return date.toLocaleDateString('en-US', {
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
+        year: 'numeric'
       });
-    } catch (e) {
+    } catch {
       return dateString;
     }
   };
 
-  return (
-    <ApiErrorBoundary 
-      onReset={fetchReviews}
-      errorMessage={error}
-    >
+  const handleError = useCallback((error: any) => {
+    console.error('Error fetching reviews:', error);
+    setError(error?.message || 'Failed to load testimonials');
+    setLoading(false);
+    toast({
+      title: 'Error',
+      description: 'Failed to load reviews. Please try again later.',
+      variant: 'destructive'
+    });
+  }, [toast]);
+
+  const fetchReviews = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiClient.get('/api/reviews');
+      setReviews(response.data.reviews);
+      setBusinessRating(response.data.business_rating);
+      setLoading(false);
+    } catch (error) {
+      handleError(error);
+    }
+  }, [handleError]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
+
+  useEffect(() => {
+    if (reviews.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [reviews]);
+
+  const handlePrevious = () => {
+    setCurrentReviewIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+  };
+
+  const handleNext = () => {
+    setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
+  };
+
+  const handleReviewClick = (index: number) => {
+    setCurrentReviewIndex(index);
+  };
+
+  if (loading) {
+    return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
               What Our Couples Say
             </h2>
-            {businessRating && (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`w-5 h-5 ${
-                        i < Math.floor(businessRating.rating) 
-                          ? 'text-yellow-500 fill-current' 
-                          : i < businessRating.rating 
-                            ? 'text-yellow-500 fill-current opacity-50' 
-                            : 'text-gray-300'
-                      }`} 
-                    />
-                  ))}
-                </div>
-                <span className="text-gray-600">
-                  {businessRating.rating.toFixed(1)} ({businessRating.total_reviews.toLocaleString()} reviews)
-                </span>
-                <a 
-                  href={`https://search.google.com/local/reviews?placeid=${businessRating.place_id || ''}`}
-                  target="_blank" 
+          </div>
+          <div className="flex justify-center items-center py-12">
+            <div data-testid="loading-spinner" className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
+              What Our Couples Say
+            </h2>
+          </div>
+          <div className="text-center py-12">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button
+              onClick={fetchReviews}
+              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-16 bg-gray-50">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-serif font-bold text-gray-900 mb-4">
+            What Our Couples Say
+          </h2>
+          {businessRating && (
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <GoogleReviewsBadge
+                rating={businessRating.rating}
+                totalReviews={businessRating.total_reviews}
+                businessName={businessRating.business_name}
+              />
+              {businessRating.place_id && (
+                <a
+                  href={`https://www.google.com/maps/place/?q=place_id:${businessRating.place_id}`}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="text-primary hover:underline flex items-center"
+                  className="text-blue-600 hover:underline text-sm mt-1"
+                  aria-label="View on Google"
                 >
-                  <ExternalLink className="w-4 h-4 mr-1" />
                   View on Google
                 </a>
-              </div>
-            )}
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <LoadingSpinner size="lg" />
-            </div>
-          ) : (
-            <div className="relative">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {reviews.map((review, index) => (
-                  <Card 
-                    key={review.id}
-                    className={`transition-all duration-500 ${
-                      index === currentReview ? 'opacity-100 transform scale-100' : 'opacity-0 transform scale-95 absolute'
-                    }`}
-                  >
-                    <CardContent className="p-6">
-                      {/* Rating */}
-                      <div className="flex items-center space-x-1 mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            className={`w-4 h-4 ${i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`} 
-                          />
-                        ))}
-                        {review.relative_time && (
-                          <span className="text-xs text-gray-500 ml-2">
-                            {review.relative_time}
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* Comment */}
-                      <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                        &quot;{review.comment}&quot;
-                      </p>
-                      
-                      {/* Wedding Date */}
-                      <p className="text-xs text-gray-500">
-                        Wedding: {formatDate(review.wedding_date)}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-
-              {/* Pagination Dots */}
-              <div className="flex justify-center space-x-2 mt-6">
-                {[...Array(Math.min(reviews.length, 5))].map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentReview(index)}
-                    className={`w-3 h-3 rounded-full transition-all ${
-                      index === currentReview ? 'bg-primary' : 'bg-primary/30'
-                    }`}
-                    aria-label={`Go to review ${index + 1}`}
-                  />
-                ))}
-              </div>
+              )}
             </div>
           )}
         </div>
-      </section>
-    </ApiErrorBoundary>
+        <div className="relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reviews.map((review, index) => (
+              <div
+                key={review.id}
+                className={`transition-all duration-500 ${
+                  index === currentReviewIndex
+                    ? 'opacity-100 transform scale-100'
+                    : 'opacity-0 transform scale-95 absolute'
+                }`}
+              >
+                <ReviewCard
+                  review={review}
+                  isActive={index === currentReviewIndex}
+                />
+              </div>
+            ))}
+          </div>
+          {reviews.length > 1 && (
+            <div className="flex justify-center mt-8 space-x-4">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handlePrevious}
+                aria-label="Previous review"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleNext}
+                aria-label="Next review"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
