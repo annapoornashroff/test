@@ -2,26 +2,28 @@ import { ReviewResponse, BusinessRating } from './types/api'
 
 export const mockReviews: ReviewResponse[] = [
   {
-    id: 1,
-    name: 'John Doe',
-    city: 'New York',
+    id: '1',
+    author_name: 'John Doe',
+    author_url: 'https://example.com/john',
+    profile_photo_url: 'https://example.com/photo1.jpg',
     rating: 5,
-    comment: 'Amazing experience!',
+    text: 'Amazing experience!',
+    relative_time_description: '2 months ago',
+    time: 1615000000,
     wedding_date: '2024-03-15',
-    source: 'google_places',
-    created_at: '2024-03-01T00:00:00Z',
-    relative_time: '2 days ago'
+    city: 'New York'
   },
   {
-    id: 2,
-    name: 'Jane Smith',
-    city: 'Los Angeles',
+    id: '2',
+    author_name: 'Jane Smith',
+    author_url: 'https://example.com/jane',
+    profile_photo_url: 'https://example.com/photo2.jpg',
     rating: 4,
-    comment: 'Great service!',
+    text: 'Great service!',
+    relative_time_description: '1 month ago',
+    time: 1616000000,
     wedding_date: '2024-03-16',
-    source: 'google_places',
-    created_at: '2024-03-03T00:00:00Z',
-    relative_time: '1 day ago'
+    city: 'Los Angeles'
   }
 ]
 

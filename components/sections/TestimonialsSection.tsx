@@ -13,7 +13,7 @@ import { GoogleReviewsBadge } from '@/components/ui/google-reviews-badge';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 
-export default function TestimonialsSection() {
+function TestimonialsSectionContent() {
   const [reviews, setReviews] = useState<ReviewResponse[]>([]);
   const [businessRating, setBusinessRating] = useState<BusinessRating | null>(null);
   const [loading, setLoading] = useState(true);
@@ -195,5 +195,13 @@ export default function TestimonialsSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function TestimonialsSection() {
+  return (
+    <ApiErrorBoundary>
+      <TestimonialsSectionContent />
+    </ApiErrorBoundary>
   );
 }

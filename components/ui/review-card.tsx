@@ -61,7 +61,7 @@ export function ReviewCard({ review, isActive = false, className }: ReviewCardPr
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-semibold truncate">{review.author_name}</h4>
+                <h4 className="font-semibold truncate" data-testid="reviewer-name" aria-label={review.author_name || ''}>{review.author_name}</h4>
                 <div className="flex items-center text-sm text-gray-500">
                   <span>{review.city}</span>
                   {review.relative_time_description && (
