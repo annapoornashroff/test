@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
+
+    TEST_FIREBASE_TOKEN: Optional[str] = None
     
     model_config = ConfigDict(env_file=".env")
 
