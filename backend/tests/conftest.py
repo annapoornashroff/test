@@ -61,14 +61,21 @@ def client():
 
 @pytest.fixture(scope="session")
 def firebase_credentials():
-    """Get Firebase credentials from environment"""
+    """Get Firebase credentials from environment or file"""
     creds_json = os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY')
     if not creds_json:
         raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set")
+    
     try:
+        # First try to parse as JSON string
         return json.loads(creds_json)
-    except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in FIREBASE_SERVICE_ACCOUNT_KEY: {str(e)}")
+    except json.JSONDecodeError:
+        # If not JSON, try to read as file
+        try:
+            with open(creds_json, 'r') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            raise ValueError(f"FIREBASE_SERVICE_ACCOUNT_KEY must be either a valid JSON string or a path to a valid JSON file: {str(e)}")
 
 @pytest.fixture(scope="session")
 def mock_firebase_token():
