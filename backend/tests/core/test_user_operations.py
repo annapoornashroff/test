@@ -13,13 +13,13 @@ def test_create_user(test_db):
     """Test user creation in database"""
     logger.info("=== Testing User Creation ===")
     
-    # Test data
+    # Test data with unique identifiers
     test_user = {
-        "phone_number": "+919999999999",  # Unique phone number
+        "phone_number": "+919999999998",  # Unique phone number
         "name": "Test User",
-        "email": "test@example.com",
+        "email": "test998@example.com",  # Unique email
         "city": "Test City",
-        "firebase_uid": "test-uid",
+        "firebase_uid": "test-uid-998",  # Unique firebase_uid
         "is_verified": True
     }
     
@@ -47,6 +47,12 @@ def test_create_user(test_db):
         test_db.rollback()
         logger.error(f"User creation failed: {str(e)}")
         raise
+    finally:
+        # Clean up the test user
+        if 'user' in locals():
+            test_db.delete(user)
+            test_db.commit()
+            logger.info("Test user cleaned up")
 
 @pytest.mark.delete
 def test_delete_user(test_db):
@@ -96,9 +102,11 @@ def test_cleanup_test_users(test_db):
     logger.info("=== Cleaning Up Test Users ===")
     
     try:
-        # Find all test users (those with phone numbers containing the test pattern)
+        # Find all test users (those with test identifiers)
         test_users = test_db.query(User).filter(
-            User.phone_number.like("+919999999999_%")
+            (User.phone_number.like("+91999999999%")) |
+            (User.firebase_uid.like("test-uid%")) |
+            (User.email.like("test%@example.com"))
         ).all()
         
         if not test_users:
@@ -109,7 +117,7 @@ def test_cleanup_test_users(test_db):
         
         # Delete each test user
         for user in test_users:
-            logger.info(f"Deleting test user: {user.id} - {user.phone_number}")
+            logger.info(f"Deleting test user: {user.id} - {user.phone_number} - {user.firebase_uid} - {user.email}")
             test_db.delete(user)
         
         test_db.commit()

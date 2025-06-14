@@ -24,13 +24,13 @@ def test_user_model_operations(test_db):
     """Test User model CRUD operations"""
     logger.info("Testing User model operations...")
     
-    # Test data
+    # Test data with unique identifiers
     test_user = {
-        "phone_number": "+919999999999",
+        "phone_number": "+919999999997",  # Unique phone number
         "name": "Test User",
-        "email": "test@example.com",
+        "email": "test997@example.com",  # Unique email
         "city": "Test City",
-        "firebase_uid": "test-uid",
+        "firebase_uid": "test-uid-997",  # Unique firebase_uid
         "is_verified": True
     }
     
@@ -73,18 +73,24 @@ def test_user_model_operations(test_db):
         test_db.rollback()
         logger.error(f"Database operation failed: {str(e)}")
         raise
+    finally:
+        # Clean up
+        if 'user' in locals():
+            test_db.delete(user)
+            test_db.commit()
+            logger.info("Test user cleaned up")
 
 def test_database_transactions(test_db):
     """Test database transaction handling"""
     logger.info("Testing database transactions...")
     
-    # Test data
+    # Test data with unique identifiers
     test_user = {
-        "phone_number": "+919999999999",
+        "phone_number": "+919999999996",  # Unique phone number
         "name": "Test User",
-        "email": "test@example.com",
+        "email": "test996@example.com",  # Unique email
         "city": "Test City",
-        "firebase_uid": "test-uid",
+        "firebase_uid": "test-uid-996",  # Unique firebase_uid
         "is_verified": True
     }
     
@@ -112,13 +118,19 @@ def test_database_transactions(test_db):
         test_db.rollback()
         logger.error(f"Transaction test failed: {str(e)}")
         raise
+    finally:
+        # Clean up
+        if 'user' in locals():
+            test_db.delete(user)
+            test_db.commit()
+            logger.info("Test user cleaned up")
 
 @pytest.mark.integration
 def test_database_concurrent_operations(test_db):
     """Test concurrent database operations"""
     logger.info("Testing concurrent database operations...")
     
-    # Test data
+    # Test data with unique identifiers
     test_users = [
         {
             "phone_number": f"+91999999999{i}",
@@ -178,23 +190,32 @@ def test_database_concurrent_operations(test_db):
         test_db.rollback()
         logger.error(f"Concurrent operations test failed: {str(e)}")
         raise
+    finally:
+        # Clean up any remaining users
+        if 'users' in locals():
+            for user in users:
+                test_db.delete(user)
+            test_db.commit()
+            logger.info("Test users cleaned up")
 
 def test_database_constraints(test_db):
     """Test database constraints"""
     logger.info("Testing database constraints...")
     
+    # Test data with unique identifiers
+    test_user = {
+        "phone_number": "+919999999995",  # Unique phone number
+        "name": "Test User",
+        "email": "test995@example.com",  # Unique email
+        "city": "Test City",
+        "firebase_uid": "test-uid-995",  # Unique firebase_uid
+        "is_verified": True
+    }
+    
+    # Test unique phone number constraint
+    logger.info("Testing unique phone number constraint...")
+    
     try:
-        # Test unique phone number constraint
-        logger.info("Testing unique phone number constraint...")
-        test_user = {
-            "phone_number": "+919999999999",
-            "name": "Test User",
-            "email": "test@example.com",
-            "city": "Test City",
-            "firebase_uid": "test-uid",
-            "is_verified": True
-        }
-        
         # Create first user
         user1 = User(**test_user)
         test_db.add(user1)
@@ -203,18 +224,23 @@ def test_database_constraints(test_db):
         # Try to create second user with same phone number
         user2 = User(**test_user)
         test_db.add(user2)
-        try:
-            test_db.commit()
-            assert False, "Should have raised an exception for duplicate phone number"
-        except SQLAlchemyError:
-            test_db.rollback()
-            logger.info("Unique phone number constraint test passed")
         
-        # Clean up
-        test_db.delete(user1)
-        test_db.commit()
+        # This should raise a UniqueViolation
+        with pytest.raises(SQLAlchemyError) as exc_info:
+            test_db.commit()
+        
+        # Verify it's a unique constraint violation
+        assert "unique constraint" in str(exc_info.value).lower()
+        test_db.rollback()
+        logger.info("Unique phone number constraint test passed")
         
     except SQLAlchemyError as e:
         test_db.rollback()
         logger.error(f"Constraint test failed: {str(e)}")
-        raise 
+        raise
+    finally:
+        # Clean up
+        if 'user1' in locals():
+            test_db.delete(user1)
+            test_db.commit()
+            logger.info("Test user cleaned up")
