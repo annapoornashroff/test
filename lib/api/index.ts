@@ -3,7 +3,7 @@ import {
   ApiError,
   WeddingData,
   WeddingResponse,
-  UserData,
+  UserProfile,
   UserResponse,
   TokenResponse,
   VendorData,
@@ -67,7 +67,7 @@ export class ApiClient {
   }
 
   // Authentication
-  async createUserProfile(token: string, data: UserData): Promise<UserResponse> {
+  async createUserProfile(token: string, data: UserProfile): Promise<UserResponse> {
     return this.request('/auth/firebase-signup', {
       method: 'POST',
       headers: this.getAuthHeaders(token),
@@ -81,7 +81,7 @@ export class ApiClient {
     });
   }
 
-  async updateUserProfile(token: string, data: Partial<UserData>): Promise<UserResponse> {
+  async updateUserProfile(token: string, data: Partial<UserProfile>): Promise<UserResponse> {
     return this.request('/users/me', {
       method: 'PUT',
       headers: this.getAuthHeaders(token),

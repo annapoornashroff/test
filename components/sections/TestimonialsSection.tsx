@@ -12,6 +12,7 @@ import { ReviewCard } from '@/components/ui/review-card';
 import { GoogleReviewsBadge } from '@/components/ui/google-reviews-badge';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/hooks/useAuth';
 
 function TestimonialsSectionContent() {
   const [reviews, setReviews] = useState<ReviewResponse[]>([]);
@@ -19,13 +20,20 @@ function TestimonialsSectionContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const [isClient, setIsClient] = useState(false);
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
+
+  // Ensure client-side rendering matches server-side
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) {
-        return dateString; // Return original string if date is invalid
+        return dateString;
       }
       return date.toLocaleDateString('en-US', {
         month: 'long',
@@ -41,20 +49,28 @@ function TestimonialsSectionContent() {
     console.error('Error fetching reviews:', error);
     setError(error?.message || 'Failed to load testimonials');
     setLoading(false);
-    toast({
-      title: 'Error',
-      description: 'Failed to load reviews. Please try again later.',
-      variant: 'destructive'
-    });
-  }, [toast]);
+    if (isClient) {
+      toast({
+        title: 'Error',
+        description: 'Failed to load reviews. Please try again later.',
+        variant: 'destructive'
+      });
+    }
+  }, [toast, isClient]);
 
   const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiClient.get('/api/reviews');
-      setReviews(response.data.reviews);
-      setBusinessRating(response.data.business_rating);
+      
+      // Fetch featured reviews and business rating
+      const [featuredReviews, businessRatingResponse] = await Promise.all([
+        apiClient.getFeaturedReviews(),
+        apiClient.getBusinessRating()
+      ]);
+      
+      setReviews(featuredReviews);
+      setBusinessRating(businessRatingResponse);
       setLoading(false);
     } catch (error) {
       handleError(error);
@@ -62,17 +78,21 @@ function TestimonialsSectionContent() {
   }, [handleError]);
 
   useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
+    // Only fetch reviews when client is ready and auth is not loading
+    // This prevents the API calls during the authentication process
+    if (isClient && !authLoading) {
+      fetchReviews();
+    }
+  }, [fetchReviews, isClient, authLoading]);
 
   useEffect(() => {
-    if (reviews.length > 1) {
+    if (isClient && reviews.length > 1) {
       const interval = setInterval(() => {
         setCurrentReviewIndex((prev) => (prev + 1) % reviews.length);
       }, 5000);
       return () => clearInterval(interval);
     }
-  }, [reviews]);
+  }, [reviews, isClient]);
 
   const handlePrevious = () => {
     setCurrentReviewIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
@@ -86,7 +106,8 @@ function TestimonialsSectionContent() {
     setCurrentReviewIndex(index);
   };
 
-  if (loading) {
+  // Show static content during SSR and initial hydration
+  if (!isClient || loading) {
     return (
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
@@ -95,9 +116,11 @@ function TestimonialsSectionContent() {
               What Our Couples Say
             </h2>
           </div>
-          <div className="flex justify-center items-center py-12">
-            <div data-testid="loading-spinner" className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          </div>
+          {isClient && (
+            <div className="flex justify-center items-center py-12">
+              <div data-testid="loading-spinner" className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          )}
         </div>
       </section>
     );

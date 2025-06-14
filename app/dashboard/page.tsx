@@ -10,10 +10,12 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { type WeddingProject } from '@/lib/types/ui';
-import { type User } from '@/lib/types';
+import { type UserProfile } from '@/lib/types/api';
 
 const quickActions = [
   { icon: ShoppingCart, label: 'Browse Vendors', href: '/vendors', color: 'bg-blue-500' },
@@ -24,20 +26,30 @@ const quickActions = [
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const { user: firebaseUser } = useAuth();
+  useProtectedRoute();
+  
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [weddingProjects, setWeddingProjects] = useState<WeddingProject[]>([]);
   const [activeProject, setActiveProject] = useState<WeddingProject | null>(null);
   const [loading, setLoading] = useState(true);
   const [projectsLoading, setProjectsLoading] = useState(false);
 
   useEffect(() => {
-    loadDashboardData();
-  }, []);
+    if (firebaseUser) {
+      loadDashboardData();
+    }
+  }, [firebaseUser]);
 
   const loadDashboardData = async () => {
+    if (!firebaseUser) return;
+    
     await withLoading(async () => {
+      const token = await firebaseUser.getIdToken();
+      apiClient.setToken(token);
+      
       // Load user data
-      const userData = (await apiClient.getCurrentUser()) as User;
+      const userData = (await apiClient.getCurrentUser()) as UserProfile;
       setUser(userData);
 
       // Load wedding projects
@@ -300,7 +312,7 @@ export default function DashboardPage() {
                 <CardContent className="space-y-3">
                   <div className="flex items-center space-x-3">
                     <Phone className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm">{user.phoneNumber}</span>
+                    <span className="text-sm">{user.phone_number}</span>
                   </div>
                   {user.email && (
                     <div className="flex items-center space-x-3">

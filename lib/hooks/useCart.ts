@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
 import { apiClient } from '../api';
@@ -8,8 +8,14 @@ import { toast } from 'react-hot-toast';
 
 export const useCart = () => {
   const [loading, setLoading] = useState(false);
+  const [hasPendingActions, setHasPendingActions] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+
+  // Check for pending actions only on client side
+  useEffect(() => {
+    setHasPendingActions(cartQueue.hasPendingActions());
+  }, []);
 
   const handleCartAction = async (action: 'ADD_TO_CART' | 'REMOVE_FROM_CART' | 'UPDATE_CART', data: CartItemData) => {
     if (!user) {
@@ -71,6 +77,6 @@ export const useCart = () => {
     loading,
     handleCartAction,
     processQueuedActions,
-    hasPendingActions: cartQueue.hasPendingActions()
+    hasPendingActions
   };
-}; 
+};

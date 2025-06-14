@@ -19,6 +19,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { ApiClient } from '@/lib/api-client';
 import { Relationship } from '@/lib/api-client';
 
@@ -42,6 +44,8 @@ const PRIVACY_LEVELS = [
 ];
 
 export default function RelationshipsPage() {
+  const { user } = useAuth();
+  useProtectedRoute();
   const router = useRouter();
   const [relationships, setRelationships] = useState<Relationship[]>([]);
   const [pendingRelationships, setPendingRelationships] = useState<Relationship[]>([]);
@@ -369,4 +373,4 @@ export default function RelationshipsPage() {
       </Dialog>
     </div>
   );
-} 
+}

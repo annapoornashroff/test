@@ -5,10 +5,9 @@ import {
   ReviewsResponse, 
   ReviewResponse, 
   BusinessRating, 
-  ReviewStats 
+  ReviewStats,
+  UserProfile
 } from '@/lib/types/api';
-import { ApiResponse } from '@/lib/types/ui';
-import axios from 'axios'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
@@ -30,17 +29,6 @@ export interface Relationship {
   expires_at?: string;
   created_at: string;
   updated_at: string;
-}
-
-export interface ApiClient {
-  get: (endpoint: string) => Promise<{ data: any }>
-}
-
-export const apiClient: ApiClient = {
-  get: async (endpoint: string) => {
-    const response = await axios.get(`/api${endpoint}`)
-    return response.data
-  }
 }
 
 export class ApiClient {
@@ -69,6 +57,11 @@ export class ApiClient {
     }
   }
 
+  private getAuthHeaders(token?: string) {
+    const authToken = token || this.token;
+    return authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+  }
+
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const config: RequestInit = {
@@ -95,8 +88,8 @@ export class ApiClient {
         if (response.status === 401) {
           this.clearToken();
           toast.error('Session expired. Please login again.');
-          // Redirect to login page
-          if (typeof window !== 'undefined') {
+          // Only redirect if it's not a user creation endpoint to prevent infinite loop
+          if (typeof window !== 'undefined' && !endpoint.includes('/auth/firebase-signup')) {
             window.location.href = '/login';
           }
         } else if (response.status >= 500) {
@@ -127,31 +120,13 @@ export class ApiClient {
     }
   }
 
-  // Authentication
-  async login(phoneNumber: string) {
-    return this.request('/auth/login', {
+  // Authentication - MERGED FROM api.ts
+  async createUserProfile(data: Omit<UserProfile, 'phone_number'>) {
+    // Remove phone_number from the request body since it should come from Firebase token
+    const { phone_number, ...profileData } = data as any;
+    return this.request('/auth/firebase-signup', {
       method: 'POST',
-      body: JSON.stringify({ phone_number: phoneNumber }),
-    });
-  }
-
-  async verifyOTP(phoneNumber: string, otp: string) {
-    const response = await this.request<{ access_token: string; token_type: string }>('/auth/verify-otp', {
-      method: 'POST',
-      body: JSON.stringify({ phone_number: phoneNumber, otp }),
-    });
-    
-    if (response.access_token) {
-      this.setToken(response.access_token);
-    }
-    
-    return response;
-  }
-
-  async signup(userData: any) {
-    return this.request('/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify(userData),
+      body: JSON.stringify(profileData),
     });
   }
 
@@ -165,6 +140,11 @@ export class ApiClient {
       method: 'PUT',
       body: JSON.stringify(userData),
     });
+  }
+
+  // MERGED: Alternative method name from api.ts for consistency
+  async updateUserProfile(data: any) {
+    return this.updateUser(data);
   }
 
   async deleteUser() {

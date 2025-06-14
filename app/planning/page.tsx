@@ -8,6 +8,7 @@ import { Calendar, MapPin, Users, IndianRupee, Heart, ArrowRight, Loader2 } from
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient } from '@/lib/api';
 import { handleApiError } from '@/lib/api-client';
 import { WeddingData } from '@/lib/types/api';
@@ -24,6 +25,8 @@ const categories = [
 export default function PlanningPage() {
   const router = useRouter();
   const { user } = useAuth();
+  useProtectedRoute();
+  
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState<WeddingData>({

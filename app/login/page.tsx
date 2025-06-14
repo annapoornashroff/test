@@ -7,13 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Phone, Lock, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { apiClient, handleApiError } from '@/lib/api-client';
+import { PhoneAuthService } from '@/lib/firebase';
+import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/hooks/useCart';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
   const { processQueuedActions } = useCart();
   const [formData, setFormData] = useState({
     phoneNumber: '',
@@ -22,6 +24,9 @@ export default function LoginPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
+  const [verificationId, setVerificationId] = useState('');
+  
+  const phoneAuthService = new PhoneAuthService();
 
   const sendOTP = async () => {
     if (!formData.phoneNumber) {
@@ -31,11 +36,12 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      await apiClient.login(formData.phoneNumber);
+      const verificationId = await phoneAuthService.sendOTP(formData.phoneNumber);
+      setVerificationId(verificationId);
       setOtpSent(true);
       toast.success('OTP sent successfully!');
-    } catch (error) {
-      handleApiError(error, 'Failed to send OTP');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send OTP');
     } finally {
       setLoading(false);
     }
@@ -49,7 +55,7 @@ export default function LoginPage() {
 
     setOtpLoading(true);
     try {
-      await apiClient.verifyOTP(formData.phoneNumber, formData.otp);
+      await phoneAuthService.verifyOTP(verificationId, formData.otp);
       
       // Process any queued cart actions
       await processQueuedActions();
@@ -63,8 +69,8 @@ export default function LoginPage() {
       }
       
       toast.success('Login successful!');
-    } catch (error) {
-      handleApiError(error, 'Invalid OTP. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Invalid OTP. Please try again.');
     } finally {
       setOtpLoading(false);
     }
@@ -73,10 +79,11 @@ export default function LoginPage() {
   const resendOTP = async () => {
     setLoading(true);
     try {
-      await apiClient.login(formData.phoneNumber);
+      const newVerificationId = await phoneAuthService.sendOTP(formData.phoneNumber);
+      setVerificationId(newVerificationId);
       toast.success('OTP resent successfully!');
-    } catch (error) {
-      handleApiError(error, 'Failed to resend OTP');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to resend OTP');
     } finally {
       setLoading(false);
     }
@@ -140,6 +147,13 @@ export default function LoginPage() {
               <>
                 <div className="text-center text-sm text-gray-600 mb-4">
                   OTP sent to {formData.phoneNumber}
+                  <button 
+                    onClick={resendOTP}
+                    disabled={loading}
+                    className="ml-2 text-primary hover:text-primary-600 underline"
+                  >
+                    {loading ? 'Resending...' : 'Resend OTP'}
+                  </button>
                 </div>
 
                 <div>
@@ -188,6 +202,8 @@ export default function LoginPage() {
               </>
             )}
           </CardContent>
+          {/* reCAPTCHA container - required for phone authentication */}
+          <div id="recaptcha-container" className="hidden"></div>
         </Card>
       </main>
     </div>

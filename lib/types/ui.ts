@@ -6,6 +6,7 @@ import { badgeVariants } from '@/lib/styles/badge';
 import { VariantProps, cva } from 'class-variance-authority';
 import * as React from 'react';
 import { type ReviewResponse } from './api';
+import { UserProfile } from './api';
 
 // Loading Components
 export interface LoadingProps {
@@ -202,7 +203,7 @@ export interface Vendor {
 // Auth Types
 export interface AuthContextType {
   user: any;
-  userProfile: any;
+  userProfile: UserProfile | null;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshUserProfile: () => Promise<void>;
