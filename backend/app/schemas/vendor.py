@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from decimal import Decimal
@@ -49,5 +49,4 @@ class VendorResponse(VendorBase):
     is_featured: bool
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

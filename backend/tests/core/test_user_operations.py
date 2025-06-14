@@ -15,7 +15,7 @@ def test_create_user(test_db):
     
     # Test data
     test_user = {
-        "phone_number": f"+919999999999_{datetime.now().strftime('%Y%m%d%H%M%S')}",  # Unique phone number
+        "phone_number": "+919999999999",  # Unique phone number
         "name": "Test User",
         "email": "test@example.com",
         "city": "Test City",
@@ -43,9 +43,6 @@ def test_create_user(test_db):
         logger.info(f"User created successfully with ID: {user.id}")
         logger.info(f"User data: {user.__dict__}")
         
-        # Return the created user for potential cleanup
-        return user
-        
     except SQLAlchemyError as e:
         test_db.rollback()
         logger.error(f"User creation failed: {str(e)}")
@@ -58,7 +55,7 @@ def test_delete_user(test_db):
     
     # First create a user to delete
     test_user = {
-        "phone_number": f"+919999999999_{datetime.now().strftime('%Y%m%d%H%M%S')}",  # Unique phone number
+        "phone_number": "+919999999991",  # Unique phone number
         "name": "Test User to Delete",
         "email": "delete@example.com",
         "city": "Test City",

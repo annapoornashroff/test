@@ -31,26 +31,27 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
 # Create test database URL by appending _test to the database name
-TEST_DATABASE_URL = DATABASE_URL.rsplit('/', 1)[0] + '/test_' + DATABASE_URL.rsplit('/', 1)[1]
 
 @pytest.fixture(scope="session")
 def test_engine():
     """Create a test database engine"""
-    logging.info(f"Creating test database engine with URL: {TEST_DATABASE_URL}")
-    engine = create_engine(TEST_DATABASE_URL)
-    Base.metadata.create_all(bind=engine)
+    engine = create_engine(DATABASE_URL)
     yield engine
-    Base.metadata.drop_all(bind=engine)
 
 @pytest.fixture(scope="function")
 def test_db(test_engine):
-    """Create a test database session"""
+    """Create a test database session with transaction rollback"""
     logging.info("Creating test database session...")
     TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
     db = TestingSessionLocal()
+    # Start a transaction
+    transaction = db.begin()
     try:
         yield db
     finally:
+        # Only rollback if transaction is still active
+        if transaction.is_active:
+            transaction.rollback()
         db.close()
 
 @pytest.fixture(scope="session")
