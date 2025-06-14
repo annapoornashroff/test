@@ -8,7 +8,7 @@ import os
 from app.core.database import get_db
 from app.core.security import create_access_token
 from app.core.config import settings
-from app.schemas.auth import Token, FirebaseSignupRequest, LoginRequest, OTPRequest
+from app.schemas.auth import Token, FirebaseSignupRequest
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import AuthService
 
@@ -107,46 +107,6 @@ async def get_access_token(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found. Please complete signup first."
         )
-    
-    # Create access token
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": str(user.id)}, expires_delta=access_token_expires
-    )
-    
-    return {"access_token": access_token, "token_type": "bearer"}
-
-# Keep existing OTP endpoints for backward compatibility
-@router.post("/login", response_model=dict)
-async def login(request: LoginRequest, db: Session = Depends(get_db)):
-    """Send OTP to phone number for login (Legacy endpoint)"""
-    auth_service = AuthService(db)
-    sms_service = SMSService()
-    
-    # Generate and store OTP
-    otp = generate_otp()
-    await auth_service.store_otp(request.phone_number, otp)
-    
-    # Send OTP via SMS
-    await sms_service.send_otp(request.phone_number, otp)
-    
-    return {"message": "OTP sent successfully", "phone_number": request.phone_number}
-
-@router.post("/verify-otp", response_model=Token)
-async def verify_otp(request: OTPRequest, db: Session = Depends(get_db)):
-    """Verify OTP and return access token (Legacy endpoint)"""
-    auth_service = AuthService(db)
-    
-    # Verify OTP
-    is_valid = await auth_service.verify_otp(request.phone_number, request.otp)
-    if not is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid or expired OTP"
-        )
-    
-    # Get or create user
-    user = await auth_service.get_or_create_user(request.phone_number)
     
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
