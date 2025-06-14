@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import firebase_admin
 from firebase_admin import auth as firebase_auth, credentials
 import os
+import logging
+from pydantic import ValidationError
 
 from app.core.database import get_db
 from app.core.security import create_access_token
@@ -12,28 +14,36 @@ from app.schemas.auth import Token, FirebaseSignupRequest
 from app.schemas.user import UserCreate, UserResponse
 from app.services.auth_service import AuthService
 
+# Get logger instance
+logger = logging.getLogger('app.auth')
+
 router = APIRouter()
 
 # Initialize Firebase Admin SDK
 if not firebase_admin._apps:
-    # In production, use service account key file
-    # For development, you can use the default credentials
+    logger.info("Initializing Firebase Admin SDK...")
     try:
         if os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'):
+            logger.info("Using service account key from environment variable")
             cred = credentials.Certificate(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
         else:
-            # Use default credentials for development
+            logger.info("Using default credentials for development")
             cred = credentials.ApplicationDefault()
         firebase_admin.initialize_app(cred)
+        logger.info("Firebase Admin SDK initialized successfully")
     except Exception as e:
-        print(f"Firebase initialization error: {e}")
+        logger.error(f"Firebase initialization error: {e}", exc_info=True)
+        raise
 
 async def verify_firebase_token(token: str):
     """Verify Firebase ID token and return user info"""
+    logger.info("Verifying Firebase token...")
     try:
         decoded_token = firebase_auth.verify_id_token(token)
+        logger.info(f"Token verified successfully. User ID: {decoded_token.get('uid')}")
         return decoded_token
     except Exception as e:
+        logger.error(f"Token verification failed: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid Firebase token"
@@ -41,49 +51,77 @@ async def verify_firebase_token(token: str):
 
 @router.post("/firebase-signup", response_model=UserResponse)
 async def firebase_signup(
-    request: FirebaseSignupRequest,
+    request: Request,
+    signup_request: FirebaseSignupRequest,
     db: Session = Depends(get_db),
     firebase_token: str = Depends(verify_firebase_token)
 ):
     """Create or update user account after Firebase authentication"""
-    auth_service = AuthService(db)
-    
-    # Extract phone number from Firebase token
-    phone_number = firebase_token.get('phone_number')
-    firebase_uid = firebase_token.get('uid')
-    
-    if not phone_number:
+    try:
+        logger.info("=== Firebase Signup Request ===")
+        logger.info(f"Request data: {signup_request.dict()}")
+        logger.info(f"Firebase token data: {firebase_token}")
+        logger.info(f"Raw request body: {await request.body()}")
+        
+        auth_service = AuthService(db)
+        
+        # Extract phone number from Firebase token
+        phone_number = firebase_token.get('phone_number')
+        firebase_uid = firebase_token.get('uid')
+        
+        logger.info(f"Extracted phone_number: {phone_number}")
+        logger.info(f"Extracted firebase_uid: {firebase_uid}")
+        
+        if not phone_number:
+            logger.error("Phone number not found in Firebase token")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Phone number not found in Firebase token"
+            )
+        
+        # Check if user already exists
+        existing_user = await auth_service.get_user_by_phone(phone_number)
+        logger.info(f"Existing user found: {existing_user is not None}")
+        
+        if existing_user:
+            logger.info(f"Updating existing user with ID: {existing_user.id}")
+            # Update existing user with new information
+            user_data = {
+                'name': signup_request.name or existing_user.name,
+                'email': signup_request.email or existing_user.email,
+                'city': signup_request.city or existing_user.city,
+                'firebase_uid': firebase_uid,
+                'is_verified': True
+            }
+            logger.info(f"Update user data: {user_data}")
+            updated_user = await auth_service.update_user(existing_user.id, user_data)
+            logger.info(f"User updated successfully: {updated_user.id}")
+            return updated_user
+        else:
+            logger.info("Creating new user")
+            # Create new user
+            user_data = UserCreate(
+                phone_number=phone_number,
+                name=signup_request.name,
+                email=signup_request.email,
+                city=signup_request.city,
+                firebase_uid=firebase_uid,
+                is_verified=True
+            )
+            logger.info(f"Create user data: {user_data.dict()}")
+            user = await auth_service.create_user(user_data)
+            logger.info(f"New user created successfully: {user.id}")
+            return user
+    except ValidationError as e:
+        logger.error(f"Validation error: {str(e)}")
+        logger.error(f"Validation errors: {e.errors()}")
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Phone number not found in Firebase token"
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=e.errors()
         )
-    
-    # Check if user already exists
-    existing_user = await auth_service.get_user_by_phone(phone_number)
-    
-    if existing_user:
-        # Update existing user with new information
-        user_data = {
-            'name': request.name or existing_user.name,
-            'email': request.email or existing_user.email,
-            'city': request.city or existing_user.city,
-            'firebase_uid': firebase_uid,
-            'is_verified': True
-        }
-        updated_user = await auth_service.update_user(existing_user.id, user_data)
-        return updated_user
-    else:
-        # Create new user
-        user_data = UserCreate(
-            phone_number=phone_number,
-            name=request.name,
-            email=request.email,
-            city=request.city,
-            firebase_uid=firebase_uid,
-            is_verified=True
-        )
-        user = await auth_service.create_user(user_data)
-        return user
+    except Exception as e:
+        logger.error(f"Error in firebase_signup: {str(e)}", exc_info=True)
+        raise
 
 @router.post("/token", response_model=Token)
 async def get_access_token(

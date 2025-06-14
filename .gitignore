@@ -39,5 +39,6 @@ venv/
 __pycache__/
 forevernco-google-calendar-service-account.json
 forevernco-firebase.json
+logs/
 .cheatsheet.md
 forevernco_create.sql

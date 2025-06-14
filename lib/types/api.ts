@@ -52,11 +52,16 @@ export interface FamilyMember {
 }
 
 // User Types
-export interface UserData {
+export interface UserProfile {
+  id: string;
   phone_number: string;
   name?: string;
   email?: string;
+  weddingDate?: Date;
+  isDateFixed?: boolean;
+  events?: string[];
   city?: string;
+  createdAt: string;
 }
 
 export interface UserResponse {
