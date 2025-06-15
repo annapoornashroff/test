@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
-import { apiClient } from '../api';
+import { apiClient } from '../api-client'; // Changed from '../api'
 import { cartQueue } from '../utils/cartQueue';
 import { CartItemData } from '../types/api';
 import { toast } from 'react-hot-toast';
@@ -31,15 +31,15 @@ export const useCart = () => {
 
       switch (action) {
         case 'ADD_TO_CART':
-          await apiClient.addToCart(token, data);
+          await apiClient.addToCart(data, token); // Fixed parameter order
           toast.success('Added to cart');
           break;
         case 'REMOVE_FROM_CART':
-          await apiClient.removeFromCart(token, data.vendor_id.toString());
+          await apiClient.removeFromCart(data.vendor_id); // Fixed - no token needed
           toast.success('Removed from cart');
           break;
         case 'UPDATE_CART':
-          await apiClient.updateCartItem(token, data.vendor_id.toString(), data);
+          await apiClient.updateCartItem(data.vendor_id, data); // Fixed - no token needed
           toast.success('Cart updated');
           break;
       }
