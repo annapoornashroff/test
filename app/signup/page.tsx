@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Phone, User, Mail, Calendar, Heart, ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, Heart, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient, handleApiError } from '@/lib/api-client';
@@ -22,7 +22,6 @@ export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [signupLoading, setSignupLoading] = useState(false);
   const [formData, setFormData] = useState({
-    phoneNumber: '',
     name: '',
     email: '',
     city: '',
@@ -48,6 +47,8 @@ export default function SignupPage() {
       }
     }
   }, [user, loading, router, searchParams]);
+
+  // Add cleanup useEffect here
 
   if (loading) {
     return (
@@ -77,7 +78,6 @@ export default function SignupPage() {
     setSignupLoading(true);
     try {
       const userData = {
-        phone_number: formData.phoneNumber,
         name: formData.name,
         email: formData.email,
         city: formData.city,
@@ -100,10 +100,8 @@ export default function SignupPage() {
   const validateStep = (currentStep: number) => {
     switch (currentStep) {
       case 1:
-        return formData.phoneNumber.length >= 10;
-      case 2:
         return true; // Optional fields
-      case 3:
+      case 2:
         return true; // Optional fields
       default:
         return false;
@@ -125,7 +123,7 @@ export default function SignupPage() {
 
       <div className="container mx-auto px-6 py-12 relative z-10">
         <div className="max-w-2xl mx-auto">
-          {/* Progress Indicator */}
+          {/* Progress Indicator - Now 2 steps instead of 3 */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center space-x-4">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -138,12 +136,6 @@ export default function SignupPage() {
                 step >= 2 ? 'bg-white text-primary' : 'bg-white/20 text-white'
               }`}>
                 {step > 2 ? <Check className="w-5 h-5" /> : '2'}
-              </div>
-              <div className={`w-16 h-1 ${step >= 3 ? 'bg-white' : 'bg-white/20'}`} />
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                step >= 3 ? 'bg-white text-primary' : 'bg-white/20 text-white'
-              }`}>
-                {step > 3 ? <Check className="w-5 h-5" /> : '3'}
               </div>
             </div>
           </div>
@@ -165,40 +157,12 @@ export default function SignupPage() {
           <Card className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-2xl font-serif text-center">
-                {step === 1 && 'Create Your Account'}
-                {step === 2 && 'Personal Details'}
-                {step === 3 && 'Wedding Preferences'}
+                {step === 1 && 'Personal Details'}
+                {step === 2 && 'Wedding Preferences'}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {step === 1 && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <Phone className="w-4 h-4 inline mr-2" />
-                      Phone Number *
-                    </label>
-                    <Input
-                      type="tel"
-                      placeholder="+91 98765 43210"
-                      value={formData.phoneNumber}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                      className="h-12"
-                      required
-                    />
-                  </div>
-
-                  <Button 
-                    onClick={() => setStep(2)}
-                    disabled={!validateStep(1)}
-                    className="w-full h-12 bg-primary hover:bg-primary-600 rounded-full"
-                  >
-                    Continue
-                  </Button>
-                </>
-              )}
-
-              {step === 2 && (
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -239,25 +203,16 @@ export default function SignupPage() {
                     />
                   </div>
 
-                  <div className="flex space-x-3">
-                    <Button 
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                      className="flex-1 h-12 rounded-full"
-                    >
-                      Back
-                    </Button>
-                    <Button 
-                      onClick={() => setStep(3)}
-                      className="flex-1 h-12 bg-primary hover:bg-primary-600 rounded-full"
-                    >
-                      Continue
-                    </Button>
-                  </div>
+                  <Button 
+                    onClick={() => setStep(2)}
+                    className="w-full h-12 bg-primary hover:bg-primary-600 rounded-full"
+                  >
+                    Continue
+                  </Button>
                 </>
               )}
 
-              {step === 3 && (
+              {step === 2 && (
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -306,18 +261,18 @@ export default function SignupPage() {
                   <div className="flex space-x-3">
                     <Button 
                       variant="outline"
-                      onClick={() => setStep(2)}
+                      onClick={() => setStep(1)}
                       className="flex-1 h-12 rounded-full"
-                      disabled={loading}
+                      disabled={signupLoading}
                     >
                       Back
                     </Button>
                     <Button 
                       onClick={handleSubmit}
-                      disabled={loading}
+                      disabled={signupLoading}
                       className="flex-1 h-12 bg-primary hover:bg-primary-600 rounded-full"
                     >
-                      {loading ? (
+                      {signupLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           Creating Account...
