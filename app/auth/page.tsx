@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Phone, Loader2 } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PhoneAuthService } from '@/lib/firebase';
+import { phoneAuthService } from '@/lib/firebase'; // Use the singleton
 import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/hooks/useCart';
 import { toast } from 'sonner';
@@ -27,7 +27,8 @@ export default function AuthPage() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [verificationId, setVerificationId] = useState('');
   
-  const phoneAuthService = new PhoneAuthService();
+  // Remove this line:
+  // const phoneAuthService = new PhoneAuthService();
 
   // Redirect logic for already authenticated users
   useEffect(() => {
@@ -46,6 +47,14 @@ export default function AuthPage() {
       }
     }
   }, [user, loading, router, searchParams]);
+
+  // Add cleanup useEffect here
+  useEffect(() => {
+    return () => {
+      // Cleanup reCAPTCHA when component unmounts
+      phoneAuthService.cleanup();
+    };
+  }, []);
 
   if (loading) {
     return (
