@@ -10,22 +10,14 @@ import { useToast } from '@/hooks/use-toast'
 // Mock the API client
 jest.mock('@/lib/api-client', () => ({
   apiClient: {
-    get: jest.fn()
+    getFeaturedReviews: jest.fn(),
+    getBusinessRating: jest.fn()
   }
 }))
 
 // Mock the useToast hook
 jest.mock('@/hooks/use-toast', () => ({
   useToast: jest.fn()
-}))
-
-// Mock next/image
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />
-  },
 }))
 
 describe('TestimonialsSection', () => {
@@ -70,25 +62,20 @@ describe('TestimonialsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useToast as jest.Mock).mockReturnValue(mockToast);
-    (apiClient.get as jest.Mock).mockResolvedValue({
-      data: {
-        reviews: mockReviews,
-        business_rating: mockBusinessRating
-      }
-    });
+    // With this:
+    (apiClient.getFeaturedReviews as jest.Mock).mockResolvedValue(mockReviews);
+    (apiClient.getBusinessRating as jest.Mock).mockResolvedValue(mockBusinessRating);
   });
 
   it('renders loading state initially', async () => {
     // Delay the API response to ensure loading state is visible
-    (apiClient.get as jest.Mock).mockImplementation(() => 
-      new Promise(resolve => setTimeout(() => resolve({
-        data: {
-          reviews: mockReviews,
-          business_rating: mockBusinessRating
-        }
-      }), 100))
+    (apiClient.getFeaturedReviews as jest.Mock).mockImplementation(() => 
+      new Promise(resolve => setTimeout(() => resolve(mockReviews), 100))
     );
-
+    (apiClient.getBusinessRating as jest.Mock).mockImplementation(() => 
+      new Promise(resolve => setTimeout(() => resolve(mockBusinessRating), 100))
+    );
+  
     render(<TestimonialsSection />);
     
     // The loading spinner should be immediately visible
@@ -114,7 +101,7 @@ describe('TestimonialsSection', () => {
     const errorMessage = 'Failed to fetch reviews'
     const originalConsoleError = console.error
     console.error = jest.fn()
-    ;(apiClient.get as jest.Mock).mockRejectedValueOnce(new Error(errorMessage))
+    ;(apiClient.getFeaturedReviews as jest.Mock).mockRejectedValueOnce(new Error(errorMessage))
 
     await act(async () => {
       render(<TestimonialsSection />)
@@ -133,7 +120,7 @@ describe('TestimonialsSection', () => {
 
   it('rotates through reviews automatically', async () => {
     jest.useFakeTimers()
-    ;(apiClient.get as jest.Mock).mockResolvedValueOnce({
+    ;(apiClient.getFeaturedReviews as jest.Mock).mockResolvedValueOnce({
       data: {
         reviews: mockReviews,
         business_rating: mockBusinessRating
@@ -251,4 +238,4 @@ describe('TestimonialsSection', () => {
       'https://www.google.com/maps/place/?q=place_id:mock-place-id'
     )
   })
-}) 
+})

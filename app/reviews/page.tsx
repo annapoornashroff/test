@@ -52,8 +52,8 @@ export default function ReviewsPage() {
   // Filter reviews based on search query and rating filter
   const filteredReviews = reviews.filter((review: ReviewResponse) => {
     const matchesSearch = searchQuery === '' || 
-      review.comment.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      review.name.toLowerCase().includes(searchQuery.toLowerCase());
+      review.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      review.author_name.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesRating = ratingFilter === null || review.rating === ratingFilter;
     
@@ -63,7 +63,7 @@ export default function ReviewsPage() {
   return (
     <ApiErrorBoundary 
       onReset={refreshReviews}
-      errorMessage={error}
+      errorMessage={error || undefined}
     >
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
@@ -203,7 +203,7 @@ export default function ReviewsPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 mb-4">
-                    We'd love to hear about your experience with us
+                    We&apos;d love to hear about your experience with us
                   </p>
                   <a 
                     href="https://search.google.com/local/writereview?placeid=YOUR_PLACE_ID"

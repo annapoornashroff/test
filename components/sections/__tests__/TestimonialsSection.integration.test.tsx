@@ -19,14 +19,15 @@ jest.mock('@/hooks/use-toast', () => ({
   useToast: jest.fn()
 }))
 
+// Remove these lines (lines 22-28):
 // Mock next/image
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />
-  },
-}))
+// jest.mock('next/image', () => ({
+//   __esModule: true,
+//   default: (props: any) => {
+//     // eslint-disable-next-line jsx-a11y/alt-text
+//     return <img {...props} />
+//   },
+// }))
 
 describe('TestimonialsSection Integration', () => {
   const mockToast = {
@@ -36,12 +37,8 @@ describe('TestimonialsSection Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useToast as jest.Mock).mockReturnValue(mockToast)
-    ;(apiClient.get as jest.Mock).mockResolvedValue({
-      data: {
-        reviews: mockReviews,
-        business_rating: mockBusinessRating
-      }
-    })
+    ;(apiClient.getFeaturedReviews as jest.Mock).mockResolvedValue(mockReviews)
+    ;(apiClient.getBusinessRating as jest.Mock).mockResolvedValue(mockBusinessRating)
     // Mock console.error to prevent it from showing in test output
     jest.spyOn(console, 'error').mockImplementation(() => {})
   })
@@ -50,7 +47,7 @@ describe('TestimonialsSection Integration', () => {
     it('shows error boundary when API fails', async () => {
       const errorMessage = 'Network Error'
       // Mock initial failure
-      ;(apiClient.get as jest.Mock).mockRejectedValueOnce(new Error(errorMessage))
+      ;(apiClient.getFeaturedReviews as jest.Mock).mockRejectedValueOnce(new Error(errorMessage))
 
       await act(async () => {
         render(<TestimonialsSection />)
@@ -90,7 +87,10 @@ describe('TestimonialsSection Integration', () => {
 
       console.log('Mock Response:', JSON.stringify(mockResponse, null, 2))
 
-      ;(apiClient.get as jest.Mock).mockImplementationOnce(() => 
+      ;(apiClient.getFeaturedReviews as jest.Mock).mockImplementationOnce(() => 
+        new Promise(resolve => setTimeout(() => resolve(mockResponse), 100))
+      )
+      ;(apiClient.getBusinessRating as jest.Mock).mockImplementationOnce(() => 
         new Promise(resolve => setTimeout(() => resolve(mockResponse), 100))
       )
 
@@ -264,13 +264,11 @@ describe('TestimonialsSection Integration', () => {
       })
 
       // Delay the API response
-      ;(apiClient.get as jest.Mock).mockImplementation(() => 
-        new Promise(resolve => setTimeout(() => resolve({
-          data: {
-            reviews: mockReviews,
-            business_rating: mockBusinessRating
-          }
-        }), 100))
+      ;(apiClient.getFeaturedReviews as jest.Mock).mockImplementation(() => 
+        new Promise(resolve => setTimeout(() => resolve(mockReviews), 100))
+      )
+      ;(apiClient.getBusinessRating as jest.Mock).mockImplementation(() => 
+        new Promise(resolve => setTimeout(() => resolve(mockBusinessRating), 100))
       )
 
       render(<TestimonialsSection />)
@@ -287,15 +285,15 @@ describe('TestimonialsSection Integration', () => {
       })
 
       const errorMessage = 'Network Error'
-      ;(apiClient.get as jest.Mock)
+      ;(apiClient.getFeaturedReviews as jest.Mock)
         .mockRejectedValueOnce(new Error(errorMessage))
         .mockImplementation(() => 
-          new Promise(resolve => setTimeout(() => resolve({
-            data: {
-              reviews: mockReviews,
-              business_rating: mockBusinessRating
-            }
-          }), 100))
+          new Promise(resolve => setTimeout(() => resolve(mockReviews), 100))
+        )
+      ;(apiClient.getBusinessRating as jest.Mock)
+        .mockRejectedValueOnce(new Error(errorMessage))
+        .mockImplementation(() => 
+          new Promise(resolve => setTimeout(() => resolve(mockBusinessRating), 100))
         )
 
       await act(async () => {
@@ -352,4 +350,4 @@ describe('TestimonialsSection Integration', () => {
       expect(googleLink).toHaveAttribute('rel', 'noopener noreferrer')
     })
   })
-}) 
+})

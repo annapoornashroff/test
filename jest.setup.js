@@ -1,4 +1,5 @@
 // Learn more: https://github.com/testing-library/jest-dom
+import React from 'react'
 import '@testing-library/jest-dom'
 
 // Mock next/router
@@ -18,8 +19,15 @@ jest.mock('next/router', () => ({
 // Mock next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />
+  default: ({ src, alt, width, height, ...props }) => {
+    // Create a more realistic mock that mimics Next.js Image behavior
+    return React.createElement('img', {
+      src,
+      alt,
+      width,
+      height,
+      ...props,
+      'data-testid': 'next-image-mock'
+    })
   },
 })) 

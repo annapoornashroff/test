@@ -63,7 +63,7 @@ export class ApiErrorBoundary extends React.Component<ApiErrorBoundaryProps, Api
           <CardHeader>
             <CardTitle className="flex items-center text-yellow-600">
               <WifiOff className="w-5 h-5 mr-2" />
-              You're Offline
+              You&apos;re Offline
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -120,4 +120,4 @@ export class ApiErrorBoundary extends React.Component<ApiErrorBoundaryProps, Api
 
     return this.props.children;
   }
-} 
+}

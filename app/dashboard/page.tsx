@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
@@ -35,13 +35,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [projectsLoading, setProjectsLoading] = useState(false);
 
-  useEffect(() => {
-    if (firebaseUser) {
-      loadDashboardData();
-    }
-  }, [firebaseUser]);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!firebaseUser) return;
     
     await withLoading(async () => {
@@ -60,7 +54,13 @@ export default function DashboardPage() {
         setActiveProject(projectsData[0]);
       }
     }, setLoading);
-  };
+  }, [firebaseUser]);
+
+  useEffect(() => {
+    if (firebaseUser) {
+      loadDashboardData();
+    }
+  }, [firebaseUser, loadDashboardData]);
 
   const calculateProgress = (project: WeddingProject) => {
     // Simple progress calculation based on spent vs budget

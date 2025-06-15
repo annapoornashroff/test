@@ -4,14 +4,15 @@ import { render, screen } from '@testing-library/react'
 import { ReviewCard } from '../review-card'
 import { type ReviewResponse } from '@/lib/types/api'
 
+// Remove these lines (lines 7-13):
 // Mock next/image
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: any) => {
-    // eslint-disable-next-line jsx-a11y/alt-text
-    return <img {...props} />
-  },
-}))
+// jest.mock('next/image', () => ({
+//   __esModule: true,
+//   default: (props: any) => {
+//     // eslint-disable-next-line jsx-a11y/alt-text
+//     return <img {...props} />
+//   },
+// }))
 
 describe('ReviewCard', () => {
   const mockReview: ReviewResponse = {
@@ -91,4 +92,4 @@ describe('ReviewCard', () => {
     expect(fallbackText).toBeInTheDocument()
     expect(fallbackText).toHaveClass('text-2xl', 'text-gray-500')
   })
-}) 
+})
