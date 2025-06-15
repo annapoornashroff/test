@@ -13,19 +13,21 @@ def setup_logging():
 
     # Configure root logger
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO if settings.DEBUG else logging.WARNING)
+    root_logger.setLevel(logging.INFO)
+    
+    # Remove any existing handlers to avoid duplicates
+    for handler in root_logger.handlers[:]:
+        root_logger.removeHandler(handler)
 
     # Create formatters
-    console_formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    file_formatter = logging.Formatter(
+    formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
 
     # Console handler
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(console_formatter)
+    console_handler.setFormatter(formatter)
+    console_handler.setLevel(logging.INFO)
     root_logger.addHandler(console_handler)
 
     # File handler
@@ -34,13 +36,19 @@ def setup_logging():
         maxBytes=10485760,  # 10MB
         backupCount=5
     )
-    file_handler.setFormatter(file_formatter)
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(logging.INFO)
     root_logger.addHandler(file_handler)
 
     # Set specific loggers
     logging.getLogger('uvicorn').setLevel(logging.INFO)
     logging.getLogger('uvicorn.access').setLevel(logging.INFO)
+    
+    # Ensure app loggers propagate to root
+    app_logger = logging.getLogger('app')
+    app_logger.setLevel(logging.INFO)
+    app_logger.propagate = True
 
 def get_logger(name: str) -> logging.Logger:
     """Get a logger instance with the given name"""
-    return logging.getLogger(name) 
+    return logging.getLogger(name)

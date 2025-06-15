@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Header
 from sqlalchemy.orm import Session
 from datetime import timedelta
 import firebase_admin
@@ -6,6 +6,7 @@ from firebase_admin import auth as firebase_auth, credentials
 import os
 import logging
 from pydantic import ValidationError
+from typing import Optional
 
 from app.core.database import get_db
 from app.core.security import create_access_token
@@ -19,28 +20,39 @@ logger = logging.getLogger('app.auth')
 
 router = APIRouter()
 
-# Initialize Firebase Admin SDK
-if not firebase_admin._apps:
-    logger.info("Initializing Firebase Admin SDK...")
-    try:
-        if os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'):
-            logger.info("Using service account key from environment variable")
-            cred = credentials.Certificate(os.getenv('FIREBASE_SERVICE_ACCOUNT_KEY'))
-        else:
-            logger.info("Using default credentials for development")
-            cred = credentials.ApplicationDefault()
-        firebase_admin.initialize_app(cred)
-        logger.info("Firebase Admin SDK initialized successfully")
-    except Exception as e:
-        logger.error(f"Firebase initialization error: {e}", exc_info=True)
-        raise
+# Remove the module-level Firebase initialization code
+# It's now handled in main.py startup event
 
-async def verify_firebase_token(token: str):
-    """Verify Firebase ID token and return user info"""
-    logger.info("Verifying Firebase token...")
+async def verify_firebase_token(authorization: Optional[str] = Header(None)):
+    """Verify Firebase ID token and return user info"""    
+    if not authorization:
+        logger.error("No authorization header provided")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header required"
+        )
+    
+    # Extract token from "Bearer <token>" format
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            logger.error(f"Invalid authorization scheme: {scheme}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authorization scheme"
+            )
+    except ValueError:
+        logger.error("Invalid authorization header format")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header format"
+        )
+    
+    logger.info(f"Verifying Firebase token... Token: {token[:20]}...")
     try:
         decoded_token = firebase_auth.verify_id_token(token)
         logger.info(f"Token verified successfully. User ID: {decoded_token.get('uid')}")
+        logger.info(f"Full token data: {decoded_token}")
         return decoded_token
     except Exception as e:
         logger.error(f"Token verification failed: {str(e)}", exc_info=True)

@@ -7,37 +7,16 @@ import sys
 import json
 from datetime import datetime
 import os
+import firebase_admin
+from firebase_admin import credentials
 
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.core.logging import setup_logging
 from app.api.v1.api import api_router
 
-# Create logs directory if it doesn't exist
-os.makedirs('logs', exist_ok=True)
-
-# Configure root logger
-root_logger = logging.getLogger()
-root_logger.setLevel(logging.INFO)
-
-# Remove any existing handlers
-for handler in root_logger.handlers[:]:
-    root_logger.removeHandler(handler)
-
-# Create formatters
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-# Console handler
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setFormatter(formatter)
-console_handler.setLevel(logging.INFO)
-root_logger.addHandler(console_handler)
-
-# File handler
-file_handler = logging.FileHandler('logs/app.log')
-file_handler.setFormatter(formatter)
-file_handler.setLevel(logging.INFO)
-root_logger.addHandler(file_handler)
+# Setup logging using the centralized configuration
+setup_logging()
 
 # Get logger for this module
 logger = logging.getLogger('app.main')
@@ -54,32 +33,28 @@ app = FastAPI(
     redoc_url="/redoc" if settings.DEBUG else None,
 )
 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    """Log all requests and responses"""
-    start_time = datetime.now()
-    
-    # Log request
-    logger.info(f"Request: {request.method} {request.url}")
-    try:
-        body = await request.body()
-        if body:
-            try:
-                body_json = json.loads(body)
-                logger.info(f"Request body: {json.dumps(body_json, indent=2)}")
-            except:
-                logger.info(f"Request body: {body}")
-    except:
-        pass
+@app.on_event("startup")
+async def startup_event():
+    """Initialize Firebase Admin SDK after logging is set up"""
+    firebase_logger = logging.getLogger('app.firebase')
 
-    # Process request
-    response = await call_next(request)
-    
-    # Log response
-    process_time = (datetime.now() - start_time).total_seconds()
-    logger.info(f"Response: {response.status_code} - Process time: {process_time:.2f}s")
-    
-    return response
+    if not firebase_admin._apps:
+        firebase_logger.info("Initializing Firebase Admin SDK...")
+        try:
+            service_account_path = settings.FIREBASE_SERVICE_ACCOUNT_KEY
+            if not service_account_path:
+                raise ValueError("FIREBASE_SERVICE_ACCOUNT_KEY is not set in environment variables")
+            
+            firebase_logger.info(f"Using service account key from file path: {service_account_path}")
+            if not os.path.exists(service_account_path):
+                raise FileNotFoundError(f"Firebase service account file not found at: {service_account_path}")
+            
+            cred = credentials.Certificate(service_account_path)
+            firebase_admin.initialize_app(cred)
+            firebase_logger.info("Firebase Admin SDK initialized successfully")
+        except Exception as e:
+            firebase_logger.error(f"Firebase initialization error: {e}", exc_info=True)
+            raise RuntimeError(f"Failed to initialize Firebase Admin SDK: {str(e)}")
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
