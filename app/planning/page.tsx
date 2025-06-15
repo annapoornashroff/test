@@ -9,7 +9,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
+
 import { handleApiError } from '@/lib/api-client';
 import { WeddingData } from '@/lib/types/api';
 import { toast } from 'sonner';
@@ -66,7 +67,6 @@ export default function PlanningPage() {
     }
 
     if (!user) {
-      // If not logged in, save to localStorage and redirect to signup
       if (typeof window !== 'undefined') {
         localStorage.setItem('weddingPlanningData', JSON.stringify(formData));
       }
@@ -78,8 +78,8 @@ export default function PlanningPage() {
       setLoading(true);
       const token = await user.getIdToken();
       
-      // Create wedding project
-      await apiClient.createWedding(token, formData);
+      // Create wedding project - fix parameter order
+      await apiClient.createWedding(formData, token);
       
       toast.success('Wedding project created successfully!');
       router.push('/dashboard');

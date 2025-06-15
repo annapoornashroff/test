@@ -13,7 +13,7 @@ import {
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
 import Image from 'next/image';
 import { useCart } from '@/lib/hooks/useCart';
 import { type CartItem, type CartSummary } from '@/lib/types/ui';

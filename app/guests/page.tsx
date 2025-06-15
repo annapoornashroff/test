@@ -13,7 +13,7 @@ import {
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
 import { type WeddingProject, type PersonalInfo } from '@/lib/types/ui';
 
 // Add type for user
@@ -82,7 +82,7 @@ export default function GuestsPage() {
 
     try {
       const token = await user.getIdToken();
-      const guestsData = await apiClient.getGuests(token, selectedWedding);
+      const guestsData = await apiClient.getGuests(parseInt(selectedWedding), token);
       setGuests(guestsData as any[]);
     } catch (error: any) {
       console.error('Error fetching guests:', error);
@@ -95,35 +95,22 @@ export default function GuestsPage() {
 
     try {
       const token = await user.getIdToken();
-      const stats = await apiClient.getGuestStatistics(token, selectedWedding);
+      const stats = await apiClient.getGuestStatistics(parseInt(selectedWedding), token);
       setGuestStats(stats);
     } catch (error: any) {
       console.error('Error fetching guest stats:', error);
     }
   }, [user, selectedWedding]);
 
-  useEffect(() => {
-    if (user) {
-      fetchWeddings();
-    }
-  }, [user, fetchWeddings]);
-
-  useEffect(() => {
-    if (selectedWedding) {
-      fetchGuests();
-      fetchGuestStats();
-    }
-  }, [selectedWedding, fetchGuests, fetchGuestStats]);
-
   const addGuest = async () => {
     if (!user || !newGuest.name || !newGuest.phoneNumber || !selectedWedding) return;
 
     try {
       const token = await user.getIdToken();
-      await apiClient.addGuest(token, {
+      await apiClient.addGuest({
         ...newGuest,
         wedding_id: parseInt(selectedWedding)
-      });
+      }, token);
 
       setNewGuest({
         name: '',
@@ -148,9 +135,8 @@ export default function GuestsPage() {
 
     try {
       const token = await user.getIdToken();
-      await apiClient.sendInvitation(token, guestId.toString());
+      await apiClient.sendInvitation(guestId, token);
       
-      // Refresh guests to show updated invitation status
       await fetchGuests();
     } catch (error: any) {
       console.error('Error sending invitation:', error);
@@ -163,11 +149,10 @@ export default function GuestsPage() {
 
     try {
       const token = await user.getIdToken();
-      await apiClient.updateGuest(token, guestId.toString(), {
+      await apiClient.updateGuest(guestId, {
         confirmation_status: status
-      });
+      }, token);
       
-      // Refresh data
       await fetchGuests();
       await fetchGuestStats();
     } catch (error: any) {
@@ -181,9 +166,8 @@ export default function GuestsPage() {
 
     try {
       const token = await user.getIdToken();
-      await apiClient.deleteGuest(token, guestId.toString());
+      await apiClient.deleteGuest(guestId, token);
       
-      // Refresh data
       await fetchGuests();
       await fetchGuestStats();
     } catch (error: any) {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { apiClient } from '@/lib/api/index';
+import { apiClient } from '@/lib/api-client';
 import { ReviewResponse, ReviewsResponse, BusinessRating, ReviewStats } from '@/lib/types/api';
 
 interface UseReviewsReturn {

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { apiClient } from '@/lib/api';
+import { apiClient } from '@/lib/api-client';
 import { type Vendor, type Package } from '@/lib/types/ui';
 
 export default function PackagesPage() {

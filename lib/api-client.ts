@@ -152,32 +152,82 @@ export class ApiClient {
     });
   }
 
-  // Weddings
-  async createWedding(weddingData: any) {
+  // Weddings - Updated to support token parameter
+  async createWedding(weddingData: any, token?: string) {
     return this.request('/weddings/', {
       method: 'POST',
       body: JSON.stringify(weddingData),
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async getWeddings() {
-    return this.request('/weddings/');
+  async getWeddings(token?: string) {
+    return this.request('/weddings/', {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
   }
 
-  async getWedding(id: number) {
-    return this.request(`/weddings/${id}`);
+  async getWedding(id: number, token?: string) {
+    return this.request(`/weddings/${id}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
   }
 
-  async updateWedding(id: number, weddingData: any) {
+  async updateWedding(id: number, weddingData: any, token?: string) {
     return this.request(`/weddings/${id}`, {
       method: 'PUT',
       body: JSON.stringify(weddingData),
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async deleteWedding(id: number) {
+  async deleteWedding(id: number, token?: string) {
     return this.request(`/weddings/${id}`, {
       method: 'DELETE',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
+  }
+
+  // Guests - Updated to support token parameter
+  async addGuest(guestData: any, token?: string) {
+    return this.request('/guests/', {
+      method: 'POST',
+      body: JSON.stringify(guestData),
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
+  }
+
+  async getGuests(weddingId: number, token?: string) {
+    return this.request(`/guests/?wedding_id=${weddingId}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
+  }
+
+  async updateGuest(guestId: number, guestData: any, token?: string) {
+    return this.request(`/guests/${guestId}`, {
+      method: 'PUT',
+      body: JSON.stringify(guestData),
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
+  }
+
+  async deleteGuest(guestId: number, token?: string) {
+    return this.request(`/guests/${guestId}`, {
+      method: 'DELETE',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
+  }
+
+  async sendInvitation(guestId: number, token?: string) {
+    return this.request(`/guests/${guestId}/send-invitation`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
+  }
+
+  async getGuestStatistics(weddingId: number, token?: string) {
+    return this.request(`/guests/statistics?wedding_id=${weddingId}`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
@@ -233,15 +283,18 @@ export class ApiClient {
   }
 
   // Cart
-  async addToCart(cartItem: any) {
+  async getCartItems(token?: string) {
     return this.request('/cart/', {
-      method: 'POST',
-      body: JSON.stringify(cartItem),
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async getCartItems() {
-    return this.request('/cart/');
+  async addToCart(cartItem: any, token?: string) {
+    return this.request('/cart/', {
+      method: 'POST',
+      body: JSON.stringify(cartItem),
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+    });
   }
 
   async updateCartItem(itemId: number, itemData: any) {
@@ -257,43 +310,10 @@ export class ApiClient {
     });
   }
 
-  async getCartSummary() {
-    return this.request('/cart/summary');
-  }
-
-  // Guests
-  async addGuest(guestData: any) {
-    return this.request('/guests/', {
-      method: 'POST',
-      body: JSON.stringify(guestData),
+  async getCartSummary(token?: string) {
+    return this.request('/cart/summary', {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
-  }
-
-  async getGuests(weddingId: number) {
-    return this.request(`/guests/?wedding_id=${weddingId}`);
-  }
-
-  async updateGuest(guestId: number, guestData: any) {
-    return this.request(`/guests/${guestId}`, {
-      method: 'PUT',
-      body: JSON.stringify(guestData),
-    });
-  }
-
-  async deleteGuest(guestId: number) {
-    return this.request(`/guests/${guestId}`, {
-      method: 'DELETE',
-    });
-  }
-
-  async sendInvitation(guestId: number) {
-    return this.request(`/guests/${guestId}/send-invitation`, {
-      method: 'POST',
-    });
-  }
-
-  async getGuestStatistics(weddingId: number) {
-    return this.request(`/guests/statistics?wedding_id=${weddingId}`);
   }
 
   // Reviews
