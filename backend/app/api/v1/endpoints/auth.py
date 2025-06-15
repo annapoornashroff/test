@@ -165,3 +165,44 @@ async def get_access_token(
     )
     
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/profile-status")
+async def get_profile_status(
+    firebase_token: str = Depends(verify_firebase_token),
+    db: Session = Depends(get_db)
+):
+    """Check if user profile is complete"""
+    auth_service = AuthService(db)
+    
+    phone_number = firebase_token.get('phone_number')
+    if not phone_number:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Phone number not found in Firebase token"
+        )
+    
+    user = await auth_service.get_user_by_phone(phone_number)
+    if not user:
+        return {
+            "exists": False,
+            "profile_complete": False
+        }
+    
+    # Check if required profile fields are filled
+    profile_complete = bool(
+        user.name and 
+        user.email and 
+        user.city
+    )
+    
+    return {
+        "exists": True,
+        "profile_complete": profile_complete,
+        "user": {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "city": user.city,
+            "phone_number": user.phone_number
+        }
+    }

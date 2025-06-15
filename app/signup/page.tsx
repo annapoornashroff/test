@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Phone, User, Mail, Calendar, Heart, ArrowLeft, Check, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth-context';
 
 const events = [
   'Haldi', 'Mehendi', 'Sangeet', 'Engagement', 'Wedding', 'Reception', 'Tilak', 'Roka'
@@ -16,8 +17,10 @@ const events = [
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, loading } = useAuth();
   const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [signupLoading, setSignupLoading] = useState(false);
   const [formData, setFormData] = useState({
     phoneNumber: '',
     name: '',
@@ -27,6 +30,39 @@ export default function SignupPage() {
     isDateFixed: false,
     selectedEvents: [] as string[]
   });
+
+  // Redirect logic for already authenticated users
+  useEffect(() => {
+    if (!loading && user) {
+      const redirect = searchParams.get('redirect');
+      const referrer = typeof window !== 'undefined' ? document.referrer : '';
+      
+      if (redirect) {
+        const safeRedirect = redirect.startsWith('/') ? redirect : `/${redirect}`;
+        router.replace(safeRedirect);
+      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup') && !referrer.includes('/auth')) {
+        const referrerPath = new URL(referrer).pathname;
+        router.replace(referrerPath);
+      } else {
+        router.replace('/dashboard');
+      }
+    }
+  }, [user, loading, router, searchParams]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-600 to-primary-700 flex items-center justify-center">
+        <div className="text-white text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return null;
+  }
 
   const toggleEvent = (event: string) => {
     setFormData(prev => ({
@@ -38,7 +74,7 @@ export default function SignupPage() {
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
+    setSignupLoading(true);
     try {
       const userData = {
         phone_number: formData.phoneNumber,
@@ -47,13 +83,17 @@ export default function SignupPage() {
         city: formData.city,
       };
 
-      await apiClient.signup(userData);
+      await apiClient.createUserProfile(userData);
       toast.success('Account created successfully!');
-      router.push('/login');
+      
+      // Preserve redirect parameter when going to login
+      const redirect = searchParams.get('redirect');
+      const loginUrl = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login';
+      router.push(loginUrl);
     } catch (error) {
       handleApiError(error, 'Failed to create account');
     } finally {
-      setLoading(false);
+      setSignupLoading(false);
     }
   };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,18 +15,51 @@ import { toast } from 'sonner';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { processQueuedActions } = useCart();
   const [formData, setFormData] = useState({
     phoneNumber: '',
     otp: ''
   });
   const [otpSent, setOtpSent] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [verificationId, setVerificationId] = useState('');
   
   const phoneAuthService = new PhoneAuthService();
+
+  // Redirect logic for already authenticated users
+  useEffect(() => {
+    if (!loading && user) {
+      const redirect = searchParams.get('redirect');
+      const referrer = typeof window !== 'undefined' ? document.referrer : '';
+      
+      if (redirect) {
+        const safeRedirect = redirect.startsWith('/') ? redirect : `/${redirect}`;
+        router.replace(safeRedirect);
+      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup') && !referrer.includes('/auth')) {
+        const referrerPath = new URL(referrer).pathname;
+        router.replace(referrerPath);
+      } else {
+        router.replace('/dashboard');
+      }
+    }
+  }, [user, loading, router, searchParams]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary-600 to-primary-700 flex items-center justify-center">
+        <div className="text-white text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return null;
+  }
 
   const sendOTP = async () => {
     if (!formData.phoneNumber) {
@@ -34,7 +67,7 @@ export default function LoginPage() {
       return;
     }
 
-    setLoading(true);
+    setLoginLoading(true);
     try {
       const verificationId = await phoneAuthService.sendOTP(formData.phoneNumber);
       setVerificationId(verificationId);
@@ -43,7 +76,7 @@ export default function LoginPage() {
     } catch (error: any) {
       toast.error(error.message || 'Failed to send OTP');
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
 
@@ -57,13 +90,17 @@ export default function LoginPage() {
     try {
       await phoneAuthService.verifyOTP(verificationId, formData.otp);
       
-      // Process any queued cart actions
       await processQueuedActions();
       
-      // Redirect back to the original page
       const redirect = searchParams.get('redirect');
+      const referrer = typeof window !== 'undefined' ? document.referrer : '';
+      
       if (redirect) {
-        router.push(`/${redirect}`);
+        const safeRedirect = redirect.startsWith('/') ? redirect : `/${redirect}`;
+        router.push(safeRedirect);
+      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup') && !referrer.includes('/auth')) {
+        const referrerPath = new URL(referrer).pathname;
+        router.push(referrerPath);
       } else {
         router.push('/dashboard');
       }
@@ -77,7 +114,7 @@ export default function LoginPage() {
   };
 
   const resendOTP = async () => {
-    setLoading(true);
+    setLoginLoading(true);
     try {
       const newVerificationId = await phoneAuthService.sendOTP(formData.phoneNumber);
       setVerificationId(newVerificationId);
@@ -85,7 +122,7 @@ export default function LoginPage() {
     } catch (error: any) {
       toast.error(error.message || 'Failed to resend OTP');
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
 
@@ -98,7 +135,7 @@ export default function LoginPage() {
       <header className="relative z-10 p-6">
         <Link href="/planning" className="flex items-center space-x-3 text-white hover:text-white/80 transition-colors">
           <ArrowLeft className="w-6 h-6" />
-          <span>Back to Planning</span>
+          <span className="text-lg font-medium">Back to Planning</span>
         </Link>
       </header>
 

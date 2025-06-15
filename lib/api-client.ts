@@ -6,7 +6,8 @@ import {
   ReviewResponse, 
   BusinessRating, 
   ReviewStats,
-  UserProfile
+  CreateUserProfileData,
+  ProfileStatusResponse
 } from '@/lib/types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
@@ -121,12 +122,10 @@ export class ApiClient {
   }
 
   // Authentication - MERGED FROM api.ts
-  async createUserProfile(data: Omit<UserProfile, 'phone_number'>) {
-    // Remove phone_number from the request body since it should come from Firebase token
-    const { phone_number, ...profileData } = data as any;
+  async createUserProfile(data: CreateUserProfileData) {
     return this.request('/auth/firebase-signup', {
       method: 'POST',
-      body: JSON.stringify(profileData),
+      body: JSON.stringify(data),
     });
   }
 
@@ -383,6 +382,12 @@ export class ApiClient {
     return this.request('/users/invite', {
       method: 'POST',
       body: JSON.stringify(inviteData),
+    });
+  }
+  
+  async getProfileStatus(): Promise<ProfileStatusResponse> {
+    return this.request('/auth/profile-status', {
+      method: 'GET'
     });
   }
 }

@@ -177,4 +177,19 @@ export interface ReviewStats {
   source: string;
   business_name: string;
   last_updated: string;
-} 
+}
+
+export interface ProfileStatusResponse {
+  exists: boolean;
+  profile_complete: boolean;
+  user?: UserProfile;
+}
+
+export interface CreateUserProfileData {
+  name?: string;
+  email?: string;
+  city?: string;
+  weddingDate?: Date;
+  isDateFixed?: boolean;
+  events?: string[];
+}
