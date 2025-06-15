@@ -43,7 +43,7 @@ export function ReviewCard({ review, isActive = false, className }: ReviewCardPr
                 width={48}
                 height={48}
                 className="rounded-full object-cover"
-                fill="true"
+                fill={true}
                 sizes="64px"
               />
             ) : (
