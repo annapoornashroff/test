@@ -128,20 +128,9 @@ SECRET_KEY=your-secret-key-here
 
 **Optional External Services:**
 ```env
-# Twilio for SMS
-TWILIO_ACCOUNT_SID=your-twilio-sid
-TWILIO_AUTH_TOKEN=your-twilio-token
-TWILIO_PHONE_NUMBER=your-twilio-phone
-
-# SendGrid for Email
-SENDGRID_API_KEY=your-sendgrid-key
-SENDGRID_FROM_EMAIL=noreply@forevernco.com
 
 # Stripe for Payments
 STRIPE_SECRET_KEY=your-stripe-secret-key
-
-# Redis for caching
-REDIS_URL=redis://localhost:6379
 ```
 
 ### 3. Database Setup
