@@ -44,10 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           apiClient.setToken(token);
           // Remove phone_number from the request - it should come from Firebase token
           const newProfile = await apiClient.createUserProfile({
-            id: user.uid,
             name: user.displayName || '',
             email: user.email || '',
-            createdAt: user.metadata.creationTime || new Date().toUTCString(),
           });
           setUserProfile(newProfile);
         } catch (createError) {
