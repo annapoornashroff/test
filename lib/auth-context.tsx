@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await signOut(auth);
         } else {
           // For all other errors, or a 401 when already on signup page, assume missing profile
-          toast.error('User profile not found. Please sign up.');
+          toast.error('Welcome! Please provide a few details to get started.');
           if (typeof window !== 'undefined' && !window.location.href.includes('/signup')) {
             window.location.href = '/signup';
           }

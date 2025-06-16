@@ -84,8 +84,6 @@ export default function VendorDetailPage() {
 
     try {
       setActionLoading(true);
-      const token = await user.getIdToken();
-      
       await apiClient.addToCart({
         wedding_id: selectedWedding,
         vendor_id: vendor?.id,

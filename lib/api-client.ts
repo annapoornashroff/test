@@ -109,6 +109,7 @@ export class ApiClient {
       return data;
     } catch (error) {
       if (error instanceof Error && error.name === 'TypeError') {
+        console.error(error);
         // Network error
         toast.error('Network error. Please check your connection.');
         throw new Error('Network error');
