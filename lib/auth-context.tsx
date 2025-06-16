@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { User, onAuthStateChanged, signOut } from 'firebase/auth';
 import { toast } from 'sonner';
 import { auth } from './firebase';
-import { apiClient } from './api-client';
+import { apiClient, ApiError } from './api-client';
 import { type AuthContextType } from '@/lib/types/ui';
 import { UserProfile } from './types/api';
 
@@ -37,25 +37,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const profile = await apiClient.getCurrentUser();
         setUserProfile(profile);
       } catch (error) {
-        console.error('Error fetching user profile:', error);
-        // If user doesn't exist in backend, create them
-        try {
-          const token = await user.getIdToken();
-          apiClient.setToken(token);
-          // Remove phone_number from the request - it should come from Firebase token
-          const newProfile = await apiClient.createUserProfile({
-            name: user.displayName || '',
-            email: user.email || '',
-          });
-          setUserProfile(newProfile);
-        } catch (createError) {
-          console.error('Error creating user profile:', createError);
-          // If backend user creation fails, sign out Firebase user to prevent loop
-          toast.error('Failed to create user profile. Please try signing up again.');
+        if ((error as ApiError).status === 401 && typeof window !== 'undefined' && !window.location.href.includes('/signup')) {
+          apiClient.clearToken(); // Clear API token
+          toast.error('Session expired. Please login again.');
           await signOut(auth);
-          apiClient.clearToken();
-          // Redirect to signup page instead of login
-          if (typeof window !== 'undefined') {
+        } else {
+          // For all other errors, or a 401 when already on signup page, assume missing profile
+          toast.error('User profile not found. Please sign up.');
+          if (typeof window !== 'undefined' && !window.location.href.includes('/signup')) {
             window.location.href = '/signup';
           }
         }
@@ -67,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await signOut(auth);
       setUserProfile(null);
+      apiClient.clearToken(); // Clear API token on explicit sign out
     } catch (error) {
       console.error('Error signing out:', error);
     }

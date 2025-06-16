@@ -62,8 +62,7 @@ export default function GuestsPage() {
       setLoading(true);
       setError('');
       
-      const token = await user.getIdToken();
-      const weddingsData = await apiClient.getWeddings(token) as Wedding[];
+      const weddingsData = await apiClient.getWeddings() as Wedding[];
       
       setWeddings(weddingsData);
       if (weddingsData.length > 0) {
@@ -81,8 +80,7 @@ export default function GuestsPage() {
     if (!user || !selectedWedding) return;
 
     try {
-      const token = await user.getIdToken();
-      const guestsData = await apiClient.getGuests(parseInt(selectedWedding), token);
+      const guestsData = await apiClient.getGuests(parseInt(selectedWedding));
       setGuests(guestsData as any[]);
     } catch (error: any) {
       console.error('Error fetching guests:', error);
@@ -94,8 +92,7 @@ export default function GuestsPage() {
     if (!user || !selectedWedding) return;
 
     try {
-      const token = await user.getIdToken();
-      const stats = await apiClient.getGuestStatistics(parseInt(selectedWedding), token);
+      const stats = await apiClient.getGuestStatistics(parseInt(selectedWedding));
       setGuestStats(stats);
     } catch (error: any) {
       console.error('Error fetching guest stats:', error);
@@ -106,11 +103,10 @@ export default function GuestsPage() {
     if (!user || !newGuest.name || !newGuest.phoneNumber || !selectedWedding) return;
 
     try {
-      const token = await user.getIdToken();
       await apiClient.addGuest({
         ...newGuest,
         wedding_id: parseInt(selectedWedding)
-      }, token);
+      });
 
       setNewGuest({
         name: '',
@@ -134,8 +130,7 @@ export default function GuestsPage() {
     if (!user) return;
 
     try {
-      const token = await user.getIdToken();
-      await apiClient.sendInvitation(guestId, token);
+      await apiClient.sendInvitation(guestId);
       
       await fetchGuests();
     } catch (error: any) {
@@ -148,10 +143,9 @@ export default function GuestsPage() {
     if (!user) return;
 
     try {
-      const token = await user.getIdToken();
       await apiClient.updateGuest(guestId, {
         confirmation_status: status
-      }, token);
+      });
       
       await fetchGuests();
       await fetchGuestStats();
@@ -165,8 +159,7 @@ export default function GuestsPage() {
     if (!user) return;
 
     try {
-      const token = await user.getIdToken();
-      await apiClient.deleteGuest(guestId, token);
+      await apiClient.deleteGuest(guestId);
       
       await fetchGuests();
       await fetchGuestStats();

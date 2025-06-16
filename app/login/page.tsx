@@ -25,9 +25,6 @@ export default function LoginPage() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [verificationId, setVerificationId] = useState('');
-  
-  // Remove this line:
-  // const phoneAuthService = new PhoneAuthService();
 
   // Redirect logic for already authenticated users
   useEffect(() => {
@@ -38,11 +35,11 @@ export default function LoginPage() {
       if (redirect) {
         const safeRedirect = redirect.startsWith('/') ? redirect : `/${redirect}`;
         router.replace(safeRedirect);
-      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup') && !referrer.includes('/auth')) {
+      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup')) {
         const referrerPath = new URL(referrer).pathname;
         router.replace(referrerPath);
       } else {
-        router.replace('/dashboard');
+        router.replace('/signup');
       }
     }
   }, [user, loading, router, searchParams]);

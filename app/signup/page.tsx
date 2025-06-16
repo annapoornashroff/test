@@ -18,7 +18,7 @@ const events = [
 export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
   const [step, setStep] = useState(1);
   const [signupLoading, setSignupLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -32,23 +32,22 @@ export default function SignupPage() {
 
   // Redirect logic for already authenticated users
   useEffect(() => {
-    if (!loading && user) {
+    console.log('Signup', user, userProfile);
+    if (!loading && user && userProfile) {
       const redirect = searchParams.get('redirect');
       const referrer = typeof window !== 'undefined' ? document.referrer : '';
-      
-      if (redirect) {
+
+      if (redirect && !referrer.includes('/login') && !referrer.includes('/signup')) {
         const safeRedirect = redirect.startsWith('/') ? redirect : `/${redirect}`;
         router.replace(safeRedirect);
-      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup') && !referrer.includes('/auth')) {
+      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup')) {
         const referrerPath = new URL(referrer).pathname;
         router.replace(referrerPath);
       } else {
         router.replace('/dashboard');
       }
     }
-  }, [user, loading, router, searchParams]);
-
-  // Add cleanup useEffect here
+  }, [user, userProfile, loading, router, searchParams]);
 
   if (loading) {
     return (
@@ -61,7 +60,7 @@ export default function SignupPage() {
     );
   }
 
-  if (user) {
+  if (user && userProfile) {
     return null;
   }
 
@@ -94,17 +93,6 @@ export default function SignupPage() {
       handleApiError(error, 'Failed to create account');
     } finally {
       setSignupLoading(false);
-    }
-  };
-
-  const validateStep = (currentStep: number) => {
-    switch (currentStep) {
-      case 1:
-        return true; // Optional fields
-      case 2:
-        return true; // Optional fields
-      default:
-        return false;
     }
   };
 

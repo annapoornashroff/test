@@ -27,11 +27,10 @@ export const useCart = () => {
 
     try {
       setLoading(true);
-      const token = await user.getIdToken();
 
       switch (action) {
         case 'ADD_TO_CART':
-          await apiClient.addToCart(data, token); // Fixed parameter order
+          await apiClient.addToCart(data); // Fixed parameter order
           toast.success('Added to cart');
           break;
         case 'REMOVE_FROM_CART':

@@ -76,10 +76,9 @@ export default function PlanningPage() {
 
     try {
       setLoading(true);
-      const token = await user.getIdToken();
       
       // Create wedding project - fix parameter order
-      await apiClient.createWedding(formData, token);
+      await apiClient.createWedding(formData);
       
       toast.success('Wedding project created successfully!');
       router.push('/dashboard');

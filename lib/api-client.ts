@@ -65,6 +65,7 @@ export class ApiClient {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
+    console.log(`token length=${this.token?.length}`)
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -87,12 +88,7 @@ export class ApiClient {
         
         // Handle specific error cases
         if (response.status === 401) {
-          this.clearToken();
-          toast.error('Session expired. Please login again.');
-          // Only redirect if it's not a user creation endpoint to prevent infinite loop
-          if (typeof window !== 'undefined' && !endpoint.includes('/auth/firebase-signup')) {
-            window.location.href = '/login';
-          }
+          // Token will be cleared and user signed out by AuthContext
         } else if (response.status >= 500) {
           toast.error('Server error. Please try again later.');
         } else {
@@ -153,82 +149,67 @@ export class ApiClient {
   }
 
   // Weddings - Updated to support token parameter
-  async createWedding(weddingData: any, token?: string) {
+  async createWedding(weddingData: any) {
     return this.request('/weddings/', {
       method: 'POST',
       body: JSON.stringify(weddingData),
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async getWeddings(token?: string) {
-    return this.request('/weddings/', {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-    });
+  async getWeddings() {
+    return this.request('/weddings/');
   }
 
-  async getWedding(id: number, token?: string) {
-    return this.request(`/weddings/${id}`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-    });
+  async getWedding(id: number) {
+    return this.request(`/weddings/${id}`);
   }
 
-  async updateWedding(id: number, weddingData: any, token?: string) {
+  async updateWedding(id: number, weddingData: any) {
     return this.request(`/weddings/${id}`, {
       method: 'PUT',
       body: JSON.stringify(weddingData),
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async deleteWedding(id: number, token?: string) {
+  async deleteWedding(id: number) {
     return this.request(`/weddings/${id}`, {
       method: 'DELETE',
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
   // Guests - Updated to support token parameter
-  async addGuest(guestData: any, token?: string) {
+  async addGuest(guestData: any) {
     return this.request('/guests/', {
       method: 'POST',
       body: JSON.stringify(guestData),
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async getGuests(weddingId: number, token?: string) {
-    return this.request(`/guests/?wedding_id=${weddingId}`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-    });
+  async getGuests(weddingId: number) {
+    return this.request(`/guests/?wedding_id=${weddingId}`);
   }
 
-  async updateGuest(guestId: number, guestData: any, token?: string) {
+  async updateGuest(guestId: number, guestData: any) {
     return this.request(`/guests/${guestId}`, {
       method: 'PUT',
       body: JSON.stringify(guestData),
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async deleteGuest(guestId: number, token?: string) {
+  async deleteGuest(guestId: number) {
     return this.request(`/guests/${guestId}`, {
       method: 'DELETE',
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async sendInvitation(guestId: number, token?: string) {
+  async sendInvitation(guestId: number) {
     return this.request(`/guests/${guestId}/send-invitation`, {
       method: 'POST',
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
-  async getGuestStatistics(weddingId: number, token?: string) {
-    return this.request(`/guests/statistics?wedding_id=${weddingId}`, {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-    });
+  async getGuestStatistics(weddingId: number) {
+    return this.request(`/guests/statistics?wedding_id=${weddingId}`);
   }
 
   // Vendors
@@ -283,17 +264,14 @@ export class ApiClient {
   }
 
   // Cart
-  async getCartItems(token?: string) {
-    return this.request('/cart/', {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-    });
+  async getCartItems() {
+    return this.request('/cart/');
   }
 
-  async addToCart(cartItem: any, token?: string) {
+  async addToCart(cartItem: any) {
     return this.request('/cart/', {
       method: 'POST',
       body: JSON.stringify(cartItem),
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     });
   }
 
@@ -310,10 +288,8 @@ export class ApiClient {
     });
   }
 
-  async getCartSummary(token?: string) {
-    return this.request('/cart/summary', {
-      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-    });
+  async getCartSummary() {
+    return this.request('/cart/summary');
   }
 
   // Reviews
