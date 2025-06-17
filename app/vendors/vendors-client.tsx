@@ -67,21 +67,24 @@ export default function VendorsClient() {
       // Load vendors
       const vendorsData = await apiClient.getVendors() as Vendor[];
       setVendors(vendorsData);
+      console.log(vendorsData)
 
       // Load categories
       const categoriesData = await apiClient.getVendorCategories() as CategoriesResponse;
       setCategories(categoriesData.categories || []);
+      console.log(categoriesData)
 
       // Load cities
       const citiesData = await apiClient.getVendorCities() as CitiesResponse;
       setCities(citiesData.cities || []);
+      console.log(citiesData)
     }, setLoading);
   };
 
   const addToWishlist = async (vendorId: number) => {
     try {
-      // This would typically add to wishlist via API
-      toast.success('Added to wishlist!');
+      // TODO: This would typically add to wishlist via API
+      toast.success('Need to Add to wishlist!');
     } catch (error) {
       handleApiError(error, 'Failed to add to wishlist');
     }
@@ -295,7 +298,7 @@ export default function VendorsClient() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <span className="text-sm font-medium">{vendor.rating?.toFixed(1) || 'N/A'}</span>
+                      <span className="text-sm font-medium">{vendor.rating || 'N/A'}</span>
                     </div>
                   </div>
                   <div className="flex items-center text-sm text-gray-600 mb-2">

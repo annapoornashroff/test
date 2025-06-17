@@ -46,7 +46,6 @@ export default function VendorDetailClient() {
       // If user is logged in, load their weddings
       if (user) {
         try {
-          const token = await user.getIdToken();
           const weddingsData = await apiClient.getWeddings();
           const typedWeddingsData = weddingsData as WeddingProject[];
           setWeddings(typedWeddingsData);
@@ -301,7 +300,7 @@ export default function VendorDetailClient() {
 
               <div className="flex items-center text-gray-600 mb-4">
                 <Star className="w-5 h-5 mr-1 text-yellow-500 fill-yellow-500" />
-                <span className="text-md font-semibold">{vendor.rating?.toFixed(1) || 'N/A'}</span>
+                <span className="text-md font-semibold">{vendor.rating || 'N/A'}</span>
                 <span className="ml-2">({vendor.review_count} reviews)</span>
                 <span className="mx-3 text-gray-400">|</span>
                 <MapPin className="w-5 h-5 mr-1" />

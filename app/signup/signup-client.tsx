@@ -33,7 +33,6 @@ export default function SignupClient() {
 
   // Redirect logic for already authenticated users
   useEffect(() => {
-    console.log('Signup', user, userProfile);
     if (!loading && user && userProfile) {
       const redirect = searchParams.get('redirect');
       const referrer = typeof window !== 'undefined' ? document.referrer : '';

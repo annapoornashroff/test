@@ -65,7 +65,6 @@ export class ApiClient {
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    console.log(`token length=${this.token?.length}`)
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
