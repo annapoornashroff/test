@@ -54,6 +54,7 @@ export default function DashboardClient() {
       // Load wedding projects
       const projectsData = (await apiClient.getWeddings()) as WeddingProject[];
       setWeddingProjects(projectsData);
+      console.log('weddingData', projectsData)
       
       if (projectsData.length > 0) {
         setActiveProject(projectsData[0]);
@@ -136,12 +137,22 @@ export default function DashboardClient() {
                   Feel free to reach out to us.
                 </p>
                 <div className="flex items-center space-x-3 text-gray-700">
-                  <Phone className="w-5 h-5 text-primary" />
-                  <span>+91 98765 43210</span>
+                  <a 
+                    href="tel:+919013806803" 
+                    className="hover:text-primary transition-colors flex items-center"
+                    aria-label="Call support at +91 90138 06803"
+                  >
+                    <Phone className="w-5 h-5 text-primary" />
+                  </a>
                 </div>
                 <div className="flex items-center space-x-3 text-gray-700">
-                  <Mail className="w-5 h-5 text-primary" />
-                  <span>support@forevernco.com</span>
+                  <a 
+                    href="mailto:hello@forevernco.com" 
+                    className="hover:text-primary transition-colors flex items-center"
+                    aria-label="Email support at hello@forevernco.com"
+                  >
+                    <Mail className="w-5 h-5 text-primary" />
+                  </a>
                 </div>
               </CardContent>
             </Card>
@@ -235,7 +246,6 @@ export default function DashboardClient() {
           </div>
 
           <ActiveProjectDetails activeProject={activeProject} user={user} />
-
         </div>
       </div>
     </div>

@@ -58,7 +58,7 @@ export default function CartItemClient({
 
             <div className="flex items-center text-sm text-gray-600 mb-2">
               <MapPin className="w-4 h-4 mr-1" />
-              {item.vendor?.city || 'City'}
+              {item.vendor?.city || 'New Delhi'}
               <span className="mx-2">•</span>
               <Star className="w-4 h-4 mr-1 text-yellow-500" />
               {item.vendor?.rating || '4.5'}

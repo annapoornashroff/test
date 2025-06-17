@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Mail, Calendar, Heart, ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { User, Mail, Calendar, Heart, ArrowLeft, Check, Loader2, Users, IndianRupee } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient, handleApiError } from '@/lib/api-client';
@@ -14,6 +14,10 @@ import { useAuth } from '@/lib/auth-context';
 
 const events = [
   'Haldi', 'Mehendi', 'Sangeet', 'Engagement', 'Wedding', 'Reception', 'Tilak', 'Roka'
+];
+
+const categories = [
+  'Venue', 'Photography', 'Catering', 'Decoration', 'Makeup Artist', 'Anchor', 'Choreographer', 'Photo Albums'
 ];
 
 export default function SignupClient() {
@@ -28,7 +32,11 @@ export default function SignupClient() {
     city: '',
     weddingDate: '',
     isDateFixed: false,
-    selectedEvents: [] as string[]
+    selectedEvents: [] as string[],
+    duration: 2,
+    estimatedGuests: 200,
+    budget: 1000000,
+    selectedCategories: [] as string[]
   });
 
   // Redirect logic for already authenticated users
@@ -73,6 +81,15 @@ export default function SignupClient() {
     }));
   };
 
+  const toggleCategory = (category: string) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedCategories: prev.selectedCategories.includes(category)
+        ? prev.selectedCategories.filter(c => c !== category)
+        : [...prev.selectedCategories, category]
+    }));
+  };
+
   const handleSubmit = async () => {
     setSignupLoading(true);
     try {
@@ -80,6 +97,13 @@ export default function SignupClient() {
         name: formData.name,
         email: formData.email,
         city: formData.city,
+        wedding_date: formData.weddingDate ? new Date(formData.weddingDate).toISOString() : '',
+        is_date_fixed: formData.isDateFixed,
+        events: formData.selectedEvents,
+        duration: formData.duration,
+        estimated_guests: formData.estimatedGuests,
+        budget: formData.budget,
+        categories: formData.selectedCategories
       };
 
       await apiClient.createUserProfile(userData);
@@ -222,8 +246,22 @@ export default function SignupClient() {
                       onChange={(e) => setFormData(prev => ({ ...prev, isDateFixed: e.target.checked }))}
                       className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
                     />
-                    <span className="text-gray-700">Wedding date is confirmed</span>
+                    <span className="text-gray-700">Date is Fixed?</span>
                   </label>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Wedding Duration (Days)
+                    </label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max="7"
+                      value={formData.duration}
+                      onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+                      className="h-12"
+                    />
+                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-4">
@@ -244,6 +282,59 @@ export default function SignupClient() {
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-4">
+                      Service Categories
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {categories.map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => toggleCategory(category)}
+                          className={`p-3 rounded-lg border-2 transition-all ${
+                            formData.selectedCategories.includes(category)
+                              ? 'border-gold bg-gold text-white'
+                              : 'border-gray-200 hover:border-gold'
+                          }`}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Users className="w-4 h-4 inline mr-2" />
+                      Estimated Guests: {formData.estimatedGuests}
+                    </label>
+                    <input
+                      type="range"
+                      min="50"
+                      max="1000"
+                      step="50"
+                      value={formData.estimatedGuests}
+                      onChange={(e) => setFormData(prev => ({ ...prev, estimatedGuests: parseInt(e.target.value) }))}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <IndianRupee className="w-4 h-4 inline mr-2" />
+                      Estimated Budget: ₹{formData.budget.toLocaleString('en-IN')}
+                    </label>
+                    <input
+                      type="range"
+                      min="100000"
+                      max="5000000"
+                      step="100000"
+                      value={formData.budget}
+                      onChange={(e) => setFormData(prev => ({ ...prev, budget: parseInt(e.target.value) }))}
+                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
                   </div>
 
                   <div className="flex space-x-3">
