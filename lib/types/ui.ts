@@ -250,7 +250,7 @@ export interface FamilyMember {
   relationship: string;
   phoneNumber: string;
   email?: string;
-  role: 'decision_maker' | 'participant' | 'observer';
+  role: 'participant' | 'organizer';
 }
 
 export interface WeddingProject {

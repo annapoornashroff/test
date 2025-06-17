@@ -150,6 +150,7 @@ export interface ReviewData {
 
 export interface ReviewResponse extends ReviewData {
   id: string;
+  status: 'pending' | 'approved' | 'rejected';
 }
 
 export interface ReviewsResponse {

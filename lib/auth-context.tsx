@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const profile = await apiClient.getCurrentUser();
         setUserProfile(profile);
       } catch (error) {
-        if ((error as ApiError).status === 401 && typeof window !== 'undefined' && !window.location.href.includes('/signup')) {
+        if ((error as ApiError).status === 401 && typeof window !== 'undefined' && !window.location.href.includes('/signup') && !window.location.href.includes('/login')) {
           apiClient.clearToken(); // Clear API token
           toast.error('Session expired. Please login again.');
           await signOut(auth);

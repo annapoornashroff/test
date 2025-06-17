@@ -11,7 +11,8 @@ export const mockReviews: ReviewResponse[] = [
     relative_time_description: '2 months ago',
     time: 1615000000,
     wedding_date: '2024-03-15',
-    city: 'New York'
+    city: 'New York',
+    status: 'approved',
   },
   {
     id: '2',
@@ -23,9 +24,10 @@ export const mockReviews: ReviewResponse[] = [
     relative_time_description: '1 month ago',
     time: 1616000000,
     wedding_date: '2024-03-16',
-    city: 'Los Angeles'
-  }
-]
+    city: 'Los Angeles',
+    status: 'approved',
+  },
+];
 
 export const mockBusinessRating: BusinessRating = {
   rating: 4.5,

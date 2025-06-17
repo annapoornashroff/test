@@ -1,16 +1,20 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { Star } from 'lucide-react';
+import { Star, Check, X } from 'lucide-react';
 import Image from 'next/image';
 import { type ReviewResponse } from '@/lib/types/api';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface ReviewCardProps {
   review: ReviewResponse;
   isActive?: boolean;
   className?: string;
+  showApproval?: boolean;
+  onApprove?: (reviewId: string) => void;
+  onReject?: (reviewId: string) => void;
 }
 
-export function ReviewCard({ review, isActive = false, className }: ReviewCardProps) {
+export function ReviewCard({ review, isActive = false, className, showApproval, onApprove, onReject }: ReviewCardProps) {
   const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -99,6 +103,29 @@ export function ReviewCard({ review, isActive = false, className }: ReviewCardPr
               </div>
             )}
             <p className="mt-2 text-gray-600 line-clamp-3">{review.text}</p>
+
+            {showApproval && (
+              <div className="flex space-x-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onApprove?.(review.id)}
+                  disabled={review.status === 'approved'}
+                  className="text-green-600 hover:text-green-800"
+                >
+                  <Check className="w-4 h-4 mr-1" /> Approve
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onReject?.(review.id)}
+                  disabled={review.status === 'rejected'}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <X className="w-4 h-4 mr-1" /> Reject
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

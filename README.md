@@ -165,6 +165,16 @@ Instead of SendGrid, we now use Gmail SMTP for email notifications:
 
 **All frontend pages have been successfully implemented with production-ready designs:**
 
+### Modularization and Component Restructuring
+- **Approach**: Client-side components have been extensively refactored into a modular and reusable structure, enhancing maintainability, scalability, and developer experience.
+- **Key Principles**:
+    - **Separation of Concerns**: UI logic, data fetching, and state management are distinctly separated.
+    - **Reusable UI Components**: Utilizing `shadcn/ui` and custom components for consistent and efficient UI development.
+    - **Dedicated Hooks**: Custom React hooks (`useAuth`, `useCart`, `useProtectedRoute`, etc.) centralize and abstract complex logic.
+    - **API Client Layer**: A dedicated `api-client.ts` for streamlined and type-safe API interactions.
+    - **Type Definitions**: Comprehensive TypeScript type definitions (`lib/types/ui.ts`, `lib/types/api.ts`) for robust type checking across the application.
+- **Benefits**: Improved code organization, easier debugging, faster development of new features, and enhanced team collaboration.
+
 1. **Landing Page** (`/`) - ✅ DONE
 2. **Planning Page** (`/planning`) - ✅ DONE + 🔗 **API Integrated**
 3. **Signup Page** (`/signup`) - ✅ DONE + 🔗 **API Integrated**
@@ -706,7 +716,6 @@ psql -d your_database_name -f backend/migrations/001_add_relationship_status.sql
 - Add relationship history tracking
 - Add relationship search and filtering
 - Add relationship analytics
-- Add relationship recommendations
 - Add relationship import/export
 - Add relationship templates
 - Add relationship validation rules
@@ -720,3 +729,33 @@ psql -d your_database_name -f backend/migrations/001_add_relationship_status.sql
 - Add relationship security measures
 - Add relationship performance optimization
 - Add relationship scalability features
+```
+
+### 🚀 Next.js Performance Optimizations: Deoptimization Resolution
+
+To enhance application performance and resolve Next.js deoptimization warnings, a comprehensive refactoring effort was undertaken to convert client-side pages into server components where appropriate, extracting client-specific logic into dedicated client components. This ensures optimal server-side rendering and reduces client-side bundle size.
+
+#### **Pages Refactored for Server-Side Rendering:**
+
+1.  **Landing Page** (`/`): The `HeroSection` component was refactored to be a server component, with its interactive elements moved to a new `HeroSectionClient` component.
+2.  **Admin Reviews Page** (`/admin/reviews`): The main page was converted to a server component, with client-side functionality moved to `ReviewsClient`.
+3.  **Dashboard Page** (`/dashboard`): Refactored into a server component, with interactive elements encapsulated in `DashboardClient`.
+4.  **Cart Page** (`/cart`): The main cart page was structured as a server component, with multiple UI sections (header, summary, planning progress, quick links, and individual cart items) extracted into dedicated server or client components (`CartHeader`, `CartSummaryCard`, `PlanningProgressCard`, `QuickLinksCard`, `CartItemClient`) to minimize client-side JavaScript.
+5.  **Guest List Page** (`/guests`): Converted to a server component, with client-side logic moved to `GuestsClient`.
+6.  **Profile Page** (`/profile`): Refactored into a server component, with interactive features handled by `ProfileClient`.
+7.  **Public Reviews Page** (`/reviews`): The main page was converted to a server component, with client-side functionality moved to `ReviewsClient`.
+8.  **Relationships Page** (`/relationships`): Refactored into a server component, with interactive elements encapsulated in `RelationshipsClient`.
+9.  **Signup Page** (`/signup`): Converted to a server component, with client-side logic moved to `SignupClient`.
+
+This refactoring significantly improves initial page load times and overall application responsiveness by leveraging Next.js server components more effectively.
+
+### 📦 Reviews Module Consolidation & Component Reusability
+
+Initially, two distinct implementations existed for displaying reviews: an administrative view (`/admin/reviews`) and a public-facing customer view (`/reviews`). While their core functionalities remain separate due to differing feature sets (admin functions vs. public display and submission), efforts have been made to consolidate shared UI logic for improved modularity and maintainability.
+
+#### **Key Changes:**
+
+-   **Shared `useReviews` Hook**: Both review implementations now leverage a centralized `useReviews` hook, ensuring consistent data fetching and state management for review-related data.
+-   **UI Component Reusability**: The `admin/reviews/reviews-client.tsx` component was refactored to utilize existing, reusable UI components such as `ReviewCard` for displaying individual reviews and `ReviewStats` for presenting review statistics. This reduces code duplication and streamlines future UI updates across both review sections.
+
+This approach ensures that while the distinct administrative and public functionalities are preserved, the underlying UI components are harmonized, leading to a more efficient and maintainable codebase.
