@@ -1,13 +1,12 @@
 // Enhanced API client with comprehensive error handling and real-time data fetching
 import { toast } from 'sonner';
-import { 
-  UserResponse, 
+import {  
   ReviewsResponse, 
   ReviewResponse, 
   BusinessRating, 
   ReviewStats,
-  CreateUserProfileData,
-  ProfileStatusResponse
+  ProfileStatusResponse,
+  UserProfile
 } from '@/lib/types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
@@ -118,7 +117,7 @@ export class ApiClient {
   }
 
   // Authentication - MERGED FROM api.ts
-  async createUserProfile(data: CreateUserProfileData) {
+  async createUserProfile(data: UserProfile) {
     return this.request('/auth/firebase-signup', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -364,8 +363,8 @@ export class ApiClient {
   }
 
   // User Management
-  async getUserByPhone(phoneNumber: string): Promise<UserResponse | null> {
-    const response = await this.request<{ data: UserResponse }>(`/users/phone/${phoneNumber}`);
+  async getUserByPhone(phoneNumber: string): Promise<UserProfile | null> {
+    const response = await this.request<{ data: UserProfile }>(`/users/phone/${phoneNumber}`);
     return response.data;
   }
 

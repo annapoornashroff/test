@@ -11,6 +11,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
+import { SUPPORTED_CITIES, type SupportedCity, CREATOR_ROLES } from '@/lib/constants';
+import { UserProfile, WeddingData } from '@/lib/types/api';
+import type { CreatorRole } from '@/lib/types/api';
+import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 const events = [
   'Haldi', 'Mehendi', 'Sangeet', 'Engagement', 'Wedding', 'Reception', 'Tilak', 'Roka'
@@ -27,16 +32,19 @@ export default function SignupClient() {
   const [step, setStep] = useState(1);
   const [signupLoading, setSignupLoading] = useState(false);
   const [formData, setFormData] = useState({
+    phone_number: user?.phoneNumber,
     name: '',
     email: '',
-    city: '',
+    cities: [] as SupportedCity[],
+    title: '',
     weddingDate: '',
-    isDateFixed: false,
+    isDateFixed: true,
     selectedEvents: [] as string[],
     duration: 2,
     estimatedGuests: 200,
     budget: 1000000,
-    selectedCategories: [] as string[]
+    selectedCategories: [] as string[],
+    role: '' as CreatorRole
   });
 
   // Redirect logic for already authenticated users
@@ -90,20 +98,46 @@ export default function SignupClient() {
     }));
   };
 
+  const toggleCity = (city: SupportedCity) => {
+    setFormData(prev => ({
+      ...prev,
+      cities: prev.cities.includes(city)
+        ? prev.cities.filter(c => c !== city)
+        : [...prev.cities, city]
+    }));
+  };
+
+  const removeCity = (city: SupportedCity) => {
+    setFormData(prev => ({
+      ...prev,
+      cities: prev.cities.filter(c => c !== city)
+    }));
+  };
+
   const handleSubmit = async () => {
+    if (!formData.cities.length) {
+      toast.error('Please select at least one city');
+      return;
+    }
+
     setSignupLoading(true);
     try {
-      const userData = {
+      const userData: UserProfile = {
         name: formData.name,
         email: formData.email,
-        city: formData.city,
-        wedding_date: formData.weddingDate ? new Date(formData.weddingDate).toISOString() : '',
-        is_date_fixed: formData.isDateFixed,
-        events: formData.selectedEvents,
-        duration: formData.duration,
-        estimated_guests: formData.estimatedGuests,
-        budget: formData.budget,
-        categories: formData.selectedCategories
+        city: formData.cities[0] || '',
+        wedding: [{
+          creator_role: formData.role as CreatorRole,
+          title: formData.title,
+          date: formData.weddingDate ? new Date(formData.weddingDate).toISOString() : '',
+          cities: formData.cities,
+          is_date_fixed: formData.isDateFixed,
+          events: formData.selectedEvents,
+          duration: formData.duration,
+          estimated_guests: formData.estimatedGuests,
+          budget: formData.budget,
+          categories: formData.selectedCategories
+        }]
       };
 
       await apiClient.createUserProfile(userData);
@@ -205,18 +239,81 @@ export default function SignupClient() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      City
+                      Cities
                     </label>
-                    <Input
-                      placeholder="City, State"
-                      value={formData.city}
-                      onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                      className="h-12"
-                    />
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formData.cities.map((city) => (
+                        <Badge key={city} variant="secondary" className="flex items-center gap-1 pr-1">
+                          {city}
+                          <button
+                            type="button"
+                            aria-label={`Remove ${city}`}
+                            className="ml-1 text-xs text-gray-500 hover:text-red-500 focus:outline-none"
+                            onClick={() => removeCity(city)}
+                          >
+                            <span className="sr-only">Remove</span>
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                      {formData.cities.length === 0 && (
+                        <span className="text-gray-400 text-sm">No cities selected</span>
+                      )}
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="flex items-center w-full h-12 border rounded-md px-3 bg-white text-sm focus:ring-2 focus:ring-primary focus:outline-none"
+                        >
+                          <span className="flex-1 text-left">
+                            {formData.cities.length > 0 ? 'Edit Cities' : 'Select Cities'}
+                          </span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="p-0 w-full min-w-[200px]">
+                        <div className="max-h-60 overflow-y-auto divide-y">
+                          {SUPPORTED_CITIES.map((city) => (
+                            <button
+                              key={city}
+                              type="button"
+                              className={`flex items-center w-full px-4 py-2 text-sm hover:bg-primary/10 focus:bg-primary/20 transition-colors ${formData.cities.includes(city) ? 'font-semibold text-primary' : ''}`}
+                              onClick={() => toggleCity(city)}
+                            >
+                              <span className="flex-1 text-left">{city}</span>
+                              {formData.cities.includes(city) && <span className="ml-2">✓</span>}
+                            </button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      I am the <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={formData.role}
+                      onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as CreatorRole }))}
+                      className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      required
+                    >
+                      <option value="">Select your role</option>
+                      {CREATOR_ROLES.map(({ value, label }) => (
+                        <option key={value} value={value}>{label}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <Button 
-                    onClick={() => setStep(2)}
+                    onClick={() => {
+                      if (!formData.role) {
+                        toast.error('Please select your role');
+                        return;
+                      }
+                      setStep(2);
+                    }}
                     className="w-full h-12 bg-primary hover:bg-primary-600 rounded-full"
                   >
                     Continue
@@ -226,6 +323,18 @@ export default function SignupClient() {
 
               {step === 2 && (
                 <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Wedding Title
+                    </label>
+                    <Input
+                      placeholder="e.g. Rohan & Priya's Dream Wedding"
+                      value={formData.title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      className="h-12"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Give your wedding a unique name or title (optional)</p>
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <Calendar className="w-4 h-4 inline mr-2" />

@@ -14,6 +14,7 @@ import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useCity } from '@/lib/city-context';
 import { type Vendor, type ApiResponse, type CategoriesResponse, type CitiesResponse } from '@/lib/types/ui';
+import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
 
 const categoryIcons: Record<string, any> = {
   'Photography': Camera,
@@ -27,7 +28,6 @@ const categoryIcons: Record<string, any> = {
 export default function VendorsClient() {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [cities, setCities] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   
@@ -67,17 +67,10 @@ export default function VendorsClient() {
       // Load vendors
       const vendorsData = await apiClient.getVendors() as Vendor[];
       setVendors(vendorsData);
-      console.log(vendorsData)
 
       // Load categories
       const categoriesData = await apiClient.getVendorCategories() as CategoriesResponse;
       setCategories(categoriesData.categories || []);
-      console.log(categoriesData)
-
-      // Load cities
-      const citiesData = await apiClient.getVendorCities() as CitiesResponse;
-      setCities(citiesData.cities || []);
-      console.log(citiesData)
     }, setLoading);
   };
 
@@ -203,11 +196,11 @@ export default function VendorsClient() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                 <select
                   value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value)}
+                  onChange={(e) => setSelectedCity(e.target.value as SupportedCity | 'All')}
                   className="w-full h-10 border border-gray-300 rounded-lg px-3"
                 >
                   <option value="All">All Cities</option>
-                  {cities.map(city => (
+                  {SUPPORTED_CITIES.map(city => (
                     <option key={city} value={city}>{city}</option>
                   ))}
                 </select>

@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, ArrowRight, Star, MapPin, Camera, Utensils, Palette } from 'lucide-react';
 import Image from 'next/image';
 import { useNavigation } from '@/lib/navigation-context';
+import { SUPPORTED_CITIES } from '@/lib/constants';
 
 const categories = [
   { name: 'Photography', icon: Camera, color: 'bg-blue-500' },
@@ -12,36 +13,36 @@ const categories = [
   { name: 'Decoration', icon: Palette, color: 'bg-purple-500' },
 ];
 
-const vendors = [
+const featuredVendors = [
   {
     id: 1,
-    name: 'Royal Photography Studio',
-    category: 'Photography',
-    city: 'Mumbai',
+    name: 'Royal Palace',
+    category: 'Venue',
     rating: 4.8,
-    reviews: 156,
-    price: '₹50,000 - ₹2,00,000',
-    image: 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg'
+    reviews: 128,
+    image: 'https://images.pexels.com/photos/1024993/pexels-photo-1024993.jpeg',
+    city: SUPPORTED_CITIES[0], // Mumbai
+    price: '₹2,00,000 onwards'
   },
   {
     id: 2,
-    name: 'Spice Garden Catering',
+    name: 'Delhi Delights',
     category: 'Catering',
-    city: 'Delhi',
     rating: 4.9,
-    reviews: 203,
-    price: '₹800 - ₹1,500 per plate',
-    image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg'
+    reviews: 256,
+    image: 'https://images.pexels.com/photos/1444442/pexels-photo-1444442.jpeg',
+    city: SUPPORTED_CITIES[1], // Delhi
+    price: '₹1,500 per plate'
   },
   {
     id: 3,
-    name: 'Elegant Decorators',
+    name: 'Bangalore Bliss',
     category: 'Decoration',
-    city: 'Bangalore',
     rating: 4.7,
     reviews: 89,
-    price: '₹1,00,000 - ₹5,00,000',
-    image: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg'
+    image: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg',
+    city: SUPPORTED_CITIES[2], // Bangalore
+    price: '₹3,00,000 onwards'
   }
 ];
 
@@ -79,7 +80,7 @@ export default function VendorSectionClient() {
 
         {/* Vendor Cards */}
         <div className="grid md:grid-cols-3 gap-8 mb-12">
-          {vendors.map((vendor) => (
+          {featuredVendors.map((vendor) => (
             <Card key={vendor.id} className="bg-pink-100 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="aspect-square relative overflow-hidden">
                 <Image

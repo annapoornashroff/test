@@ -193,7 +193,12 @@ export default function DashboardClient() {
                       <Calendar className="w-5 h-5 mr-3 text-gray-500" />
                       <div>
                         <p className="font-medium">Wedding Date:</p>
-                        <p>{user.weddingDate ? new Date(user.weddingDate).toLocaleDateString() : 'Not set'}</p>
+                        {/* Ensure user.wedding is an array and has at least one element before accessing date */}
+                        {(() => {
+                          const weddings = user?.wedding;
+                          const lastWedding = Array.isArray(weddings) && weddings.length > 0 ? weddings[weddings.length - 1] : undefined;
+                          return lastWedding?.date ? new Date(lastWedding.date).toLocaleDateString() : 'Not set';
+                        })()}
                       </div>
                     </div>
                     <div className="flex items-center">

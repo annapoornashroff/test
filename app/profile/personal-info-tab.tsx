@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { User, Mail, Edit, Save, X, Phone } from 'lucide-react';
 import { type PersonalInfo } from '@/lib/types/ui';
+import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
 
 interface PersonalInfoTabProps {
   personalInfo: PersonalInfo;
@@ -82,12 +83,18 @@ export default function PersonalInfoTab({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             City
           </label>
-          <Input
+          <select
             value={personalInfo.city}
-            onChange={(e) => setPersonalInfo({ ...personalInfo, city: e.target.value })}
-            readOnly={!editingPersonal}
-            className={!editingPersonal ? 'border-transparent bg-transparent shadow-none' : ''}
-          />
+            onChange={(e) => setPersonalInfo({ ...personalInfo, city: e.target.value as SupportedCity })}
+            className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          >
+            <option value="">Select a city</option>
+            {SUPPORTED_CITIES.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
         </div>
       </CardContent>
     </Card>

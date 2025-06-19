@@ -176,18 +176,17 @@ Instead of SendGrid, we now use Gmail SMTP for email notifications:
 - **Benefits**: Improved code organization, easier debugging, faster development of new features, and enhanced team collaboration.
 
 1. **Landing Page** (`/`) - ✅ DONE
-2. **Planning Page** (`/planning`) - ✅ DONE + 🔗 **API Integrated**
-3. **Signup Page** (`/signup`) - ✅ DONE + 🔗 **API Integrated**
-4. **Login Page** (`/login`) - ✅ DONE + 🔗 **API Integrated**
-5. **Dashboard Page** (`/dashboard`) - ✅ DONE + 🔗 **API Integrated**
-6. **Vendors Page** (`/vendors`) - ✅ DONE + 🔗 **API Integrated**
-7. **Individual Vendor Page** (`/vendors/[id]`) - ✅ DONE + 🔗 **API Integrated**
-8. **Book Visit Page** (`/book-visit/[vendorId]`) - ✅ DONE + 🔗 **API Integrated**
-9. **Cart Page** (`/cart`) - ✅ DONE + 🔗 **API Integrated**
-10. **Wishlist Page** (`/wishlist`) - ✅ DONE + 🔗 **API Integrated**
-11. **Guest List Page** (`/guests`) - ✅ DONE + 🔗 **API Integrated**
-12. **Profile Page** (`/profile`) - ✅ DONE + 🔗 **API Integrated**
-13. **Package Page** (`/packages`) - ✅ DONE + 🔗 **API Integrated**
+2. **Signup Page** (`/signup`) - ✅ DONE + 🔗 **API Integrated**
+3. **Login Page** (`/login`) - ✅ DONE + 🔗 **API Integrated**
+4. **Dashboard Page** (`/dashboard`) - ✅ DONE + 🔗 **API Integrated**
+5. **Vendors Page** (`/vendors`) - ✅ DONE + 🔗 **API Integrated**
+6. **Individual Vendor Page** (`/vendors/[id]`) - ✅ DONE + 🔗 **API Integrated**
+7. **Book Visit Page** (`/book-visit/[vendorId]`) - ✅ DONE + 🔗 **API Integrated**
+8. **Cart Page** (`/cart`) - ✅ DONE + 🔗 **API Integrated**
+9. **Wishlist Page** (`/wishlist`) - ✅ DONE + 🔗 **API Integrated**
+10. **Guest List Page** (`/guests`) - ✅ DONE + 🔗 **API Integrated**
+11. **Profile Page** (`/profile`) - ✅ DONE + 🔗 **API Integrated**
+12. **Package Page** (`/packages`) - ✅ DONE + 🔗 **API Integrated**
 
 ### 🔧 Backend Implementation Status
 

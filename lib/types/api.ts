@@ -1,3 +1,5 @@
+import { type SupportedCity } from '@/lib/constants';
+
 // API Types
 export interface ApiError {
   message: string;
@@ -6,9 +8,14 @@ export interface ApiError {
 }
 
 // Wedding Types
+export type CreatorRole = 'groom' | 'bride' | 'family' | 'other';
+
 export interface WeddingData {
-  name: string;
-  city: string;
+  id?: number;
+  user_id?: number;
+  creator_role?: CreatorRole;
+  title?: string;
+  cities: SupportedCity[];
   date: string;
   is_date_fixed: boolean;
   duration: number;
@@ -53,22 +60,13 @@ export interface FamilyMember {
 
 // User Types
 export interface UserProfile {
-  id: string;
-  phone_number: string;
+  id?: number;
+  phone_number?: string;
   name?: string;
   email?: string;
-  weddingDate?: Date;
-  isDateFixed?: boolean;
-  events?: string[];
-  city?: string;
-  createdAt: string;
-}
-
-export interface UserResponse {
-  id: number;
-  name: string;
-  phone_number: string;
-  email?: string;
+  city: string;
+  wedding?: WeddingData[];
+  createdAt?: string;
 }
 
 // Auth Types
@@ -81,7 +79,7 @@ export interface TokenResponse {
 export interface VendorData {
   name: string;
   category: string;
-  city: string;
+  city: SupportedCity;
   description: string;
   price_range: {
     min: number;
@@ -145,7 +143,7 @@ export interface ReviewData {
   relative_time_description: string;
   time: number;
   wedding_date: string;
-  city: string;
+  city: SupportedCity;
 }
 
 export interface ReviewResponse extends ReviewData {
@@ -184,13 +182,4 @@ export interface ProfileStatusResponse {
   exists: boolean;
   profile_complete: boolean;
   user?: UserProfile;
-}
-
-export interface CreateUserProfileData {
-  name?: string;
-  email?: string;
-  city?: string;
-  weddingDate?: Date;
-  isDateFixed?: boolean;
-  events?: string[];
 }

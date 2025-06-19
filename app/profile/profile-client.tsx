@@ -20,6 +20,7 @@ import ProfileTabs from './profile-tabs';
 import PersonalInfoTab from './personal-info-tab';
 import WeddingProjectsTab from './wedding-projects-tab';
 import FamilyMembersTab from './family-members-tab';
+import { SupportedCity } from '@/lib/constants';
 
 export default function ProfileClient() {
   const [activeTab, setActiveTab] = useState('personal');
@@ -34,7 +35,7 @@ export default function ProfileClient() {
     name: '',
     phoneNumber: '',
     email: '',
-    city: ''
+    city: 'Delhi'
   });
 
   const [projects, setProjects] = useState<WeddingProject[]>([]);
@@ -73,13 +74,13 @@ export default function ProfileClient() {
         name?: string;
         phone_number?: string;
         email?: string;
-        city?: string;
+        city?: SupportedCity;
       };
       setPersonalInfo({
         name: userProfile.name || '',
         phoneNumber: userProfile.phone_number || '',
         email: userProfile.email || '',
-        city: userProfile.city || ''
+        city: userProfile.city || 'Delhi'
       });
       
       // Load wedding projects
@@ -116,8 +117,6 @@ export default function ProfileClient() {
         throw new Error('User not authenticated');
       }
       
-      const token = await user.getIdToken();
-      
       await apiClient.updateUser({
         name: personalInfo.name,
         email: personalInfo.email,
@@ -147,7 +146,6 @@ export default function ProfileClient() {
       }
 
       // First check if user exists
-      const token = await user.getIdToken();
       const existingUser = await apiClient.getUserByPhone(newFamilyMember.phoneNumber);
       
       if (!existingUser) {
@@ -160,13 +158,16 @@ export default function ProfileClient() {
       }
 
       // Create relationship
-      await apiClient.createRelationship({
-        related_user_id: existingUser.id,
-        relationship_type: 'family',
-        relationship_name: newFamilyMember.relationship,
-        is_primary: true,
-        privacy_level: 'private'
-      });
+      // TODO: Poosible future bug
+      if (existingUser.id){
+        await apiClient.createRelationship({
+          related_user_id: existingUser.id,
+          relationship_type: 'family',
+          relationship_name: newFamilyMember.relationship,
+          is_primary: true,
+          privacy_level: 'private'
+        });
+      }
       
       // Add to family members array
       const updatedFamily = [...family, {

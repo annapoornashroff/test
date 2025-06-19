@@ -6,6 +6,7 @@ import { Heart, Trash2, Calendar, MapPin, Star, Clock, AlertCircle, CheckCircle 
 import Image from 'next/image';
 import { type CartItem } from '@/lib/types/ui';
 import React from 'react';
+import { SUPPORTED_CITIES } from '@/lib/constants';
 
 interface CartItemClientProps {
   item: CartItem;
@@ -58,7 +59,7 @@ export default function CartItemClient({
 
             <div className="flex items-center text-sm text-gray-600 mb-2">
               <MapPin className="w-4 h-4 mr-1" />
-              {item.vendor?.city || 'New Delhi'}
+              {item.vendor?.city || SUPPORTED_CITIES[0]}
               <span className="mx-2">•</span>
               <Star className="w-4 h-4 mr-1 text-yellow-500" />
               {item.vendor?.rating || '4.5'}

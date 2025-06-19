@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { useNavigation } from '@/lib/navigation-context';
 import { Loading } from '@/components/ui/loading';
 import { useCity } from '@/lib/city-context';
+import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
 
 const navigationItems = [
   {
@@ -36,8 +37,6 @@ const weddingImages = [
   'https://images.pexels.com/photos/1024994/pexels-photo-1024994.jpeg',
   'https://images.pexels.com/photos/1444443/pexels-photo-1444443.jpeg'
 ];
-
-const cities = ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Kolkata', 'Jaipur', 'Goa'];
 
 export default function HeroSection() {
   const { navigate } = useNavigation();
@@ -91,7 +90,7 @@ export default function HeroSection() {
   };
 
   const handleCitySelect = (city: string) => {
-    setSelectedCity(city);
+    setSelectedCity(city as SupportedCity);
     setShowCityDropdown(false);
   };
 
@@ -189,7 +188,7 @@ export default function HeroSection() {
                 {showCityDropdown && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50">
                     <div className="py-2">
-                      {cities.map((city) => (
+                      {SUPPORTED_CITIES.map((city) => (
                         <button
                           key={city}
                           onClick={() => handleCitySelect(city)}
