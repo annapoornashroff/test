@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ErrorMessage } from '@/components/ui/error-message';
 import { 
@@ -45,7 +44,7 @@ export default function ProfileClient() {
     relationship: '',
     phoneNumber: '',
     email: '',
-    role: 'participant'
+    role: 'PARTICIPANT'
   });
 
   const [showAddFamily, setShowAddFamily] = useState(false);
@@ -165,7 +164,7 @@ export default function ProfileClient() {
           relationship_type: 'family',
           relationship_name: newFamilyMember.relationship,
           is_primary: true,
-          privacy_level: 'private'
+          privacy_level: 'PRIVATE'
         });
       }
       

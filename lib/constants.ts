@@ -2,7 +2,7 @@ import type { CreatorRole } from './types/api';
 
 export const SUPPORTED_CITIES = [
   'DELHI',
-  'BENGALURU',\
+  'BENGALURU',
 ] as const;
 
 export type SupportedCity = typeof SUPPORTED_CITIES[number];

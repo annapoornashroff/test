@@ -284,6 +284,12 @@ Instead of SendGrid, we now use Gmail SMTP for email notifications:
 
 ### 🔄 Recent Updates
 
+#### Enums & Constants Standardization (Latest)
+- **All event, category, city, and creator role values are now UPPERCASE** in the codebase for backend consistency.
+- Updated `WEDDING_EVENTS`, `SERVICE_CATEGORIES`, `SUPPORTED_CITIES`, and `CREATOR_ROLES` in `lib/constants.ts` to use uppercase values.
+- All usages in forms and API submissions (e.g., `WeddingDetailsForm.tsx`) have been updated to use these uppercase values.
+- This standardization ensures reliable backend integration and data validation, preventing case-mismatch issues.
+
 #### Reviews Page Enhancements (Latest)
 - **Infinite Scroll**: Implemented with Intersection Observer
 - **Fallback Support**: "Load More" button for browsers without Intersection Observer
