@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { User, Mail, Phone, Plus, Trash2, Send, Users, Loader2 } from 'lucide-react';
-import { type FamilyMember, type PersonalInfo } from '@/lib/types/ui';
+import { type FamilyMember } from '@/lib/types/ui';
 
 interface FamilyMembersTabProps {
   family: FamilyMember[];
@@ -183,7 +183,7 @@ export default function FamilyMembersTab({
               </label>
               <Select
                 value={newFamilyMember.role}
-                onValueChange={(value) => setNewFamilyMember({ ...newFamilyMember, role: value as 'participant' | 'organizer' })}
+                onValueChange={(value) => setNewFamilyMember({ ...newFamilyMember, role: value as 'PARTICIPANT' | 'ORGANIZER' })}
               >
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select a role" />

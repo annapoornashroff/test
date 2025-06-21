@@ -76,7 +76,7 @@ export default function ProfileClient() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -269,7 +269,7 @@ export default function ProfileClient() {
             )}
 
             {activeTab === 'weddings' && (
-              <WeddingsTab user={user} weddings={weddings} setWeddings={setWeddings} />
+              <WeddingsTab weddings={weddings} />
             )}
 
             {activeTab === 'family' && (

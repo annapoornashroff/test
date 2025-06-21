@@ -191,7 +191,7 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
               className="flex items-center w-full h-12 border rounded-md px-3 bg-white text-sm focus:ring-2 focus:ring-primary focus:outline-none"
             >
               <span className="flex-1 text-left">
-                'Select Cities'
+                Select Cities
               </span>
               <ChevronDown className="w-4 h-4 ml-2" />
             </button>

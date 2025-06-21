@@ -13,8 +13,9 @@ import Image from 'next/image';
 import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useCity } from '@/lib/city-context';
-import { type Vendor, type ApiResponse, type CategoriesResponse, type CitiesResponse } from '@/lib/types/ui';
-import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
+import { type Vendor, type CategoriesResponse } from '@/lib/types/ui';
+import { SUPPORTED_CITIES } from '@/lib/constants';
+import type { CityType } from '@/lib/types/ui';
 
 const categoryIcons: Record<string, any> = {
   'Photography': Camera,
@@ -43,7 +44,8 @@ export default function VendorsClient() {
       
       if (searchQuery) params.search = searchQuery;
       if (selectedCategory !== 'All') params.category = selectedCategory;
-      if (selectedCity !== 'All') params.city = selectedCity;
+      // if (selectedCity !== 'All') params.city = selectedCity;
+      if (selectedCity) params.city = selectedCity;
       
       const vendorsData = await apiClient.getVendors(params) as Vendor[];
       setVendors(vendorsData);
@@ -196,7 +198,7 @@ export default function VendorsClient() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
                 <select
                   value={selectedCity}
-                  onChange={(e) => setSelectedCity(e.target.value as SupportedCity | 'All')}
+                  onChange={(e) => setSelectedCity(e.target.value as CityType)}
                   className="w-full h-10 border border-gray-300 rounded-lg px-3"
                 >
                   <option value="All">All Cities</option>
@@ -230,7 +232,7 @@ export default function VendorsClient() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {categories.map((category) => {
               const IconComponent = categoryIcons[category] || Camera;
-              const vendorCount = vendors.filter(v => v.category === category && (selectedCity === 'All' || v.city === selectedCity)).length;
+              const vendorCount = vendors.filter(v => v.category === category && (selectedCity === 'All' || (v.city as unknown as CityType) === selectedCity)).length;
               
               return (
                 <button
@@ -262,7 +264,7 @@ export default function VendorsClient() {
           {vendors
             .filter(vendor => 
               (selectedCategory === 'All' || vendor.category === selectedCategory) &&
-              (selectedCity === 'All' || vendor.city === selectedCity) &&
+              (selectedCity === 'All' || (vendor.city as unknown as CityType) === selectedCity) &&
               (vendor.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                vendor?.services?.some(service => service.toLowerCase().includes(searchQuery.toLowerCase()))
               )

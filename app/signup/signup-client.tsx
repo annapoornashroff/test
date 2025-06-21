@@ -11,8 +11,8 @@ import { useRouter } from 'next/navigation';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
-import { SUPPORTED_CITIES, type SupportedCity, CREATOR_ROLES } from '@/lib/constants';
-import type { CreatorRole } from '@/lib/types/api';
+import { SUPPORTED_CITIES, CREATOR_ROLES } from '@/lib/constants';
+
 
 export default function SignupClient() {
   const router = useRouter();
@@ -21,13 +21,13 @@ export default function SignupClient() {
   const [formData, setFormData] = useState<{
     name: string;
     email: string;
-    city: SupportedCity;
-    role: CreatorRole;
+    city: (typeof SUPPORTED_CITIES)[number];
+    role: (typeof CREATOR_ROLES)[number];
   }>({
     name: '',
     email: '',
     city: SUPPORTED_CITIES[0],
-    role: '' as CreatorRole,
+    role: CREATOR_ROLES[0],
   });
 
   // Redirect logic for already authenticated users
@@ -152,7 +152,7 @@ export default function SignupClient() {
                   </label>
                   <select
                     value={formData.city}
-                    onChange={e => setFormData(prev => ({ ...prev, city: e.target.value as SupportedCity }))}
+                    onChange={e => setFormData(prev => ({ ...prev, city: e.target.value as (typeof SUPPORTED_CITIES)[number] }))}
                     className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     required
                   >
@@ -169,13 +169,13 @@ export default function SignupClient() {
                   </label>
                   <select
                     value={formData.role}
-                    onChange={e => setFormData(prev => ({ ...prev, role: e.target.value as CreatorRole }))}
+                    onChange={e => setFormData(prev => ({ ...prev, role: e.target.value as (typeof CREATOR_ROLES)[number] }))}
                     className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     required
                   >
                     <option value="">Select your role</option>
-                    {CREATOR_ROLES.map(({ value, label }) => (
-                      <option key={value} value={value}>{label}</option>
+                    {CREATOR_ROLES.map((value) => (
+                      <option key={value} value={value}>{value}</option>
                     ))}
                   </select>
                 </div>

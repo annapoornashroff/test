@@ -17,7 +17,8 @@ import { useAuth } from '@/lib/hooks/useAuth';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
-import { type WeddingProject, type Vendor } from '@/lib/types/ui';
+import { type Vendor } from '@/lib/types/ui';
+import { type WeddingData } from '@/lib/types/api';
 import { useCart } from '@/lib/hooks/useCart';
 
 export default function VendorDetailClient() {
@@ -26,7 +27,7 @@ export default function VendorDetailClient() {
   const { handleCartAction, loading: cartLoading } = useCart();
   
   const [vendor, setVendor] = useState<Vendor | null>(null);
-  const [weddings, setWeddings] = useState<WeddingProject[]>([]);
+  const [weddings, setWeddings] = useState<WeddingData[]>([]);
   const [selectedWedding, setSelectedWedding] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -47,11 +48,11 @@ export default function VendorDetailClient() {
       if (user) {
         try {
           const weddingsData = await apiClient.getWeddings();
-          const typedWeddingsData = weddingsData as WeddingProject[];
+          const typedWeddingsData = weddingsData as WeddingData[];
           setWeddings(typedWeddingsData);
           
           if (typedWeddingsData.length > 0) {
-            setSelectedWedding(typedWeddingsData[0].id);
+            setSelectedWedding(typedWeddingsData[0].id || null);
             setSelectedDate(new Date(typedWeddingsData[0].date).toISOString().split('T')[0]);
           }
         } catch (error) {
@@ -396,7 +397,7 @@ export default function VendorDetailClient() {
                         ) : (
                           weddings.map(project => (
                             <option key={project.id} value={project.id}>
-                              {project.name}
+                              {project.title}
                             </option>
                           ))
                         )}

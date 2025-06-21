@@ -275,8 +275,11 @@ export interface Package {
   customPrice?: number;
 }
 
-export interface CityContextType {
-  selectedCity: typeof SUPPORTED_CITIES | 'All';
-  setSelectedCity: (city: typeof SUPPORTED_CITIES | 'All') => void;
+// Add or update CityType to match city-context.tsx
+export type CityType = (typeof SUPPORTED_CITIES)[number] | 'All';
+
+export type CityContextType = {
+  selectedCity: CityType;
+  setSelectedCity: (city: CityType) => void;
   clearCity: () => void;
-} 
+}; 

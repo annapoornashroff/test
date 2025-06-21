@@ -9,7 +9,8 @@ import Image from 'next/image';
 import { useNavigation } from '@/lib/navigation-context';
 import { Loading } from '@/components/ui/loading';
 import { useCity } from '@/lib/city-context';
-import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
+import { SUPPORTED_CITIES } from '@/lib/constants';
+import { CityType } from '@/lib/types/ui';
 
 const navigationItems = [
   {
@@ -90,7 +91,7 @@ export default function HeroSection() {
   };
 
   const handleCitySelect = (city: string) => {
-    setSelectedCity(city as SupportedCity);
+    setSelectedCity(city as CityType);
     setShowCityDropdown(false);
   };
 

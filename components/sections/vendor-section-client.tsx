@@ -41,7 +41,7 @@ const featuredVendors = [
     rating: 4.7,
     reviews: 89,
     image: 'https://images.pexels.com/photos/1729931/pexels-photo-1729931.jpeg',
-    city: SUPPORTED_CITIES[2], // Bangalore
+    city: SUPPORTED_CITIES[1], // Bangalore
     price: '₹3,00,000 onwards'
   }
 ];

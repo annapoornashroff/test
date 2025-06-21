@@ -2,13 +2,15 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { type CityContextType } from '@/lib/types/ui';
-import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
+import { type CityContextType, CityType } from '@/lib/types/ui';
+import { SUPPORTED_CITIES } from '@/lib/constants';
 
 const CityContext = createContext<CityContextType | undefined>(undefined);
 
+// TODO : Add support for multiple cities or 'All'
 export function CityProvider({ children }: { children: React.ReactNode }) {
-  const [selectedCity, setSelectedCityState] = useState<SupportedCity | 'All'>('All');
+  // Default to 'All' instead of first city
+  const [selectedCity, setSelectedCityState] = useState<CityType>('All');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -16,32 +18,31 @@ export function CityProvider({ children }: { children: React.ReactNode }) {
   // Initialize city from URL params
   useEffect(() => {
     const cityParam = searchParams.get('city');
-    if (cityParam && SUPPORTED_CITIES.includes(cityParam as SupportedCity)) {
-      setSelectedCityState(cityParam as SupportedCity);
+    if (cityParam === 'All') {
+      setSelectedCityState('All');
+    } else if (cityParam && SUPPORTED_CITIES.includes(cityParam as (typeof SUPPORTED_CITIES)[number])) {
+      setSelectedCityState(cityParam as (typeof SUPPORTED_CITIES)[number]);
     }
   }, [searchParams]);
 
-  const setSelectedCity = (city: string) => {
-    if (city !== 'All' && !SUPPORTED_CITIES.includes(city as SupportedCity)) {
+  // Accept 'All' or a supported city
+  const setSelectedCity = (city: CityType) => {
+    if (city !== 'All' && !SUPPORTED_CITIES.includes(city)) {
       console.error(`Invalid city: ${city}`);
       return;
     }
-    
-    setSelectedCityState(city as SupportedCity);
-    
-    // Update URL with city parameter
+    setSelectedCityState(city);
     const params = new URLSearchParams(searchParams.toString());
     if (city === 'All') {
       params.delete('city');
     } else {
       params.set('city', city);
     }
-    
-    // Preserve other query parameters
     const newUrl = `${pathname}${params.toString() ? `?${params.toString()}` : ''}`;
     router.push(newUrl);
   };
 
+  // Clear city to 'All'
   const clearCity = () => {
     setSelectedCityState('All');
     const params = new URLSearchParams(searchParams.toString());
@@ -50,6 +51,7 @@ export function CityProvider({ children }: { children: React.ReactNode }) {
     router.push(newUrl);
   };
 
+  // Provide context with updated types
   return (
     <CityContext.Provider value={{ selectedCity, setSelectedCity, clearCity }}>
       {children}
