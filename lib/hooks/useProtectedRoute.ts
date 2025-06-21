@@ -5,14 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
 
 export const useProtectedRoute = () => {
-  const { user, userProfile, loading } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && user && !userProfile) {
-      router.replace('/signup');
-    } else if (!loading && !user) {
+    if (!loading && !user) {
       router.replace('/login');
     }
-  }, [user, userProfile, loading, router]);
+  }, [user, loading, router]);
 };
