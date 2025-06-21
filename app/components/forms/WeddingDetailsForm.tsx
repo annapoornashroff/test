@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -39,7 +39,6 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
     categories: [] as string[],
     role: '' as CreatorRole
   });
-
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -47,6 +46,34 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
   function setField<K extends keyof typeof formData>(field: K, value: typeof formData[K]) {
     setFormData(prev => ({ ...prev, [field]: value }));
   }
+
+  // Fetch and set wedding details as form defaults
+  useEffect(() => {
+    // Only fetch if userProfile exists and not already fetching
+    if (!userProfile) return;
+    apiClient.getWeddings()
+      .then((value) => {
+        const projects = value as any[];
+        if (projects && projects.length > 0) {
+          const project = projects[0]; // Use the first wedding project
+          setFormData({
+            cities: project.city ? [project.city] : [],
+            title: project.name || '',
+            date: project.date ? project.date.split('T')[0] : '', // ISO to yyyy-mm-dd
+            is_date_fixed: project.is_date_fixed ?? true,
+            events: project.events || [],
+            duration: project.duration || 2,
+            estimated_guests: project.estimated_guests || 200,
+            budget: project.budget || 1000000,
+            categories: project.categories || [],
+            role: project.creator_role || ''
+          });
+        }
+      })
+      .catch((err: any) => {
+        console.log(err)
+      });
+  }, [userProfile]);
 
   // Handles form submission
   const onSubmit = async () => {
@@ -70,12 +97,13 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
       };
 
       await apiClient.createWedding(weddingData);
+      formData.cities.length > 0?
+      toast.success('Updated Wedding Plan successfully'): 
       toast.success('New Wedding Plan created successfully!');
       
-      // Preserve redirect parameter when going to login
       router.push('/dashboard');
     } catch (error) {
-      handleApiError(error, 'Failed to create account');
+      handleApiError(error, 'Failed to update wedding plan');
     } finally {
       setLoading(false);
     }
