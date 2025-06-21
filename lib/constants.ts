@@ -22,9 +22,9 @@ export const CREATOR_ROLES: { value: CreatorRole; label: string }[] = [
 ];
 
 export const WEDDING_EVENTS = [
-  'Haldi', 'Mehendi', 'Sangeet', 'Engagement', 'Wedding', 'Reception', 'Tilak', 'Roka'
+  'Mehendi', 'Sangeet', 'Wedding', 'Reception', 'Engagement', 'Others'
 ] as const;
 
 export const SERVICE_CATEGORIES = [
-  'Venue', 'Photography', 'Catering', 'Decoration', 'Makeup Artist', 'Anchor', 'Choreographer', 'Photo Albums'
+  'Photography', 'Catering', 'Decoration', 'Music', 'Venue', 'Makeup', 'Others'
 ] as const;

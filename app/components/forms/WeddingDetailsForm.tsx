@@ -4,12 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Calendar, Users, IndianRupee, Check, ChevronDown, X } from 'lucide-react';
-import { SUPPORTED_CITIES, type SupportedCity, WEDDING_EVENTS, SERVICE_CATEGORIES } from '@/lib/constants';
-import { CreatorRole, UserProfile } from '@/lib/types/api';
+import { SUPPORTED_CITIES, type SupportedCity, WEDDING_EVENTS, SERVICE_CATEGORIES, CREATOR_ROLES } from '@/lib/constants';
+import { CreatorRole, UserProfile, WeddingData } from '@/lib/types/api';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { handleApiError } from '@/lib/api-client';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 // These should match the types used in the parent forms
 export interface WeddingDetailsFormProps<T> {
@@ -53,12 +54,12 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
     if (!userProfile) return;
     apiClient.getWeddings()
       .then((value) => {
-        const projects = value as any[];
-        if (projects && projects.length > 0) {
-          const project = projects[0]; // Use the first wedding project
+        const weddings = value as WeddingData[];
+        if (weddings && weddings.length > 0) {
+          const project = weddings[0]; // Use the first wedding project
           setFormData({
-            cities: project.city ? [project.city] : [],
-            title: project.name || '',
+            cities: project.cities || [],
+            title: project.title || '',
             date: project.date ? project.date.split('T')[0] : '', // ISO to yyyy-mm-dd
             is_date_fixed: project.is_date_fixed ?? true,
             events: project.events || [],
@@ -66,7 +67,7 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
             estimated_guests: project.estimated_guests || 200,
             budget: project.budget || 1000000,
             categories: project.categories || [],
-            role: project.creator_role || ''
+            role: project.creator_role || CREATOR_ROLES[0].value,
           });
         }
       })
@@ -112,6 +113,28 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
   // Render the form using formData
   return (
     <div className="space-y-6">
+      {/* Creator Role Field */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Your Role</label>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-700">I am the</span>
+          <Select
+            value={formData.role}
+            onValueChange={value => setField('role', value as CreatorRole)}
+          >
+            <SelectTrigger className="w-40 h-10">
+              <SelectValue placeholder="Select role" />
+            </SelectTrigger>
+            <SelectContent>
+              {CREATOR_ROLES.map(role => (
+                <SelectItem key={role.value} value={role.value}>
+                  {role.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       {/* Wedding Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -228,6 +251,20 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
         <label className="block text-sm font-medium text-gray-700 mb-4">
           Select Wedding Events
         </label>
+        <div className="flex justify-end mb-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const allSelected = WEDDING_EVENTS.every(event => formData.events.includes(event));
+              setField('events', allSelected ? [] : [...WEDDING_EVENTS]);
+            }}
+            className="px-3 py-1"
+          >
+            {WEDDING_EVENTS.every(event => formData.events.includes(event)) ? 'Deselect All' : 'Select All'}
+          </Button>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           {WEDDING_EVENTS.map((event) => (
             <button
@@ -256,6 +293,20 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
         <label className="block text-sm font-medium text-gray-700 mb-4">
           Service Categories
         </label>
+        <div className="flex justify-end mb-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const allSelected = SERVICE_CATEGORIES.every(category => formData.categories.includes(category));
+              setField('categories', allSelected ? [] : [...SERVICE_CATEGORIES]);
+            }}
+            className="px-3 py-1"
+          >
+            {SERVICE_CATEGORIES.every(category => formData.categories.includes(category)) ? 'Deselect All' : 'Select All'}
+          </Button>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           {SERVICE_CATEGORIES.map((category) => (
             <button

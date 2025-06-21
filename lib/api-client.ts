@@ -125,7 +125,7 @@ export class ApiClient {
   }
 
   // Users
-  async getCurrentUser() {
+  async getCurrentUser(): Promise<UserProfile> {
     return this.request('/users/me');
   }
 
