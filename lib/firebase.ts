@@ -24,10 +24,16 @@ export const db = getFirestore(app);
 // Phone authentication utilities
 export class PhoneAuthService {
   private recaptchaVerifier: RecaptchaVerifier | null = null;
+  private recaptchaRendered: boolean = false;
 
-  // Initialize reCAPTCHA verifier
+  // Initialize reCAPTCHA verifier (only once per page load)
   initializeRecaptcha(containerId: string = 'recaptcha-container') {
     if (typeof window !== 'undefined' && !this.recaptchaVerifier) {
+      const container = document.getElementById(containerId);
+      if (!container) {
+        throw new Error(`reCAPTCHA container with id '${containerId}' not found`);
+      }
+      // Only create the verifier if not already rendered
       this.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
         size: 'invisible',
         callback: () => {
@@ -39,6 +45,7 @@ export class PhoneAuthService {
           console.log('reCAPTCHA expired');
         }
       });
+      this.recaptchaRendered = true;
     }
     return this.recaptchaVerifier;
   }
@@ -46,31 +53,29 @@ export class PhoneAuthService {
   // Send OTP to phone number
   async sendOTP(phoneNumber: string): Promise<string> {
     try {
+      // Only initialize if not already present
       if (!this.recaptchaVerifier) {
         this.initializeRecaptcha();
       }
-
       if (!this.recaptchaVerifier) {
         throw new Error('reCAPTCHA verifier not initialized');
       }
-
+      // Render the verifier if not already rendered
+      if (!this.recaptchaRendered) {
+        await this.recaptchaVerifier.render();
+        this.recaptchaRendered = true;
+      }
       const confirmationResult = await signInWithPhoneNumber(
         auth,
         phoneNumber,
         this.recaptchaVerifier
       );
-
       // Store verification ID for later use
       return confirmationResult.verificationId;
     } catch (error: any) {
       console.error('Error sending OTP:', error);
-      
       // Reset reCAPTCHA on error
-      if (this.recaptchaVerifier) {
-        this.recaptchaVerifier.clear();
-        this.recaptchaVerifier = null;
-      }
-      
+      this.cleanup();
       throw new Error(error.message || 'Failed to send OTP');
     }
   }
@@ -80,13 +85,8 @@ export class PhoneAuthService {
     try {
       const credential = PhoneAuthProvider.credential(verificationId, otp);
       const result = await signInWithCredential(auth, credential);
-      
-      // Clean up reCAPTCHA
-      if (this.recaptchaVerifier) {
-        this.recaptchaVerifier.clear();
-        this.recaptchaVerifier = null;
-      }
-      
+      // Clean up reCAPTCHA after successful login
+      this.cleanup();
       return result;
     } catch (error: any) {
       console.error('Error verifying OTP:', error);
@@ -99,6 +99,7 @@ export class PhoneAuthService {
     if (this.recaptchaVerifier) {
       this.recaptchaVerifier.clear();
       this.recaptchaVerifier = null;
+      this.recaptchaRendered = false;
     }
   }
 }

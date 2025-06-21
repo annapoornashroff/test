@@ -118,7 +118,7 @@ export class ApiClient {
 
   // Authentication - MERGED FROM api.ts
   async createUserProfile(data: UserProfile) {
-    return this.request('/auth/firebase-signup', {
+    return this.request('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(data),
     });

@@ -5,67 +5,45 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Mail, Calendar, Heart, ArrowLeft, Check, Loader2, Users, IndianRupee } from 'lucide-react';
+import { User, Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/auth-context';
 import { SUPPORTED_CITIES, type SupportedCity, CREATOR_ROLES } from '@/lib/constants';
-import { UserProfile, WeddingData } from '@/lib/types/api';
 import type { CreatorRole } from '@/lib/types/api';
-import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-
-const events = [
-  'Haldi', 'Mehendi', 'Sangeet', 'Engagement', 'Wedding', 'Reception', 'Tilak', 'Roka'
-];
-
-const categories = [
-  'Venue', 'Photography', 'Catering', 'Decoration', 'Makeup Artist', 'Anchor', 'Choreographer', 'Photo Albums'
-];
 
 export default function SignupClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { user, userProfile, loading } = useAuth();
-  const [step, setStep] = useState(1);
   const [signupLoading, setSignupLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    phone_number: user?.phoneNumber,
+  const [formData, setFormData] = useState<{
+    name: string;
+    email: string;
+    city: SupportedCity;
+    role: CreatorRole;
+  }>({
     name: '',
     email: '',
-    cities: [] as SupportedCity[],
-    title: '',
-    weddingDate: '',
-    isDateFixed: true,
-    selectedEvents: [] as string[],
-    duration: 2,
-    estimatedGuests: 200,
-    budget: 1000000,
-    selectedCategories: [] as string[],
-    role: '' as CreatorRole
+    city: SUPPORTED_CITIES[0],
+    role: '' as CreatorRole,
   });
 
   // Redirect logic for already authenticated users
   useEffect(() => {
-    if (!loading && user && userProfile) {
-      const redirect = searchParams.get('redirect');
-      const referrer = typeof window !== 'undefined' ? document.referrer : '';
-
-      if (redirect && !referrer.includes('/login') && !referrer.includes('/signup')) {
-        const safeRedirect = redirect.startsWith('/') ? redirect : `/${redirect}`;
-        router.replace(safeRedirect);
-      } else if (referrer && referrer.includes(window.location.origin) && !referrer.includes('/login') && !referrer.includes('/signup')) {
-        const referrerPath = new URL(referrer).pathname;
-        router.replace(referrerPath);
-      } else {
-        router.replace('/dashboard');
-      }
+    if (loading) return;
+    if (!user) {
+      router.replace('/login');
+      return;
     }
-  }, [user, userProfile, loading, router, searchParams]);
+    if (user && userProfile) {
+      router.replace('/dashboard');
+    }
+    // If user exists but no profile, stay on signup
+  }, [user, userProfile, loading, router]);
 
-  if (loading) {
+  if (loading || signupLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary-600 to-primary-700 flex items-center justify-center">
         <div className="text-white text-center">
@@ -76,83 +54,33 @@ export default function SignupClient() {
     );
   }
 
-  if (user && userProfile) {
-    return null;
-  }
+  // If user is not present, don't render form (redirect will happen)
+  if (!user) return null;
+  // If userProfile exists, don't render form (redirect will happen)
+  if (userProfile) return null;
 
-  const toggleEvent = (event: string) => {
-    setFormData(prev => ({
-      ...prev,
-      selectedEvents: prev.selectedEvents.includes(event)
-        ? prev.selectedEvents.filter(e => e !== event)
-        : [...prev.selectedEvents, event]
-    }));
-  };
-
-  const toggleCategory = (category: string) => {
-    setFormData(prev => ({
-      ...prev,
-      selectedCategories: prev.selectedCategories.includes(category)
-        ? prev.selectedCategories.filter(c => c !== category)
-        : [...prev.selectedCategories, category]
-    }));
-  };
-
-  const toggleCity = (city: SupportedCity) => {
-    setFormData(prev => ({
-      ...prev,
-      cities: prev.cities.includes(city)
-        ? prev.cities.filter(c => c !== city)
-        : [...prev.cities, city]
-    }));
-  };
-
-  const removeCity = (city: SupportedCity) => {
-    setFormData(prev => ({
-      ...prev,
-      cities: prev.cities.filter(c => c !== city)
-    }));
-  };
-
-  const handleSubmit = async () => {
-    if (!formData.cities.length) {
-      toast.error('Please select at least one city');
+  // Handle form submission
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.city || !formData.role) {
+      toast.error('Please fill all required fields');
       return;
     }
-
     setSignupLoading(true);
     try {
-      const userData: UserProfile = {
+      await apiClient.createUserProfile({
         name: formData.name,
         email: formData.email,
-        city: formData.cities[0] || '',
-        wedding: [{
-          creator_role: formData.role as CreatorRole,
-          title: formData.title,
-          date: formData.weddingDate ? new Date(formData.weddingDate).toISOString() : '',
-          cities: formData.cities,
-          is_date_fixed: formData.isDateFixed,
-          events: formData.selectedEvents,
-          duration: formData.duration,
-          estimated_guests: formData.estimatedGuests,
-          budget: formData.budget,
-          categories: formData.selectedCategories
-        }]
-      };
-
-      await apiClient.createUserProfile(userData);
+        city: formData.city,
+      });
       toast.success('Account created successfully!');
-      
-      // Preserve redirect parameter when going to login
-      const redirect = searchParams.get('redirect');
-      const loginUrl = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login';
-      router.push(loginUrl);
+      router.replace('/planning');
     } catch (error) {
       handleApiError(error, 'Failed to create account');
     } finally {
       setSignupLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary-600 to-primary-700 relative overflow-hidden">
@@ -169,28 +97,11 @@ export default function SignupClient() {
 
       <div className="container mx-auto px-6 py-12 relative z-10">
         <div className="max-w-2xl mx-auto">
-          {/* Progress Indicator - Now 2 steps instead of 3 */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center space-x-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                step >= 1 ? 'bg-white text-primary' : 'bg-white/20 text-white'
-              }`}>
-                {step > 1 ? <Check className="w-5 h-5" /> : '1'}
-              </div>
-              <div className={`w-16 h-1 ${step >= 2 ? 'bg-white' : 'bg-white/20'}`} />
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                step >= 2 ? 'bg-white text-primary' : 'bg-white/20 text-white'
-              }`}>
-                {step > 2 ? <Check className="w-5 h-5" /> : '2'}
-              </div>
-            </div>
-          </div>
-
           {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center space-x-3 mb-4">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                <Heart className="w-8 h-8 text-primary" />
+                <User className="w-8 h-8 text-primary" />
               </div>
               <div className="text-white">
                 <h1 className="text-3xl font-serif font-bold">Forever & Co.</h1>
@@ -203,284 +114,82 @@ export default function SignupClient() {
           <Card className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl">
             <CardHeader>
               <CardTitle className="text-2xl font-serif text-center">
-                {step === 1 && 'Personal Details'}
-                {step === 2 && 'Wedding Preferences'}
+                Personal Details
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {step === 1 && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <User className="w-4 h-4 inline mr-2" />
-                      Full Name
-                    </label>
-                    <Input
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      className="h-12"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <Mail className="w-4 h-4 inline mr-2" />
-                      Email Address
-                    </label>
-                    <Input
-                      type="email"
-                      placeholder="your.email@example.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      className="h-12"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Cities
-                    </label>
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {formData.cities.map((city) => (
-                        <Badge key={city} variant="secondary" className="flex items-center gap-1 pr-1">
-                          {city}
-                          <button
-                            type="button"
-                            aria-label={`Remove ${city}`}
-                            className="ml-1 text-xs text-gray-500 hover:text-red-500 focus:outline-none"
-                            onClick={() => removeCity(city)}
-                          >
-                            <span className="sr-only">Remove</span>
-                            ×
-                          </button>
-                        </Badge>
-                      ))}
-                      {formData.cities.length === 0 && (
-                        <span className="text-gray-400 text-sm">No cities selected</span>
-                      )}
-                    </div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className="flex items-center w-full h-12 border rounded-md px-3 bg-white text-sm focus:ring-2 focus:ring-primary focus:outline-none"
-                        >
-                          <span className="flex-1 text-left">
-                            {formData.cities.length > 0 ? 'Edit Cities' : 'Select Cities'}
-                          </span>
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent align="start" className="p-0 w-full min-w-[200px]">
-                        <div className="max-h-60 overflow-y-auto divide-y">
-                          {SUPPORTED_CITIES.map((city) => (
-                            <button
-                              key={city}
-                              type="button"
-                              className={`flex items-center w-full px-4 py-2 text-sm hover:bg-primary/10 focus:bg-primary/20 transition-colors ${formData.cities.includes(city) ? 'font-semibold text-primary' : ''}`}
-                              onClick={() => toggleCity(city)}
-                            >
-                              <span className="flex-1 text-left">{city}</span>
-                              {formData.cities.includes(city) && <span className="ml-2">✓</span>}
-                            </button>
-                          ))}
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      I am the <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value as CreatorRole }))}
-                      className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select your role</option>
-                      {CREATOR_ROLES.map(({ value, label }) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <Button 
-                    onClick={() => {
-                      if (!formData.role) {
-                        toast.error('Please select your role');
-                        return;
-                      }
-                      setStep(2);
-                    }}
-                    className="w-full h-12 bg-primary hover:bg-primary-600 rounded-full"
-                  >
-                    Continue
-                  </Button>
-                </>
-              )}
-
-              {step === 2 && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Wedding Title
-                    </label>
-                    <Input
-                      placeholder="e.g. Rohan & Priya's Dream Wedding"
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      className="h-12"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Give your wedding a unique name or title (optional)</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <Calendar className="w-4 h-4 inline mr-2" />
-                      Wedding Date
-                    </label>
-                    <Input
-                      type="date"
-                      value={formData.weddingDate}
-                      onChange={(e) => setFormData(prev => ({ ...prev, weddingDate: e.target.value }))}
-                      className="h-12"
-                    />
-                  </div>
-
-                  <label className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={formData.isDateFixed}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isDateFixed: e.target.checked }))}
-                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span className="text-gray-700">Date is Fixed?</span>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <User className="w-4 h-4 inline mr-2" />
+                    Full Name
                   </label>
+                  <Input
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className="h-12"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Wedding Duration (Days)
-                    </label>
-                    <Input
-                      type="number"
-                      min="1"
-                      max="7"
-                      value={formData.duration}
-                      onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
-                      className="h-12"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Mail className="w-4 h-4 inline mr-2" />
+                    Email Address
+                  </label>
+                  <Input
+                    type="email"
+                    placeholder="your.email@example.com"
+                    value={formData.email}
+                    onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="h-12"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-4">
-                      Select Wedding Events
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {events.map((event) => (
-                        <button
-                          key={event}
-                          onClick={() => toggleEvent(event)}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            formData.selectedEvents.includes(event)
-                              ? 'border-primary bg-primary text-white'
-                              : 'border-gray-200 hover:border-primary'
-                          }`}
-                        >
-                          {event}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    City
+                  </label>
+                  <select
+                    value={formData.city}
+                    onChange={e => setFormData(prev => ({ ...prev, city: e.target.value as SupportedCity }))}
+                    className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select your city</option>
+                    {SUPPORTED_CITIES.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-4">
-                      Service Categories
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {categories.map((category) => (
-                        <button
-                          key={category}
-                          onClick={() => toggleCategory(category)}
-                          className={`p-3 rounded-lg border-2 transition-all ${
-                            formData.selectedCategories.includes(category)
-                              ? 'border-gold bg-gold text-white'
-                              : 'border-gray-200 hover:border-gold'
-                          }`}
-                        >
-                          {category}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    I am the <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={formData.role}
+                    onChange={e => setFormData(prev => ({ ...prev, role: e.target.value as CreatorRole }))}
+                    className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select your role</option>
+                    {CREATOR_ROLES.map(({ value, label }) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </select>
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <Users className="w-4 h-4 inline mr-2" />
-                      Estimated Guests: {formData.estimatedGuests}
-                    </label>
-                    <input
-                      type="range"
-                      min="50"
-                      max="1000"
-                      step="50"
-                      value={formData.estimatedGuests}
-                      onChange={(e) => setFormData(prev => ({ ...prev, estimatedGuests: parseInt(e.target.value) }))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <IndianRupee className="w-4 h-4 inline mr-2" />
-                      Estimated Budget: ₹{formData.budget.toLocaleString('en-IN')}
-                    </label>
-                    <input
-                      type="range"
-                      min="100000"
-                      max="5000000"
-                      step="100000"
-                      value={formData.budget}
-                      onChange={(e) => setFormData(prev => ({ ...prev, budget: parseInt(e.target.value) }))}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="flex space-x-3">
-                    <Button 
-                      variant="outline"
-                      onClick={() => setStep(1)}
-                      className="flex-1 h-12 rounded-full"
-                    >
-                      Back
-                    </Button>
-                    <Button 
-                      onClick={handleSubmit}
-                      disabled={signupLoading}
-                      className="flex-1 h-12 bg-gold hover:bg-gold-600 rounded-full"
-                    >
-                      {signupLoading ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Signing up...
-                        </>
-                      ) : (
-                        'Sign Up'
-                      )}
-                    </Button>
-                  </div>
-                </>
-              )}
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-primary hover:bg-primary-600 rounded-full"
+                  disabled={signupLoading}
+                >
+                  {signupLoading ? 'Saving...' : 'Continue'}
+                </Button>
+              </form>
             </CardContent>
           </Card>
-
-          {/* Login Link */}
-          <div className="text-center mt-6 text-white text-sm">
-            Already have an account? {' '}
-            <Link href="/login" className="font-semibold hover:underline">
-              Log in
-            </Link>
-          </div>
         </div>
       </div>
     </div>

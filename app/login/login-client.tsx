@@ -245,6 +245,7 @@ export default function LoginClient() {
               </>
             )}
           </CardContent>
+          {/* TODO: Ensure this container is always present in the DOM for Firebase reCAPTCHA. Do not conditionally render or remove it. */}
           {/* reCAPTCHA container - required for phone authentication */}
           <div id="recaptcha-container" className="hidden"></div>
         </Card>
