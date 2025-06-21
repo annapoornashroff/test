@@ -23,6 +23,7 @@ export interface WeddingData {
   categories: string[];
   estimated_guests: number;
   budget: number;
+  timezone?: string; // IANA timezone name, e.g., 'Asia/Kolkata'
 }
 
 export interface WeddingResponse extends WeddingData {

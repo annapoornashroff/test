@@ -38,10 +38,19 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
     estimated_guests: 200,
     budget: 1000000,
     categories: [] as string[],
-    role: '' as CreatorRole
+    role: '' as CreatorRole,
+    timezone: typeof window !== 'undefined'? Intl.DateTimeFormat().resolvedOptions().timeZone: 'Asia/Kolkata',
   });
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Use only built-in Intl API for timezone list
+  const timezoneOptions = React.useMemo(() => {
+    if (typeof Intl !== 'undefined' && typeof Intl.supportedValuesOf === 'function') {
+      return Intl.supportedValuesOf('timeZone');
+    }
+    return [];
+  }, []);
 
   // Helper to update a single field
   function setField<K extends keyof typeof formData>(field: K, value: typeof formData[K]) {
@@ -68,6 +77,7 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
             budget: project.budget || 1000000,
             categories: project.categories || [],
             role: project.creator_role || CREATOR_ROLES[0].value,
+            timezone: project.timezone || (typeof window !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata'),
           });
         }
       })
@@ -94,7 +104,8 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
         duration: formData.duration,
         estimated_guests: formData.estimated_guests,
         budget: formData.budget,
-        categories: formData.categories
+        categories: formData.categories,
+        timezone: formData.timezone,
       };
 
       await apiClient.createWedding(weddingData);
@@ -218,6 +229,26 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
           onChange={e => setField('date', e.target.value)}
           className="h-12"
         />
+      </div>
+
+      {/* Timezone */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Timezone
+        </label>
+        <Select
+          value={formData.timezone}
+          onValueChange={value => setField('timezone', value)}
+        >
+          <SelectTrigger className="w-full h-12">
+            <SelectValue placeholder="Select timezone" />
+          </SelectTrigger>
+          <SelectContent>
+            {timezoneOptions.map(tz => (
+              <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Is Date Fixed */}
