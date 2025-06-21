@@ -20,7 +20,7 @@ import ProfileTabs from './profile-tabs';
 import PersonalInfoTab from './personal-info-tab';
 import WeddingProjectsTab from './wedding-projects-tab';
 import FamilyMembersTab from './family-members-tab';
-import { SupportedCity } from '@/lib/constants';
+import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
 
 export default function ProfileClient() {
   const [activeTab, setActiveTab] = useState('personal');
@@ -35,7 +35,7 @@ export default function ProfileClient() {
     name: '',
     phoneNumber: '',
     email: '',
-    city: 'Delhi'
+    city: SUPPORTED_CITIES[0]
   });
 
   const [projects, setProjects] = useState<WeddingProject[]>([]);
@@ -80,7 +80,7 @@ export default function ProfileClient() {
         name: userProfile.name || '',
         phoneNumber: userProfile.phone_number || '',
         email: userProfile.email || '',
-        city: userProfile.city || 'Delhi'
+        city: userProfile.city || 'DELHI'
       });
       
       // Load wedding projects

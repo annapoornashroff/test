@@ -89,7 +89,7 @@ export default function FooterSection() {
               </div>
               <div className="flex items-center space-x-3 text-white/90">
                 <MapPin className="w-4 h-4" />
-                <span>Mumbai, Delhi, Bangalore</span>
+                <span>Delhi, Bengaluru</span>
               </div>
             </div>
           </div>

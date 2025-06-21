@@ -1,30 +1,36 @@
 import type { CreatorRole } from './types/api';
 
 export const SUPPORTED_CITIES = [
-  'Mumbai',
-  'Delhi',
-  'Bangalore',
-  'Chennai',
-  'Hyderabad',
-  'Pune',
-  'Kolkata',
-  'Jaipur',
-  'Goa'
+  'DELHI',
+  'BENGALURU',\
 ] as const;
 
 export type SupportedCity = typeof SUPPORTED_CITIES[number];
 
 export const CREATOR_ROLES: { value: CreatorRole; label: string }[] = [
-  { value: 'groom', label: 'Groom' },
-  { value: 'bride', label: 'Bride' },
-  { value: 'family', label: 'Family' },
-  { value: 'other', label: 'Other' }
+  { value: 'GROOM', label: 'Groom' },
+  { value: 'BRIDE', label: 'Bride' },
+  { value: 'FAMILY', label: 'Family' },
+  { value: 'OTHER', label: 'Other' }
 ];
 
-export const WEDDING_EVENTS = [
-  'Mehendi', 'Sangeet', 'Wedding', 'Reception', 'Engagement', 'Others'
-] as const;
+// Wedding events with UPPERCASE value-label pairs for consistent backend usage
+export const WEDDING_EVENTS: { value: string; label: string }[] = [
+  { value: 'MEHENDI', label: 'Mehendi' },
+  { value: 'SANGEET', label: 'Sangeet' },
+  { value: 'WEDDING', label: 'Wedding' },
+  { value: 'RECEPTION', label: 'Reception' },
+  { value: 'ENGAGEMENT', label: 'Engagement' },
+  { value: 'OTHERS', label: 'Others' }
+];
 
-export const SERVICE_CATEGORIES = [
-  'Photography', 'Catering', 'Decoration', 'Music', 'Venue', 'Makeup', 'Others'
-] as const;
+// Service categories with UPPERCASE value-label pairs for consistent backend usage
+export const SERVICE_CATEGORIES: { value: string; label: string }[] = [
+  { value: 'PHOTOGRAPHY', label: 'Photography' },
+  { value: 'CATERING', label: 'Catering' },
+  { value: 'DECORATION', label: 'Decoration' },
+  { value: 'MUSIC', label: 'Music' },
+  { value: 'VENUE', label: 'Venue' },
+  { value: 'MAKEUP', label: 'Makeup' },
+  { value: 'OTHERS', label: 'Others' }
+];

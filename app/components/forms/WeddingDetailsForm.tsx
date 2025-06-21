@@ -278,6 +278,7 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
       </div>
 
       {/* Events Multi-select */}
+      {/* Note: WEDDING_EVENTS values are now UPPERCASE for backend compatibility */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-4">
           Select Wedding Events
@@ -288,38 +289,39 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
             variant="outline"
             size="sm"
             onClick={() => {
-              const allSelected = WEDDING_EVENTS.every(event => formData.events.includes(event));
-              setField('events', allSelected ? [] : [...WEDDING_EVENTS]);
+              const allSelected = WEDDING_EVENTS.every(event => formData.events.includes(event.value));
+              setField('events', allSelected ? [] : WEDDING_EVENTS.map(e => e.value));
             }}
             className="px-3 py-1"
           >
-            {WEDDING_EVENTS.every(event => formData.events.includes(event)) ? 'Deselect All' : 'Select All'}
+            {WEDDING_EVENTS.every(event => formData.events.includes(event.value)) ? 'Deselect All' : 'Select All'}
           </Button>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {WEDDING_EVENTS.map((event) => (
             <button
-              key={event}
+              key={event.value}
               type="button"
               onClick={() => {
                 const selected = formData.events;
-                setField('events', selected.includes(event)
-                  ? selected.filter((e: string) => e !== event)
-                  : [...selected, event]);
+                setField('events', selected.includes(event.value)
+                  ? selected.filter((e: string) => e !== event.value)
+                  : [...selected, event.value]);
               }}
               className={`p-3 rounded-lg border-2 transition-all ${
-                (formData.events).includes(event)
+                (formData.events).includes(event.value)
                   ? 'border-primary bg-primary text-white'
                   : 'border-gray-200 hover:border-primary'
               }`}
             >
-              {event}
+              {event.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Categories Multi-select */}
+      {/* Note: SERVICE_CATEGORIES values are now UPPERCASE for backend compatibility */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-4">
           Service Categories
@@ -330,32 +332,32 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
             variant="outline"
             size="sm"
             onClick={() => {
-              const allSelected = SERVICE_CATEGORIES.every(category => formData.categories.includes(category));
-              setField('categories', allSelected ? [] : [...SERVICE_CATEGORIES]);
+              const allSelected = SERVICE_CATEGORIES.every(category => formData.categories.includes(category.value));
+              setField('categories', allSelected ? [] : SERVICE_CATEGORIES.map(c => c.value));
             }}
             className="px-3 py-1"
           >
-            {SERVICE_CATEGORIES.every(category => formData.categories.includes(category)) ? 'Deselect All' : 'Select All'}
+            {SERVICE_CATEGORIES.every(category => formData.categories.includes(category.value)) ? 'Deselect All' : 'Select All'}
           </Button>
         </div>
         <div className="grid grid-cols-2 gap-3">
           {SERVICE_CATEGORIES.map((category) => (
             <button
-              key={category}
+              key={category.value}
               type="button"
               onClick={() => {
                 const selected = formData.categories;
-                setField('categories', selected.includes(category)
-                  ? selected.filter((c: string) => c !== category)
-                  : [...selected, category]);
+                setField('categories', selected.includes(category.value)
+                  ? selected.filter((c: string) => c !== category.value)
+                  : [...selected, category.value]);
               }}
               className={`p-3 rounded-lg border-2 transition-all ${
-                (formData.categories).includes(category)
+                (formData.categories).includes(category.value)
                   ? 'border-gold bg-gold text-white'
                   : 'border-gray-200 hover:border-gold'
               }`}
             >
-              {category}
+              {category.label}
             </button>
           ))}
         </div>

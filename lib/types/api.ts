@@ -7,9 +7,6 @@ export interface ApiError {
   details?: any;
 }
 
-// Wedding Types
-export type CreatorRole = 'groom' | 'bride' | 'family' | 'other';
-
 export interface WeddingData {
   id?: number;
   user_id?: number;
