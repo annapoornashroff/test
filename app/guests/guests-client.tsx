@@ -14,7 +14,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient } from '@/lib/api-client';
-import { type WeddingProject, type PersonalInfo } from '@/lib/types/ui';
 import GuestListHeader from './guest-list-header';
 import GuestPageHeader from './guest-page-header';
 import GuestWeddingStatsSection from './guest-wedding-stats-section';

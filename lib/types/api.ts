@@ -1,4 +1,4 @@
-import { type SupportedCity } from '@/lib/constants';
+import { SUPPORTED_CITIES, CREATOR_ROLES, WEDDING_STATUS } from '@/lib/constants';
 
 // API Types
 export interface ApiError {
@@ -10,28 +10,24 @@ export interface ApiError {
 export interface WeddingData {
   id?: number;
   user_id?: number;
-  creator_role?: CreatorRole;
+  creator_role: (typeof CREATOR_ROLES)[number];
   title?: string;
-  cities: SupportedCity[];
+  cities: (typeof SUPPORTED_CITIES)[number][];
   date: string;
   is_date_fixed: boolean;
   duration: number;
   events: string[];
   categories: string[];
   estimated_guests: number;
-  budget: number;
-  timezone?: string; // IANA timezone name, e.g., 'Asia/Kolkata'
-}
-
-export interface WeddingResponse extends WeddingData {
-  id: number;
-  user_id: number;
   actual_guests?: number;
-  spent: number;
-  status: 'planning' | 'partially_booked' | 'booked' | 'completed';
+  budget: number;
+  spent?: number;
+  timezone?: string; // IANA timezone name, e.g., 'Asia/Kolkata'
+  status: (typeof WEDDING_STATUS)[number];
   family_details?: FamilyMember[];
-  created_at: string;
-  updated_at: string;
+
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Relationship Types
@@ -62,7 +58,7 @@ export interface UserProfile {
   phone_number?: string;
   name?: string;
   email?: string;
-  city: string;
+  city: (typeof SUPPORTED_CITIES)[number];
   wedding?: WeddingData[];
   createdAt?: string;
 }
@@ -77,7 +73,7 @@ export interface TokenResponse {
 export interface VendorData {
   name: string;
   category: string;
-  city: SupportedCity;
+  city: (typeof SUPPORTED_CITIES)[number];
   description: string;
   price_range: {
     min: number;
@@ -141,7 +137,7 @@ export interface ReviewData {
   relative_time_description: string;
   time: number;
   wedding_date: string;
-  city: SupportedCity;
+  city: (typeof SUPPORTED_CITIES)[number];
 }
 
 export interface ReviewResponse extends ReviewData {

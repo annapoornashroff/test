@@ -271,7 +271,7 @@ Instead of SendGrid, we now use Gmail SMTP for email notifications:
 
 #### Progress
 - ✅ Moved Vendor interface to common types
-- ✅ Moved WeddingProject interface to common types
+- ✅ Moved WeddingData interface to common types
 - ✅ Moved Review interface to common types
 - ✅ Moved AuthContextType to common types
 - ✅ Moved NavigationContextType to common types

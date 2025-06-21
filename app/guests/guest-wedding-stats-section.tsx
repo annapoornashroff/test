@@ -1,12 +1,9 @@
 'use client';
 
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Users, Plus, Download, Send, Phone, Mail, Check, X, Clock, Edit, Trash2 } from 'lucide-react';
-import { type WeddingProject } from '@/lib/types/ui';
-import { type GuestResponse } from '@/lib/types/api';
-import React, { ChangeEvent, FormEvent } from 'react';
+import { Plus } from 'lucide-react';
 
 type Wedding = {
   id: number;

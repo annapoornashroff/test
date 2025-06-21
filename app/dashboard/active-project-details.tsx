@@ -7,11 +7,10 @@ import {
   Phone, Mail, Loader2, Edit, User as UserIcon
 } from 'lucide-react';
 import Link from 'next/link';
-import { type WeddingProject } from '@/lib/types/ui';
-import { type UserProfile } from '@/lib/types/api';
+import { type UserProfile, type WeddingData } from '@/lib/types/api';
 
 interface ActiveProjectDetailsProps {
-  activeProject: WeddingProject | null;
+  activeProject: WeddingData | null;
   user: UserProfile | null;
 }
 
@@ -48,7 +47,7 @@ export default function ActiveProjectDetails({
           </div>
           <div className="flex items-center">
             <MapPin className="w-4 h-4 mr-3 text-gray-500" />
-            <span>Location: {activeProject.city}</span>
+            <span>Location: {activeProject.cities}</span>
           </div>
           <div className="flex items-center">
             <Users className="w-4 h-4 mr-3 text-gray-500" />
@@ -60,7 +59,7 @@ export default function ActiveProjectDetails({
           </div>
           <div className="flex items-center">
             <IndianRupee className="w-4 h-4 mr-3 text-gray-500" />
-            <span>Spent: ₹{activeProject.spent.toLocaleString('en-IN')}</span>
+            <span>Spent: ₹{activeProject.spent?.toLocaleString('en-IN')}</span>
           </div>
         </CardContent>
       </Card>

@@ -129,7 +129,7 @@ export class ApiClient {
     return this.request('/users/me');
   }
 
-  async updateUser(userData: any) {
+  async updateUser(userData: UserProfile) {
     return this.request('/users/me', {
       method: 'PUT',
       body: JSON.stringify(userData),
@@ -372,7 +372,7 @@ export class ApiClient {
     phone_number: string;
     name: string;
     relationship: string;
-    invited_by: string;
+    invited_by: number;
   }) {
     return this.request('/users/invite', {
       method: 'POST',

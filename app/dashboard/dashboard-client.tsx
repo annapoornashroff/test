@@ -4,21 +4,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  Heart, Calendar, MapPin, Users, IndianRupee, 
-  ShoppingCart, Bookmark, User as UserIcon, Plus, Edit,
+  Calendar, MapPin, Users, 
+  ShoppingCart, Bookmark, User as UserIcon, Edit,
   CheckCircle, Clock, AlertCircle, Loader2, Phone, Mail
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
-import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
-import { toast } from 'sonner';
-import { type WeddingProject } from '@/lib/types/ui';
-import { type UserProfile } from '@/lib/types/api';
+import { apiClient, withLoading } from '@/lib/api-client';
+import { type UserProfile, type WeddingData } from '@/lib/types/api';
 import DashboardHeader from './dashboard-header';
 import WelcomeSection from './welcome-section';
-import WeddingProjectsSection from './wedding-projects-section';
+import WeddingsSection from './weddings-section';
 import QuickActionsSection from './quick-actions-section';
 import ActiveProjectDetails from './active-project-details';
 
@@ -35,8 +33,8 @@ export default function DashboardClient() {
   useProtectedRoute();
   
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [weddingProjects, setWeddingProjects] = useState<WeddingProject[]>([]);
-  const [activeProject, setActiveProject] = useState<WeddingProject | null>(null);
+  const [weddings, setWeddings] = useState<WeddingData[]>([]);
+  const [activeProject, setActiveProject] = useState<WeddingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [projectsLoading, setProjectsLoading] = useState(false);
 
@@ -52,8 +50,8 @@ export default function DashboardClient() {
       setUser(userData);
 
       // Load wedding projects
-      const projectsData = (await apiClient.getWeddings()) as WeddingProject[];
-      setWeddingProjects(projectsData);
+      const projectsData = (await apiClient.getWeddings()) as WeddingData[];
+      setWeddings(projectsData);
       console.log('weddingData', projectsData)
       
       if (projectsData.length > 0) {
@@ -68,9 +66,9 @@ export default function DashboardClient() {
     }
   }, [firebaseUser, loadDashboardData]);
 
-  const calculateProgress = (project: WeddingProject) => {
+  const calculateProgress = (project: WeddingData) => {
     // Simple progress calculation based on spent vs budget
-    return Math.min(Math.round((project.spent / project.budget) * 100), 100);
+    return Math.min(Math.round(((project.spent || 0) / project.budget) * 100), 100);
   };
 
   const getStatusColor = (status: string) => {
@@ -114,8 +112,8 @@ export default function DashboardClient() {
           <div className="lg:col-span-2 space-y-8">
             <WelcomeSection userName={user?.name} />
 
-            <WeddingProjectsSection 
-              weddingProjects={weddingProjects}
+            <WeddingsSection 
+              weddingProjects={weddings}
               activeProject={activeProject}
               projectsLoading={projectsLoading}
               setActiveProject={setActiveProject}

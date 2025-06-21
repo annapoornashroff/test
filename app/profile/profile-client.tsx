@@ -7,37 +7,31 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ErrorMessage } from '@/components/ui/error-message';
 import { 
   User, Heart, Edit, Save, X, Calendar, MapPin, 
-  IndianRupee, Plane, CheckCircle, XCircle, Clock
+  IndianRupee, Plane, CheckCircle, XCircle, Clock,
+  Router
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
 import { apiClient, handleApiError } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { type FamilyMember, type WeddingProject, type PersonalInfo } from '@/lib/types/ui';
+import { type FamilyMember } from '@/lib/types/ui';
 import ProfileTabs from './profile-tabs';
-import PersonalInfoTab from './personal-info-tab';
-import WeddingProjectsTab from './wedding-projects-tab';
+import ProfileTab from './profile-tab';
+import WeddingsTab from './wedding-tab';
 import FamilyMembersTab from './family-members-tab';
-import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
+import { WeddingData } from '@/lib/types/api';
+import { useRouter } from 'next/navigation';
 
 export default function ProfileClient() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('personal');
-  const [editingPersonal, setEditingPersonal] = useState(false);
-  const [editingProject, setEditingProject] = useState<number | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [weddings, setWeddings] = useState<WeddingData[]>([]);
 
-  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-    name: '',
-    phoneNumber: '',
-    email: '',
-    city: SUPPORTED_CITIES[0]
-  });
-
-  const [projects, setProjects] = useState<WeddingProject[]>([]);
   const [family, setFamily] = useState<FamilyMember[]>([]);
   const [newFamilyMember, setNewFamilyMember] = useState<Omit<FamilyMember, 'id'>>({
     name: '',
@@ -54,41 +48,24 @@ export default function ProfileClient() {
   const [inviteRelationship, setInviteRelationship] = useState('');
   const [inviting, setInviting] = useState(false);
 
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   useProtectedRoute();
+
+  if (!userProfile){
+    router.replace('/signup');
+  }
 
   const loadUserData = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-      
-      const token = await user.getIdToken();
-      
-      // Load user profile
-      const userProfile = await apiClient.getCurrentUser() as {
-        name?: string;
-        phone_number?: string;
-        email?: string;
-        city?: SupportedCity;
-      };
-      setPersonalInfo({
-        name: userProfile.name || '',
-        phoneNumber: userProfile.phone_number || '',
-        email: userProfile.email || '',
-        city: userProfile.city || 'DELHI'
-      });
-      
-      // Load wedding projects
-      const weddingProjects = await apiClient.getWeddings() as WeddingProject[];
-      setProjects(weddingProjects);
-      
+
+      // Load weddings
+      const fetched_weddings = await apiClient.getWeddings() as WeddingData[];
+      setWeddings(fetched_weddings);
+
       // Load family members (from the first wedding project if available)
-      if (weddingProjects.length > 0) {
-        const familyDetails = weddingProjects[0].family_details || [];
+      if (fetched_weddings.length > 0) {
+        const familyDetails = fetched_weddings[0].family_details || [];
         setFamily(familyDetails.map((member: any, index: number) => ({
           id: index + 1,
           ...member
@@ -96,7 +73,6 @@ export default function ProfileClient() {
       }
     } catch (error: any) {
       console.error('Error loading user data:', error);
-      setError(error.message || 'Failed to load user data');
     } finally {
       setLoading(false);
     }
@@ -107,29 +83,6 @@ export default function ProfileClient() {
       loadUserData();
     }
   }, [user, loadUserData]);
-
-  const savePersonalInfo = async () => {
-    try {
-      setSaving(true);
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-      
-      await apiClient.updateUser({
-        name: personalInfo.name,
-        email: personalInfo.email,
-        city: personalInfo.city
-      });
-      
-      setEditingPersonal(false);
-      toast.success('Profile updated successfully');
-    } catch (error: any) {
-      handleApiError(error, 'Failed to update profile');
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const addFamilyMember = async () => {
     if (!newFamilyMember.name || !newFamilyMember.phoneNumber) {
@@ -178,18 +131,18 @@ export default function ProfileClient() {
       setFamily(updatedFamily);
       
       // Update wedding project with new family details
-      if (projects.length > 0) {
-        await apiClient.updateWedding(projects[0].id, {
+      if (weddings.length > 0 && weddings[0].id) {
+        await apiClient.updateWedding(weddings[0].id, {
           family_details: updatedFamily.map(({ id, ...rest }) => rest)
         });
       }
-      
+
       setNewFamilyMember({
         name: '',
         relationship: '',
         phoneNumber: '',
         email: '',
-        role: 'participant'
+        role: 'PARTICIPANT'
       });
       
       setShowAddFamily(false);
@@ -209,17 +162,13 @@ export default function ProfileClient() {
 
     try {
       setInviting(true);
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
 
       // Send invite to create account
       await apiClient.sendInvite({
         phone_number: invitePhone,
         name: inviteName,
         relationship: inviteRelationship,
-        invited_by: user.uid
+        invited_by: userProfile?.id || 0
       });
 
       toast.success('Invitation sent successfully');
@@ -237,18 +186,14 @@ export default function ProfileClient() {
   const removeFamilyMember = async (id: number) => {
     try {
       setSaving(true);
-      
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
 
       // Remove from family members array
       const updatedFamily = family.filter(member => member.id !== id);
       setFamily(updatedFamily);
       
       // Update wedding project with new family details
-      if (projects.length > 0) {
-        await apiClient.updateWedding(projects[0].id, {
+      if (weddings.length > 0 && weddings[0].id) {
+        await apiClient.updateWedding(weddings[0].id, {
           family_details: updatedFamily.map(({ id, ...rest }) => rest)
         });
       }
@@ -261,45 +206,11 @@ export default function ProfileClient() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'planning': return 'bg-yellow-100 text-yellow-800';
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'participant': return 'bg-blue-100 text-blue-800';
       case 'organizer': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
-
-  const getProjectStatusIcon = (status: string) => {
-    switch (status) {
-      case 'planning': return Plane;
-      case 'active': return CheckCircle;
-      case 'completed': return CheckCircle;
-      case 'cancelled': return XCircle;
-      default: return Clock;
     }
   };
 
@@ -354,26 +265,11 @@ export default function ProfileClient() {
           <div className="mt-8">
             {/* Personal Info Tab */}
             {activeTab === 'personal' && (
-              <PersonalInfoTab
-                personalInfo={personalInfo}
-                editingPersonal={editingPersonal}
-                setEditingPersonal={setEditingPersonal}
-                setPersonalInfo={setPersonalInfo}
-                savePersonalInfo={savePersonalInfo}
-                saving={saving}
-              />
+              <ProfileTab />
             )}
 
-            {activeTab === 'projects' && (
-              <WeddingProjectsTab
-                projects={projects}
-                editingProject={editingProject}
-                setEditingProject={setEditingProject}
-                formatCurrency={formatCurrency}
-                formatDate={formatDate}
-                getProjectStatusColor={getStatusColor}
-                getProjectStatusIcon={getProjectStatusIcon}
-              />
+            {activeTab === 'weddings' && (
+              <WeddingsTab user={user} weddings={weddings} setWeddings={setWeddings} />
             )}
 
             {activeTab === 'family' && (

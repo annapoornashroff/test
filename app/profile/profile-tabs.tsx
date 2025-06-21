@@ -19,9 +19,9 @@ export default function ProfileTabs({ activeTab, setActiveTab }: ProfileTabsProp
         <User className="w-4 h-4 mr-2" /> Personal Info
       </Button>
       <Button
-        variant={activeTab === 'projects' ? 'secondary' : 'ghost'}
+        variant={activeTab === 'weddings' ? 'secondary' : 'ghost'}
         className="w-full justify-start"
-        onClick={() => setActiveTab('projects')}
+        onClick={() => setActiveTab('weddings')}
       >
         <Heart className="w-4 h-4 mr-2" /> Wedding Projects
       </Button>

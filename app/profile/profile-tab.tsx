@@ -1,40 +1,67 @@
 'use client';
 
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { User, Mail, Edit, Save, X, Phone } from 'lucide-react';
-import { type PersonalInfo } from '@/lib/types/ui';
-import { SUPPORTED_CITIES, type SupportedCity } from '@/lib/constants';
+import { UserProfile } from '@/lib/types/api';
+import { SUPPORTED_CITIES } from '@/lib/constants';
+import { apiClient, handleApiError } from '@/lib/api-client';
+import { toast } from 'sonner';
+import { useAuth } from '@/lib/auth-context';
 
-interface PersonalInfoTabProps {
-  personalInfo: PersonalInfo;
-  editingPersonal: boolean;
-  setEditingPersonal: (editing: boolean) => void;
-  setPersonalInfo: (info: PersonalInfo) => void;
-  savePersonalInfo: () => Promise<void>;
-  saving: boolean;
-}
 
-export default function PersonalInfoTab({
-  personalInfo,
-  editingPersonal,
-  setEditingPersonal,
-  setPersonalInfo,
-  savePersonalInfo,
-  saving,
-}: PersonalInfoTabProps) {
-  return (
+export default function ProfileTab() {
+  const { userProfile, refreshUserProfile } = useAuth();
+  const [editingPersonal, setEditingPersonal] = React.useState(false);
+  const [editedProfile, setEditedProfile] = React.useState<UserProfile | null>(null);
+  const [saving, setSaving] = React.useState(false);
+
+
+  const startEditing = () => {
+    setEditedProfile(userProfile ? { ...userProfile } : null);
+    setEditingPersonal(true);
+  };
+
+  const cancelEditing = () => {
+    setEditedProfile(null);
+    setEditingPersonal(false);
+  };
+
+  const savePersonalInfo = async () => {
+    if (!editedProfile) return;
+    try {
+      setSaving(true);
+      await apiClient.updateUser({
+        name: editedProfile.name,
+        email: editedProfile.email,
+        city: editedProfile.city
+      });
+      await refreshUserProfile();
+      setEditingPersonal(false);
+      setEditedProfile(null);
+      toast.success('Profile updated successfully');
+    } catch (error: any) {
+      handleApiError(error, 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const profile = editingPersonal && editedProfile ? editedProfile : userProfile;
+
+  return (userProfile?
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Personal Information</CardTitle>
         {!editingPersonal ? (
-          <Button variant="outline" size="sm" onClick={() => setEditingPersonal(true)}>
+          <Button variant="outline" size="sm" onClick={startEditing}>
             <Edit className="w-4 h-4 mr-2" /> Edit
           </Button>
         ) : (
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" onClick={() => setEditingPersonal(false)}>
+            <Button variant="outline" size="sm" onClick={cancelEditing}>
               <X className="w-4 h-4 mr-2" /> Cancel
             </Button>
             <Button size="sm" onClick={savePersonalInfo} disabled={saving}>
@@ -50,8 +77,8 @@ export default function PersonalInfoTab({
             Full Name
           </label>
           <Input
-            value={personalInfo.name}
-            onChange={(e) => setPersonalInfo({ ...personalInfo, name: e.target.value })}
+            value={profile?.name || ''}
+            onChange={editingPersonal ? (e) => setEditedProfile(p => p ? { ...p, name: e.target.value } : p) : undefined}
             readOnly={!editingPersonal}
             className={!editingPersonal ? 'border-transparent bg-transparent shadow-none' : ''}
           />
@@ -62,8 +89,8 @@ export default function PersonalInfoTab({
             Email Address
           </label>
           <Input
-            value={personalInfo.email}
-            onChange={(e) => setPersonalInfo({ ...personalInfo, email: e.target.value })}
+            value={profile?.email || ''}
+            onChange={editingPersonal ? (e) => setEditedProfile(p => p ? { ...p, email: e.target.value } : p) : undefined}
             readOnly={!editingPersonal}
             className={!editingPersonal ? 'border-transparent bg-transparent shadow-none' : ''}
           />
@@ -74,7 +101,7 @@ export default function PersonalInfoTab({
             Phone Number
           </label>
           <Input
-            value={personalInfo.phoneNumber}
+            value={profile?.phone_number || ''}
             readOnly
             className="border-transparent bg-transparent shadow-none text-gray-500"
           />
@@ -84,9 +111,10 @@ export default function PersonalInfoTab({
             City
           </label>
           <select
-            value={personalInfo.city}
-            onChange={(e) => setPersonalInfo({ ...personalInfo, city: e.target.value as SupportedCity })}
+            value={profile?.city || ''}
+            onChange={editingPersonal ? (e) => setEditedProfile(p => p ? { ...p, city: (e.target.value as (typeof SUPPORTED_CITIES)[number]) } : p) : undefined}
             className="w-full h-12 border border-gray-300 rounded-lg px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            disabled={!editingPersonal}
           >
             <option value="">Select a city</option>
             {SUPPORTED_CITIES.map((city) => (
@@ -98,5 +126,5 @@ export default function PersonalInfoTab({
         </div>
       </CardContent>
     </Card>
-  );
+  : null);
 } 

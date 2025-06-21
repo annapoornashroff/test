@@ -1,18 +1,22 @@
-import type { CreatorRole } from './types/api';
 
 export const SUPPORTED_CITIES = [
   'DELHI',
   'BENGALURU',
 ] as const;
 
-export type SupportedCity = typeof SUPPORTED_CITIES[number];
+export const CREATOR_ROLES = [
+  'GROOM',
+  'BRIDE',
+  'FAMILY',
+  'OTHER'
+] as const;
 
-export const CREATOR_ROLES: { value: CreatorRole; label: string }[] = [
-  { value: 'GROOM', label: 'Groom' },
-  { value: 'BRIDE', label: 'Bride' },
-  { value: 'FAMILY', label: 'Family' },
-  { value: 'OTHER', label: 'Other' }
-];
+export const WEDDING_STATUS = [
+  "PLANNING",
+  "PARTIALLY_BOOKED",
+  "BOOKED",
+  "COMPLETED"
+] as const;
 
 // Wedding events with UPPERCASE value-label pairs for consistent backend usage
 export const WEDDING_EVENTS: { value: string; label: string }[] = [

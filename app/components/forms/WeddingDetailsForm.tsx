@@ -4,8 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Calendar, Users, IndianRupee, Check, ChevronDown, X } from 'lucide-react';
-import { SUPPORTED_CITIES, type SupportedCity, WEDDING_EVENTS, SERVICE_CATEGORIES, CREATOR_ROLES } from '@/lib/constants';
-import { CreatorRole, UserProfile, WeddingData } from '@/lib/types/api';
+import { SUPPORTED_CITIES, WEDDING_EVENTS, SERVICE_CATEGORIES, CREATOR_ROLES } from '@/lib/constants';
+import { UserProfile, WeddingData } from '@/lib/types/api';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api-client';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -28,8 +28,8 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
   submitLabel = 'Save',
 }: WeddingDetailsFormProps<T>) {
   // Local state for form data
-  const [formData, setFormData] = useState({
-    cities: [] as SupportedCity[],
+  const [formData, setFormData] = useState<WeddingData>({
+    cities: [] as (typeof SUPPORTED_CITIES)[number][],
     title: '',
     date: '',
     is_date_fixed: true,
@@ -38,8 +38,9 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
     estimated_guests: 200,
     budget: 1000000,
     categories: [] as string[],
-    role: '' as CreatorRole,
+    creator_role: CREATOR_ROLES[0],
     timezone: typeof window !== 'undefined'? Intl.DateTimeFormat().resolvedOptions().timeZone: 'Asia/Kolkata',
+    status: 'PLANNING',
   });
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -65,19 +66,20 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
       .then((value) => {
         const weddings = value as WeddingData[];
         if (weddings && weddings.length > 0) {
-          const project = weddings[0]; // Use the first wedding project
+          const wedding = weddings[0]; // Use the first wedding project
           setFormData({
-            cities: project.cities || [],
-            title: project.title || '',
-            date: project.date ? project.date.split('T')[0] : '', // ISO to yyyy-mm-dd
-            is_date_fixed: project.is_date_fixed ?? true,
-            events: project.events || [],
-            duration: project.duration || 2,
-            estimated_guests: project.estimated_guests || 200,
-            budget: project.budget || 1000000,
-            categories: project.categories || [],
-            role: project.creator_role || CREATOR_ROLES[0].value,
-            timezone: project.timezone || (typeof window !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata'),
+            cities: wedding.cities || [],
+            title: wedding.title || '',
+            date: wedding.date ? wedding.date.split('T')[0] : '', // ISO to yyyy-mm-dd
+            is_date_fixed: wedding.is_date_fixed ?? true,
+            events: wedding.events || [],
+            duration: wedding.duration || 2,
+            estimated_guests: wedding.estimated_guests || 200,
+            budget: wedding.budget || 1000000,
+            categories: wedding.categories || [],
+            creator_role: wedding.creator_role || CREATOR_ROLES[0],
+            timezone: wedding.timezone || (typeof window !== 'undefined' && Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata'),
+            status: wedding.status || 'PLANNING'
           });
         }
       })
@@ -95,7 +97,7 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
     setLoading(true);
     try {
       const weddingData = {
-        creator_role: formData.role as CreatorRole,
+        creator_role: formData.creator_role as (typeof CREATOR_ROLES)[number],
         title: formData.title,
         date: formData.date ? new Date(formData.date).toISOString() : '',
         cities: formData.cities,
@@ -130,16 +132,16 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
         <div className="flex items-center gap-2">
           <span className="text-gray-700">I am the</span>
           <Select
-            value={formData.role}
-            onValueChange={value => setField('role', value as CreatorRole)}
+            value={formData.creator_role}
+            onValueChange={value => setField('creator_role', value as (typeof CREATOR_ROLES)[number])}
           >
             <SelectTrigger className="w-40 h-10">
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent>
               {CREATOR_ROLES.map(role => (
-                <SelectItem key={role.value} value={role.value}>
-                  {role.label}
+                <SelectItem key={role} value={role}>
+                  {role}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -165,14 +167,14 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
           Cities
         </label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {(formData.cities).map((city: SupportedCity) => (
+          {(formData.cities).map((city: (typeof SUPPORTED_CITIES)[number]) => (
             <Badge key={city} variant="secondary" className="flex items-center gap-1 pr-1">
-              {city}
+              {city === 'DELHI'? 'DELHI (NCR)': city}
               <button
                 type="button"
                 aria-label={`Remove ${city}`}
                 className="ml-1 text-xs text-gray-500 hover:text-red-500 focus:outline-none"
-                onClick={() => setField('cities', (formData.cities).filter((c: SupportedCity) => c !== city))}
+                onClick={() => setField('cities', (formData.cities).filter((c: (typeof SUPPORTED_CITIES)[number]) => c !== city))}
               >
                 <X className="w-3 h-3" />
               </button>
@@ -189,7 +191,7 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
               className="flex items-center w-full h-12 border rounded-md px-3 bg-white text-sm focus:ring-2 focus:ring-primary focus:outline-none"
             >
               <span className="flex-1 text-left">
-                {formData.cities.length > 0 ? 'Edit Cities' : 'Select Cities'}
+                'Select Cities'
               </span>
               <ChevronDown className="w-4 h-4 ml-2" />
             </button>
@@ -204,11 +206,11 @@ export function WeddingDetailsForm<T extends Record<string, any>>({
                   onClick={() => {
                     const cities = formData.cities;
                     setField('cities', cities.includes(city)
-                      ? cities.filter((c: SupportedCity) => c !== city)
+                      ? cities.filter((c: (typeof SUPPORTED_CITIES)[number]) => c !== city)
                       : [...cities, city]);
                   }}
                 >
-                  <span className="flex-1 text-left">{city}</span>
+                  <span className="flex-1 text-left">{city === 'DELHI'? 'DELHI (NCR)': city}</span>
                   {(formData.cities).includes(city) && <Check className="w-4 h-4 ml-2 text-primary" />}
                 </button>
               ))}

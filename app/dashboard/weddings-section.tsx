@@ -3,33 +3,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Heart, Calendar, MapPin, Users, IndianRupee, 
-  ShoppingCart, Bookmark, User as UserIcon, Plus, Edit,
-  CheckCircle, Clock, AlertCircle, Loader2, Phone, Mail
-} from 'lucide-react';
+import { Calendar, MapPin, Plus, Edit, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/hooks/useAuth';
-import { useProtectedRoute } from '@/lib/hooks/useProtectedRoute';
-import { apiClient, handleApiError, withLoading } from '@/lib/api-client';
-import { toast } from 'sonner';
-import { type WeddingProject } from '@/lib/types/ui';
-import { type UserProfile } from '@/lib/types/api';
-import DashboardHeader from './dashboard-header';
-import WelcomeSection from './welcome-section';
+import { type WeddingData } from '@/lib/types/api';
 
-interface WeddingProjectsSectionProps {
-  weddingProjects: WeddingProject[];
-  activeProject: WeddingProject | null;
+interface WeddingsSectionProps {
+  weddingProjects: WeddingData[];
+  activeProject: WeddingData | null;
   projectsLoading: boolean;
-  setActiveProject: (project: WeddingProject) => void;
-  calculateProgress: (project: WeddingProject) => number;
+  setActiveProject: (project: WeddingData) => void;
+  calculateProgress: (project: WeddingData) => number;
   getStatusColor: (status: string) => string;
   getStatusIcon: (status: string) => React.ElementType;
 }
 
-export default function WeddingProjectsSection({
+export default function WeddingsSection({
   weddingProjects,
   activeProject,
   projectsLoading,
@@ -37,7 +25,7 @@ export default function WeddingProjectsSection({
   calculateProgress,
   getStatusColor,
   getStatusIcon,
-}: WeddingProjectsSectionProps) {
+}: WeddingsSectionProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -84,7 +72,7 @@ export default function WeddingProjectsSection({
                   onClick={() => setActiveProject(project)}
                 >
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-lg">{project.name}</h3>
+                    <h3 className="font-semibold text-lg">{project.title}</h3>
                     <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center ${getStatusColor(project.status)}`}>
                       <StatusIcon className="w-3 h-3 mr-1" />
                       {project.status.replace('_', ' ')}
@@ -98,7 +86,7 @@ export default function WeddingProjectsSection({
                     </div>
                     <div className="flex items-center">
                       <MapPin className="w-4 h-4 mr-2" />
-                      {project.city}
+                      {project.cities}
                     </div>
                   </div>
 

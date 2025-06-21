@@ -7,8 +7,7 @@ import { VariantProps, cva } from 'class-variance-authority';
 import * as React from 'react';
 import { type ReviewResponse } from './api';
 import { UserProfile } from './api';
-import { type SupportedCity } from '@/lib/constants';
-import internal from 'node:stream';
+import { SUPPORTED_CITIES } from '@/lib/constants';
 import { User } from 'firebase/auth';
 
 // Loading Components
@@ -187,7 +186,7 @@ export interface Vendor {
   id: number;
   name: string;
   category: string;
-  city: SupportedCity;
+  city: typeof SUPPORTED_CITIES;
   description?: string;
   rating: number;
   review_count: number;
@@ -244,7 +243,7 @@ export interface CategoriesResponse {
 }
 
 export interface CitiesResponse {
-  cities: SupportedCity[];
+  cities: typeof SUPPORTED_CITIES[];
 }
 
 export interface FamilyMember {
@@ -253,35 +252,7 @@ export interface FamilyMember {
   relationship: string;
   phoneNumber: string;
   email?: string;
-  role: 'participant' | 'organizer';
-}
-
-export interface WeddingProject {
-  id: number;
-  user_id: number;
-  name: string;
-  city: SupportedCity;
-  date: string;
-  is_date_fixed: boolean;
-  duration: number;
-  events: string[];
-  categories: string[];
-  estimated_guests?: number,
-  actual_guests?: number,
-  budget: number;
-  spent: number;
-  status: 'planning' | 'partially_booked' | 'booked' | 'completed';
-  family_details: FamilyMember[];
-
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface PersonalInfo {
-  name: string;
-  phoneNumber: string;
-  email: string;
-  city: SupportedCity;
+  role: 'PARTICIPANT' | 'ORGANIZER';
 }
 
 // Package Types
@@ -305,7 +276,7 @@ export interface Package {
 }
 
 export interface CityContextType {
-  selectedCity: SupportedCity | 'All';
-  setSelectedCity: (city: SupportedCity | 'All') => void;
+  selectedCity: typeof SUPPORTED_CITIES | 'All';
+  setSelectedCity: (city: typeof SUPPORTED_CITIES | 'All') => void;
   clearCity: () => void;
 } 
