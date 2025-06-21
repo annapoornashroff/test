@@ -42,3 +42,5 @@ forevernco-firebase.json
 logs/
 .cheatsheet.md
 forevernco_create.sql
+ecosystem.config.js
+ecosystem.dev.config.js
